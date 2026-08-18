@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 02841cfcad27faf4d9183151d75b7018
+guid: 14612f17fcf1d2544a1ca4690ad0f3c7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1086120990478993265
-    second: bow_angels_0
+      213: 6569630779224905185
+    second: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bow_angels_0
+      name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_0
       rect:
         serializedVersion: 2
-        x: 35
-        y: 7
-        width: 32
-        height: 86
+        x: 4
+        y: 5
+        width: 61
+        height: 12
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f887763b6b25de0f0800000000000000
-      internalID: -1086120990478993265
+      spriteID: 1e55c25e2640c2b50800000000000000
+      internalID: 6569630779224905185
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      bow_angels_0: -1086120990478993265
+      sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_0: 6569630779224905185
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
