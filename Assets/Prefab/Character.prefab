@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6367675701153558599}
   - component: {fileID: 7776909602718960015}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: upperleg_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102,7 +102,7 @@ GameObject:
   m_Component:
   - component: {fileID: 243111828372763851}
   - component: {fileID: 6748458606638248828}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -193,7 +193,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7238964930886179931}
   - component: {fileID: 5705686332299112692}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: upperleg_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -284,7 +284,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7506213025121876150}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: arrowspawnpoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -316,7 +316,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6310298845818199511}
   - component: {fileID: 8469455481616063236}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: hand_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -408,7 +408,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8499089883281746447}
   - component: {fileID: 176896371874652664}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: bow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -501,7 +501,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8287490094973157194}
   - component: {fileID: 2148698094858589982}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: arm_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -593,7 +593,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2728361079417865344}
   - component: {fileID: 2522085037495659024}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: leg_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -684,7 +684,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6543049916277308194}
   - component: {fileID: 723369047151242313}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: hand_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -774,9 +774,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8664954524116716544}
-  m_Layer: 0
+  - component: {fileID: 1817898826961239844}
+  - component: {fileID: 398496029237368364}
+  - component: {fileID: 549464354867854587}
+  - component: {fileID: 3165953958454512254}
+  - component: {fileID: 5011468171898418685}
+  m_Layer: 9
   m_Name: Character
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -799,6 +804,114 @@ Transform:
   - {fileID: 2962600125112500433}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &1817898826961239844
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 1
+  m_Constraints: 0
+--- !u!114 &398496029237368364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a1b1770f3b07f439fd8b7e2ed533a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.DuelCharacter
+  teamId: 0
+  inputSource: {fileID: 0}
+  motor: {fileID: 5011468171898418685}
+  actionController: {fileID: 0}
+  autoAttackController: {fileID: 0}
+  health: {fileID: 0}
+  animationController: {fileID: 0}
+  projectilePool: {fileID: 0}
+  arrowSpawnPoint: {fileID: 0}
+  aimTarget: {fileID: 0}
+  loadedArrowVisual: {fileID: 0}
+  basicArrow: {fileID: 0}
+--- !u!114 &549464354867854587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acf6695a27f139a4cadf0b065c376ecf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.DuelCharacterActionController
+  owner: {fileID: 0}
+  motor: {fileID: 0}
+  animationController: {fileID: 0}
+  autoAttackDuration: 0.55
+  autoAttackReleaseTime: 0.32
+  dashDuration: 0.2
+  dashSpeed: 14
+  dashCooldown: 2
+  shieldDuration: 0.7
+  shieldCooldown: 4
+  equippedSkills:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+--- !u!114 &3165953958454512254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 291064701e9debd4e8362b4c5a552337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.DuelCharacterAnimator
+  animator: {fileID: 126940495493332647}
+  visualRoot: {fileID: 0}
+--- !u!114 &5011468171898418685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5be6c02162c5ac14c9ee5da0c8f8ffbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.DuelCharacterMotor
+  moveSpeed: 5
+  minimumX: -8
+  maximumX: 8
+  movingThreshold: 0.05
 --- !u!1 &4347938009977863661
 GameObject:
   m_ObjectHideFlags: 0
@@ -809,7 +922,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8976150201349371743}
   - component: {fileID: 5100286837162555385}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: shoulder_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -901,7 +1014,7 @@ GameObject:
   m_Component:
   - component: {fileID: 242334813646234659}
   - component: {fileID: 4756907559126611355}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: arrowVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -970,7 +1083,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 5b11b1b93739ff344ae46c6e29954ee7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -992,7 +1105,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4447245149955941638}
   - component: {fileID: 7077132896923261499}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: shoulder_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1084,7 +1197,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2472605158840130759}
   - component: {fileID: 329206019679645145}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: leg_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1175,7 +1288,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5088110923891505465}
   - component: {fileID: 126940495493332647}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1230,7 +1343,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6798074796764834107}
   - component: {fileID: 7098948557653109294}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: arm_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1321,7 +1434,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2962600125112500433}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: aimtarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1352,9 +1465,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4171960021253098384}
-  - component: {fileID: 2752906970340654750}
   - component: {fileID: 7804139425927094544}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Hitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1376,33 +1488,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8664954524116716544}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &2752906970340654750
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9117441185884870170}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!60 &7804139425927094544
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -1449,23 +1534,11 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0.17357627, y: 0.15324588}
-      - {x: 0.18201822, y: 0.19053334}
-      - {x: 0.17855312, y: 0.253102}
-      - {x: 0.12920047, y: 0.26219186}
-      - {x: 0.07013883, y: 0.2576029}
-      - {x: 0.06635888, y: 0.18949877}
-      - {x: -0.0023042634, y: 0.18410258}
-      - {x: -0.029492088, y: 0.06630504}
-      - {x: -0.06325215, y: 0.035313044}
-      - {x: -0.10749403, y: -0.12635519}
-      - {x: -0.22479036, y: -0.31407607}
-      - {x: 0.16400854, y: -0.30296123}
-      - {x: 0.16297075, y: -0.08824667}
-      - {x: 0.112568825, y: -0.08198803}
-      - {x: 0.11908981, y: 0.041578062}
-      - {x: 0.14370081, y: 0.09596883}
-      - {x: 0.13009065, y: 0.13088386}
+    - - {x: 0.0799205, y: 0.25574017}
+      - {x: 0.0139350295, y: 0.25688735}
+      - {x: -0.115247145, y: -0.29446322}
+      - {x: 0.16613832, y: -0.2969495}
+      - {x: 0.16975826, y: 0.25067967}
   m_UseDelaunayMesh: 1
 --- !u!1 &9154162448132056534
 GameObject:
@@ -1477,7 +1550,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3347729844317538114}
   - component: {fileID: 6602235270656620669}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
