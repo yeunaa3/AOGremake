@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 02841cfcad27faf4d9183151d75b7018
+guid: e7db0ba2bc036634d9d5dcd8a71b034f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1086120990478993265
-    second: bow_angels_0
+      213: 61104733238737339
+    second: armR_44_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bow_angels_0
+      name: armR_44_0
       rect:
         serializedVersion: 2
-        x: 35
-        y: 7
-        width: 32
-        height: 86
+        x: 1
+        y: 2
+        width: 9
+        height: 15
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f887763b6b25de0f0800000000000000
-      internalID: -1086120990478993265
+      spriteID: bb93ace5e6619d000800000000000000
+      internalID: 61104733238737339
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      bow_angels_0: -1086120990478993265
+      armR_44_0: 61104733238737339
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

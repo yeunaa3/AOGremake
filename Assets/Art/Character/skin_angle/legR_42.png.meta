@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6c0ff789799c5b547a8f7441a73aec7d
+guid: 38d526a65fd95584196167aeac769ebb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6791175662458492658
-    second: armR_28_0
+      213: -2684656264219805606
+    second: legR_42_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,9 +46,9 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: armR_28_0
+      name: legR_42_0
       rect:
         serializedVersion: 2
-        x: 1
-        y: 1
+        x: 2
+        y: 0
         width: 10
-        height: 16
+        height: 23
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e0922e757b5e0c1a0800000000000000
-      internalID: -6791175662458492658
+      spriteID: a58b6230a5f2ebad0800000000000000
+      internalID: -2684656264219805606
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      armR_28_0: -6791175662458492658
+      legR_42_0: -2684656264219805606
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

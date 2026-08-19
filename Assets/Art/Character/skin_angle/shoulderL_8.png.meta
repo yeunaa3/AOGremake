@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 27b54f03dc0244740af35c17c1c9b585
+guid: b677c9f013f45044fa7e4fec3e34fe74
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7056312436952246970
-    second: armL_28_0
+      213: 4296565612384253065
+    second: shoulderL_8_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,9 +46,9 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: armL_28_0
+      name: shoulderL_8_0
       rect:
         serializedVersion: 2
         x: 2
-        y: 2
+        y: 1
         width: 10
-        height: 15
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: abaa5b486ce0de160800000000000000
-      internalID: 7056312436952246970
+      spriteID: 984725809a770ab30800000000000000
+      internalID: 4296565612384253065
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      armL_28_0: 7056312436952246970
+      shoulderL_8_0: 4296565612384253065
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
