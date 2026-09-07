@@ -8,6 +8,7 @@ namespace AOG.Duel
         [SerializeField] private DuelCharacterMotor motor;
         [SerializeField] private DuelCharacterActionController actionController;
         [SerializeField, Min(0f)] private float idleDelay = 0.2f;
+        [Tooltip("Chỉ dùng nếu CharacterStats chưa được gắn.")]
         [SerializeField, Min(0.01f)] private float attackInterval = 1f;
 
         private float idleTimer;
@@ -24,7 +25,7 @@ namespace AOG.Duel
         {
             attackCooldownRemaining = Mathf.Max(0f, attackCooldownRemaining - Time.deltaTime);
 
-            if (owner == null || !owner.CanReceiveInput || motor.IsMoving || !actionController.IsReady)
+            if (owner == null || !owner.CanBasicAttack || motor.IsMoving || !actionController.IsReady)
             {
                 idleTimer = 0f;
                 return;
@@ -38,7 +39,9 @@ namespace AOG.Duel
 
             if (actionController.TryAutoAttack())
             {
-                attackCooldownRemaining = attackInterval;
+                attackCooldownRemaining = owner.Stats != null
+                    ? owner.Stats.AttackInterval
+                    : attackInterval;
                 idleTimer = 0f;
             }
         }

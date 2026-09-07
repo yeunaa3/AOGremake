@@ -38,7 +38,7 @@ namespace AOG.Duel
             if (button != null)
             {
                 button.interactable = configured
-                    && character.CanReceiveInput
+                    && character.CanUseSpecialActions
                     && character.ActionController.IsReady
                     && remaining <= 0f;
             }

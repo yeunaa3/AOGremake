@@ -22,6 +22,11 @@ namespace AOG.Duel
             SetFloatIfPresent("MoveSpeed", moving ? 1f : 0f);
         }
 
+        public void SetAttackSpeed(float multiplier)
+        {
+            SetFloatIfPresent("AttackSpeed", Mathf.Max(0.05f, multiplier));
+        }
+
         public void SetFacing(float direction)
         {
             if (visualRoot == null || Mathf.Approximately(direction, 0f)) return;

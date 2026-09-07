@@ -2,13 +2,14 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    [CreateAssetMenu(menuName = "JS Club/Duel/Projectile Definition", fileName = "ProjectileDefinition")]
+    [CreateAssetMenu(menuName = "AOG/Duel/Projectile Definition", fileName = "ProjectileDefinition")]
     public sealed class DuelProjectileDefinition : ScriptableObject
     {
         [Header("Prefab")]
         [SerializeField] private ArrowProjectile projectilePrefab;
 
-        [Header("Combat")]
+        [Header("Fallback/skill combat")]
+        [Tooltip("Damage mặc định cho skill. Đòn bắn thường sẽ lấy damage từ cung.")]
         [SerializeField, Min(0)] private int damage = 10;
         [SerializeField] private bool ignoreShield;
 

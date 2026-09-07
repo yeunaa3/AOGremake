@@ -16,6 +16,9 @@ namespace AOG.Duel
         [SerializeField] private DuelHealth health;
         [SerializeField] private DuelCharacterAnimator animationController;
         [SerializeField] private ProjectilePool projectilePool;
+        [SerializeField] private CharacterStats stats;
+        [SerializeField] private CharacterStatusController statusController;
+        [SerializeField] private CharacterEquipment equipment;
 
         [Header("Combat points")]
         [SerializeField] private Transform arrowSpawnPoint;
@@ -32,7 +35,16 @@ namespace AOG.Duel
         public DuelCharacterActionController ActionController => actionController;
         public DuelHealth Health => health;
         public DuelCharacterAnimator AnimationController => animationController;
+        public CharacterStats Stats => stats;
+        public CharacterStatusController StatusController => statusController;
+        public CharacterEquipment Equipment => equipment;
         public bool CanReceiveInput => matchActive && health != null && health.IsAlive;
+        public bool CanMove => CanReceiveInput
+            && (statusController == null || statusController.CanMove);
+        public bool CanBasicAttack => CanReceiveInput
+            && (statusController == null || statusController.CanBasicAttack);
+        public bool CanUseSpecialActions => CanReceiveInput
+            && (statusController == null || statusController.CanUseSpecialActions);
         public Vector2 AimTargetPosition => aimTarget != null ? aimTarget.position : transform.position;
         public float FacingDirection
         {
@@ -51,12 +63,16 @@ namespace AOG.Duel
             if (health == null) health = GetComponent<DuelHealth>();
             if (animationController == null) animationController = GetComponent<DuelCharacterAnimator>();
             if (inputSource == null) inputSource = GetComponent<DuelInputSource>();
+            if (stats == null) stats = GetComponent<CharacterStats>();
+            if (statusController == null) statusController = GetComponent<CharacterStatusController>();
+            if (equipment == null) equipment = GetComponent<CharacterEquipment>();
             SetLoadedArrowVisible(false);
         }
 
         private void Update()
         {
             animationController.SetFacing(FacingDirection);
+            if (stats != null) animationController.SetAttackSpeed(stats.AttackAnimationSpeed);
 
             if (!CanReceiveInput || inputSource == null)
             {
@@ -66,8 +82,14 @@ namespace AOG.Duel
             }
 
             DuelPlayerCommand command = inputSource.ReadCommand();
-            motor.SetMovementInput(command.Move);
-            animationController.SetMoving(Mathf.Abs(command.Move) > 0.05f || motor.IsDashing);
+            float permittedMovement = CanMove ? command.Move : 0f;
+            motor.SetMovementInput(permittedMovement);
+            animationController.SetMoving(Mathf.Abs(permittedMovement) > 0.05f || motor.IsDashing);
+
+            if (!CanUseSpecialActions)
+            {
+                return;
+            }
 
             // Chỉ hành động đầu tiên trong frame được xét; controller tiếp tục bảo đảm khóa độc quyền.
             if (command.DashPressed)
@@ -106,6 +128,8 @@ namespace AOG.Duel
             motor.SetGameplayMovementAllowed(false);
             actionController.ResetActions();
             autoAttackController.ResetAttack();
+            statusController?.ResetStatuses();
+            stats?.ResetRuntimeModifiers();
             health.ResetHealth();
             SetLoadedArrowVisible(false);
         }
@@ -123,9 +147,17 @@ namespace AOG.Duel
 
         public void FireBasicArrow()
         {
-            if (basicArrow != null && Opponent != null && health.IsAlive)
+            DuelProjectileDefinition projectileDefinition = stats != null
+                ? stats.BasicAttackProjectile
+                : null;
+            if (projectileDefinition == null) projectileDefinition = basicArrow;
+
+            if (projectileDefinition != null && Opponent != null && health.IsAlive)
             {
-                SpawnArrow(basicArrow, Opponent, 0f);
+                int damage = stats != null
+                    ? stats.BasicAttackDamage
+                    : projectileDefinition.Damage;
+                SpawnArrow(projectileDefinition, Opponent, 0f, damage);
             }
         }
 
@@ -178,7 +210,7 @@ namespace AOG.Duel
                 }
 
                 float arcOffset = (i - center) * arcHeightStep;
-                SpawnArrow(projectile, target, arcOffset);
+                SpawnArrow(projectile, target, arcOffset, projectile.Damage);
 
                 if (delay > 0f && i < count - 1)
                 {
@@ -190,7 +222,8 @@ namespace AOG.Duel
         private void SpawnArrow(
             DuelProjectileDefinition definition,
             DuelCharacter target,
-            float arcHeightOffset)
+            float arcHeightOffset,
+            int damage)
         {
             if (arrowSpawnPoint == null || definition.ProjectilePrefab == null) return;
 
@@ -202,7 +235,7 @@ namespace AOG.Duel
 
             Vector2 start = arrowSpawnPoint.position;
             Vector2 targetSnapshot = target.AimTargetPosition;
-            projectile.Launch(this, definition, start, targetSnapshot, arcHeightOffset, null);
+            projectile.Launch(this, definition, start, targetSnapshot, arcHeightOffset, damage, null);
         }
     }
 }

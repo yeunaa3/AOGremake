@@ -8,9 +8,10 @@ namespace AOG.Duel
         [SerializeField, Min(1)] private int maximumHealth = 100;
 
         private DuelCharacter owner;
+        private CharacterStats stats;
 
         public int CurrentHealth { get; private set; }
-        public int MaximumHealth => maximumHealth;
+        public int MaximumHealth => stats != null ? stats.MaximumHealth : maximumHealth;
         public bool IsAlive => CurrentHealth > 0;
 
         public event Action<int, int> HealthChanged;
@@ -20,13 +21,25 @@ namespace AOG.Duel
         private void Awake()
         {
             owner = GetComponentInParent<DuelCharacter>();
-            CurrentHealth = maximumHealth;
+            stats = GetComponentInParent<CharacterStats>();
+            CurrentHealth = MaximumHealth;
         }
 
         public void ResetHealth()
         {
-            CurrentHealth = maximumHealth;
-            HealthChanged?.Invoke(CurrentHealth, maximumHealth);
+            CurrentHealth = MaximumHealth;
+            HealthChanged?.Invoke(CurrentHealth, MaximumHealth);
+        }
+
+        public int Heal(int amount)
+        {
+            if (!IsAlive || amount <= 0) return 0;
+
+            int before = CurrentHealth;
+            CurrentHealth = Mathf.Min(MaximumHealth, CurrentHealth + amount);
+            int healed = CurrentHealth - before;
+            if (healed > 0) HealthChanged?.Invoke(CurrentHealth, MaximumHealth);
+            return healed;
         }
 
         public DuelDamageResult TakeDamage(DuelDamageInfo damage)
@@ -44,7 +57,7 @@ namespace AOG.Duel
             }
 
             CurrentHealth = Mathf.Max(0, CurrentHealth - damage.Amount);
-            HealthChanged?.Invoke(CurrentHealth, maximumHealth);
+            HealthChanged?.Invoke(CurrentHealth, MaximumHealth);
 
             DuelDamageResult result = CurrentHealth == 0
                 ? DuelDamageResult.Killed

@@ -9,10 +9,14 @@ namespace AOG.Duel
         [SerializeField] private DuelCharacter owner;
         [SerializeField] private DuelCharacterMotor motor;
         [SerializeField] private DuelCharacterAnimator animationController;
+        [SerializeField] private CharacterStats stats;
+        [SerializeField] private CharacterStatusController statusController;
 
         [Header("Basic attack")]
         [SerializeField, Min(0.01f)] private float autoAttackDuration = 0.55f;
         [SerializeField, Min(0f)] private float autoAttackReleaseTime = 0.32f;
+        [Tooltip("Bật khi clip có Animation Event gọi ReleaseArrow.")]
+        [SerializeField] private bool releaseArrowByAnimationEvent;
 
         [Header("Dash")]
         [SerializeField, Min(0.01f)] private float dashDuration = 0.2f;
@@ -35,6 +39,7 @@ namespace AOG.Duel
         private bool activeTriggered;
         private int activeSkillSlot = -1;
         private float pendingCooldown;
+        private bool autoAttackReleased;
 
         public DuelActionState CurrentState { get; private set; } = DuelActionState.Ready;
         public bool IsReady => CurrentState == DuelActionState.Ready;
@@ -52,14 +57,19 @@ namespace AOG.Duel
             if (owner == null) owner = GetComponent<DuelCharacter>();
             if (motor == null) motor = GetComponent<DuelCharacterMotor>();
             if (animationController == null) animationController = GetComponent<DuelCharacterAnimator>();
+            if (stats == null) stats = GetComponent<CharacterStats>();
+            if (statusController == null) statusController = GetComponent<CharacterStatusController>();
             EnsureFourSkillSlots();
         }
 
         private void Update()
         {
             TickCooldowns(Time.deltaTime);
+            SynchronizeStunState();
 
-            if (CurrentState == DuelActionState.Ready || CurrentState == DuelActionState.Dead)
+            if (CurrentState == DuelActionState.Ready
+                || CurrentState == DuelActionState.Dead
+                || CurrentState == DuelActionState.Stunned)
             {
                 return;
             }
@@ -78,19 +88,20 @@ namespace AOG.Duel
 
         public bool TryAutoAttack()
         {
-            if (!CanBeginAction()) return false;
+            if (!CanBeginBasicAttack()) return false;
+
+            float attackAnimationSpeed = stats != null ? stats.AttackAnimationSpeed : 1f;
+            float effectiveDuration = autoAttackDuration / attackAnimationSpeed;
+            float effectiveReleaseTime = autoAttackReleaseTime / attackAnimationSpeed;
+            autoAttackReleased = false;
 
             return BeginAction(
                 DuelActionState.AutoAttacking,
-                autoAttackDuration,
-                Mathf.Min(autoAttackReleaseTime, autoAttackDuration),
+                effectiveDuration,
+                Mathf.Min(effectiveReleaseTime, effectiveDuration),
                 0f,
                 true,
-                () =>
-                {
-                    owner.SetLoadedArrowVisible(false);
-                    owner.FireBasicArrow();
-                },
+                releaseArrowByAnimationEvent ? null : ReleaseAutoAttack,
                 () => owner.SetLoadedArrowVisible(false),
                 () =>
                 {
@@ -101,7 +112,7 @@ namespace AOG.Duel
 
         public bool TryDash(float requestedDirection, float facingDirection)
         {
-            if (!CanBeginAction() || DashCooldownRemaining > 0f) return false;
+            if (!CanBeginSpecialAction() || DashCooldownRemaining > 0f) return false;
 
             float direction = Mathf.Abs(requestedDirection) > 0.01f
                 ? requestedDirection
@@ -120,7 +131,7 @@ namespace AOG.Duel
 
         public bool TryShield()
         {
-            if (!CanBeginAction() || ShieldCooldownRemaining > 0f) return false;
+            if (!CanBeginSpecialAction() || ShieldCooldownRemaining > 0f) return false;
 
             return BeginAction(
                 DuelActionState.Shielding,
@@ -135,7 +146,7 @@ namespace AOG.Duel
 
         public bool TrySkill(int slot)
         {
-            if (!CanBeginAction() || !IsValidSkillSlot(slot)) return false;
+            if (!CanBeginSpecialAction() || !IsValidSkillSlot(slot)) return false;
             if (skillCooldownRemaining[slot] > 0f) return false;
 
             DuelSkillDefinition skill = equippedSkills[slot];
@@ -155,18 +166,18 @@ namespace AOG.Duel
 
         public void ApplyStun(float duration)
         {
-            if (CurrentState == DuelActionState.Dead || duration <= 0f) return;
+            statusController?.ApplyStun(duration);
+        }
 
-            CancelCurrentAction(false);
-            BeginAction(
-                DuelActionState.Stunned,
-                duration,
-                duration,
-                0f,
-                false,
-                null,
-                null,
-                () => animationController.PlayStun());
+        public void ApplySilence(float duration)
+        {
+            statusController?.ApplySilence(duration);
+        }
+
+        public void ReleaseAutoAttackFromAnimation()
+        {
+            if (!releaseArrowByAnimationEvent) return;
+            ReleaseAutoAttack();
         }
 
         public void MarkDead()
@@ -309,6 +320,7 @@ namespace AOG.Duel
             activeTriggered = false;
             pendingCooldown = 0f;
             activeSkillSlot = -1;
+            autoAttackReleased = false;
         }
 
         private void TickCooldowns(float deltaTime)
@@ -321,9 +333,49 @@ namespace AOG.Duel
             }
         }
 
-        private bool CanBeginAction()
+        private bool CanBeginBasicAttack()
         {
-            return CurrentState == DuelActionState.Ready && owner != null && owner.CanReceiveInput;
+            return CurrentState == DuelActionState.Ready
+                && owner != null
+                && owner.CanBasicAttack;
+        }
+
+        private bool CanBeginSpecialAction()
+        {
+            return CurrentState == DuelActionState.Ready
+                && owner != null
+                && owner.CanUseSpecialActions;
+        }
+
+        private void ReleaseAutoAttack()
+        {
+            if (CurrentState != DuelActionState.AutoAttacking || autoAttackReleased) return;
+            autoAttackReleased = true;
+            owner.SetLoadedArrowVisible(false);
+            owner.FireBasicArrow();
+        }
+
+        private void SynchronizeStunState()
+        {
+            bool stunned = statusController != null && statusController.IsStunned;
+            if (stunned)
+            {
+                if (CurrentState != DuelActionState.Dead && CurrentState != DuelActionState.Stunned)
+                {
+                    CancelCurrentAction(false);
+                    motor.SetActionMovementAllowed(false);
+                    motor.StopImmediately();
+                    SetState(DuelActionState.Stunned);
+                    animationController.PlayStun();
+                }
+                return;
+            }
+
+            if (CurrentState == DuelActionState.Stunned)
+            {
+                motor.SetActionMovementAllowed(true);
+                SetState(DuelActionState.Ready);
+            }
         }
 
         private bool IsValidSkillSlot(int slot)

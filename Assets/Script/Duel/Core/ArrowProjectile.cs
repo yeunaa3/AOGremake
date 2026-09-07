@@ -19,6 +19,7 @@ namespace AOG.Duel
         private bool flying;
         private bool reachedEnd;
         private float endGraceRemaining;
+        private int damage;
         private Action<ArrowProjectile> returnToPool;
 
         private void Awake()
@@ -75,6 +76,7 @@ namespace AOG.Duel
             Vector2 start,
             Vector2 targetSnapshot,
             float arcHeightOffset,
+            int shotDamage,
             Action<ArrowProjectile> onDespawn)
         {
             owner = projectileOwner;
@@ -88,6 +90,7 @@ namespace AOG.Duel
             lifetime = 0f;
             reachedEnd = false;
             endGraceRemaining = 0f;
+            damage = Mathf.Max(0, shotDamage);
             if (onDespawn != null)
             {
                 returnToPool = onDespawn;
@@ -110,6 +113,7 @@ namespace AOG.Duel
             reachedEnd = false;
             owner = null;
             definition = null;
+            damage = 0;
             returnToPool = null;
             if (hitbox != null) hitbox.enabled = false;
         }
@@ -139,7 +143,7 @@ namespace AOG.Duel
 
             targetHealth.TakeDamage(new DuelDamageInfo(
                 owner,
-                definition.Damage,
+                damage,
                 definition.IgnoreShield,
                 transform.position));
             Despawn();

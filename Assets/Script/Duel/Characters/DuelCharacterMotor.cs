@@ -5,7 +5,9 @@ namespace AOG.Duel
     [RequireComponent(typeof(Rigidbody2D))]
     public sealed class DuelCharacterMotor : MonoBehaviour
     {
+        [Tooltip("Chỉ dùng nếu CharacterStats chưa được gắn.")]
         [SerializeField, Min(0f)] private float moveSpeed = 5f;
+        [SerializeField] private CharacterStats stats;
         [SerializeField] private float minimumX = -8f;
         [SerializeField] private float maximumX = 8f;
         [SerializeField, Min(0f)] private float movingThreshold = 0.05f;
@@ -25,6 +27,7 @@ namespace AOG.Duel
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
+            if (stats == null) stats = GetComponent<CharacterStats>();
         }
 
         private void FixedUpdate()
@@ -38,7 +41,8 @@ namespace AOG.Duel
                 }
                 else if (actionMovementAllowed)
                 {
-                    velocityX = movementInput * moveSpeed;
+                    float effectiveMoveSpeed = stats != null ? stats.MoveSpeed : moveSpeed;
+                    velocityX = movementInput * effectiveMoveSpeed;
                 }
             }
 

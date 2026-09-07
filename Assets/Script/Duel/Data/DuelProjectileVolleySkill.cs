@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    [CreateAssetMenu(menuName = "JS Club/Duel/Skills/Projectile Volley", fileName = "Skill_ProjectileVolley")]
+    [CreateAssetMenu(menuName = "AOG/Duel/Skills/Projectile Volley", fileName = "Skill_ProjectileVolley")]
     public sealed class DuelProjectileVolleySkill : DuelSkillDefinition
     {
         [SerializeField] private DuelProjectileDefinition projectile;
