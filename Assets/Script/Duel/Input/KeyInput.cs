@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 namespace AOG.Duel
 {
-    public sealed class DuelKeyboardInput : DuelInputSource
+    public sealed class KeyInput : InputSource
     {
 #if ENABLE_INPUT_SYSTEM
         [Header("Movement")]
@@ -33,7 +33,7 @@ namespace AOG.Duel
         [SerializeField] private KeyCode skill4 = KeyCode.Alpha4;
 #endif
 
-        public override DuelPlayerCommand ReadCommand()
+        public override InputCmd ReadCommand()
         {
 #if ENABLE_INPUT_SYSTEM
             Keyboard keyboard = Keyboard.current;
@@ -43,7 +43,7 @@ namespace AOG.Duel
             if (keyboard[moveLeft].isPressed) move -= 1f;
             if (keyboard[moveRight].isPressed) move += 1f;
 
-            return new DuelPlayerCommand
+            return new InputCmd
             {
                 Move = Mathf.Clamp(move, -1f, 1f),
                 DashPressed = keyboard[dash].wasPressedThisFrame,
@@ -58,7 +58,7 @@ namespace AOG.Duel
             if (Input.GetKey(moveLeft)) move -= 1f;
             if (Input.GetKey(moveRight)) move += 1f;
 
-            return new DuelPlayerCommand
+            return new InputCmd
             {
                 Move = Mathf.Clamp(move, -1f, 1f),
                 DashPressed = Input.GetKeyDown(dash),

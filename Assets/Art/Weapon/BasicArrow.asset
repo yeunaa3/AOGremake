@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 405ab070d8632d447bb9265f1702c583, type: 3}
-  m_Name: ProjectileDefinition
-  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.DuelProjectileDefinition
-  projectilePrefab: {fileID: 0}
+  m_Name: BasicArrow
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.ArrowData
+  projectilePrefab: {fileID: 1046340276981905311, guid: 66d432150ac8d494f9d62a61c953a6d1, type: 3}
   damage: 10
   ignoreShield: 0
-  flightDuration: 0.8
-  arcHeight: 2.5
-  maximumLifetime: 4
+  flightDuration: 5
+  arcHeight: 5
+  maximumLifetime: 30
   rotateAlongPath: 1

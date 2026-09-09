@@ -4,12 +4,12 @@ using UnityEngine;
 namespace AOG.Duel
 {
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
-    public sealed class ArrowProjectile : MonoBehaviour
+    public sealed class Arrow : MonoBehaviour
     {
         private Rigidbody2D body;
         private Collider2D hitbox;
-        private DuelCharacter owner;
-        private DuelProjectileDefinition definition;
+        private Player owner;
+        private ArrowData definition;
         private Vector2 startPoint;
         private Vector2 controlPoint;
         private Vector2 endPoint;
@@ -20,7 +20,7 @@ namespace AOG.Duel
         private bool reachedEnd;
         private float endGraceRemaining;
         private int damage;
-        private Action<ArrowProjectile> returnToPool;
+        private Action<Arrow> returnToPool;
 
         private void Awake()
         {
@@ -71,13 +71,13 @@ namespace AOG.Duel
         }
 
         public void Launch(
-            DuelCharacter projectileOwner,
-            DuelProjectileDefinition projectileDefinition,
+            Player projectileOwner,
+            ArrowData projectileDefinition,
             Vector2 start,
             Vector2 targetSnapshot,
             float arcHeightOffset,
             int shotDamage,
-            Action<ArrowProjectile> onDespawn)
+            Action<Arrow> onDespawn)
         {
             owner = projectileOwner;
             definition = projectileDefinition;
@@ -102,7 +102,7 @@ namespace AOG.Duel
             hitbox.enabled = true;
         }
 
-        public void PrepareForPool(Action<ArrowProjectile> onDespawn)
+        public void PrepareForPool(Action<Arrow> onDespawn)
         {
             returnToPool = onDespawn;
         }
@@ -131,17 +131,17 @@ namespace AOG.Duel
             if (!flying || owner == null || definition == null) return;
             if (other.transform == owner.transform || other.transform.IsChildOf(owner.transform)) return;
 
-            DuelHealth targetHealth = other.GetComponentInParent<DuelHealth>();
+            Health targetHealth = other.GetComponentInParent<Health>();
             if (targetHealth == null)
             {
                 Despawn();
                 return;
             }
 
-            DuelCharacter targetCharacter = targetHealth.GetComponentInParent<DuelCharacter>();
+            Player targetCharacter = targetHealth.GetComponentInParent<Player>();
             if (targetCharacter == null || targetCharacter.TeamId == owner.TeamId) return;
 
-            targetHealth.TakeDamage(new DuelDamageInfo(
+            targetHealth.TakeDamage(new DamageInfo(
                 owner,
                 damage,
                 definition.IgnoreShield,
@@ -155,7 +155,7 @@ namespace AOG.Duel
             flying = false;
             if (hitbox != null) hitbox.enabled = false;
 
-            Action<ArrowProjectile> callback = returnToPool;
+            Action<Arrow> callback = returnToPool;
             returnToPool = null;
             if (callback != null)
             {

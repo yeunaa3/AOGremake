@@ -14,9 +14,9 @@ namespace AOG.Duel
         Skill4
     }
 
-    public sealed class DuelCooldownDisplay : MonoBehaviour
+    public sealed class CooldownUI : MonoBehaviour
     {
-        [SerializeField] private DuelCharacter character;
+        [SerializeField] private Player character;
         [SerializeField] private DuelActionSlot slot;
         [SerializeField] private Image cooldownFill;
         [SerializeField] private TMP_Text cooldownText;
@@ -46,7 +46,7 @@ namespace AOG.Duel
 
         private void GetCooldown(out float remaining, out float duration, out bool configured)
         {
-            DuelCharacterActionController actions = character.ActionController;
+            PlayerAction actions = character.ActionController;
             configured = true;
 
             switch (slot)
@@ -62,7 +62,7 @@ namespace AOG.Duel
             }
 
             int skillSlot = (int)slot - (int)DuelActionSlot.Skill1;
-            DuelSkillDefinition skill = actions.GetSkill(skillSlot);
+            SkillData skill = actions.GetSkill(skillSlot);
             configured = skill != null;
             remaining = actions.GetSkillCooldownRemaining(skillSlot);
             duration = skill != null ? skill.Cooldown : 0f;

@@ -2,17 +2,17 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    public sealed class DuelCharacterAnimator : MonoBehaviour
+    public sealed class PlayerAnim : MonoBehaviour
     {
-        [SerializeField] private Animator animator;
-        [SerializeField] private Transform visualRoot;
+        private Animator animator;
+        private Transform visualRoot;
 
         private float visualScaleX = 1f;
 
         private void Awake()
         {
-            if (animator == null) animator = GetComponentInChildren<Animator>();
-            if (visualRoot == null && animator != null) visualRoot = animator.transform;
+            animator = GetComponentInChildren<Animator>();
+            if (animator != null) visualRoot = animator.transform;
             if (visualRoot != null) visualScaleX = Mathf.Abs(visualRoot.localScale.x);
         }
 

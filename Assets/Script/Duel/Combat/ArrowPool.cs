@@ -3,38 +3,38 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    public sealed class ProjectilePool : MonoBehaviour
+    public sealed class ArrowPool : MonoBehaviour
     {
         [SerializeField, Min(0)] private int prewarmCount = 12;
-        [SerializeField] private DuelProjectileDefinition[] definitionsToPrewarm;
+        [SerializeField] private ArrowData[] definitionsToPrewarm;
 
-        private readonly Dictionary<ArrowProjectile, Queue<ArrowProjectile>> available =
-            new Dictionary<ArrowProjectile, Queue<ArrowProjectile>>();
-        private readonly Dictionary<ArrowProjectile, ArrowProjectile> activeOrigins =
-            new Dictionary<ArrowProjectile, ArrowProjectile>();
+        private readonly Dictionary<Arrow, Queue<Arrow>> available =
+            new Dictionary<Arrow, Queue<Arrow>>();
+        private readonly Dictionary<Arrow, Arrow> activeOrigins =
+            new Dictionary<Arrow, Arrow>();
 
         private void Awake()
         {
             if (definitionsToPrewarm == null) return;
 
-            foreach (DuelProjectileDefinition definition in definitionsToPrewarm)
+            foreach (ArrowData definition in definitionsToPrewarm)
             {
                 if (definition == null || definition.ProjectilePrefab == null) continue;
                 for (int i = 0; i < prewarmCount; i++)
                 {
-                    ArrowProjectile projectile = Create(definition.ProjectilePrefab);
+                    Arrow projectile = Create(definition.ProjectilePrefab);
                     Return(definition.ProjectilePrefab, projectile);
                 }
             }
         }
 
-        public ArrowProjectile Spawn(DuelProjectileDefinition definition)
+        public Arrow Spawn(ArrowData definition)
         {
             if (definition == null || definition.ProjectilePrefab == null) return null;
 
-            ArrowProjectile prefab = definition.ProjectilePrefab;
-            Queue<ArrowProjectile> queue = GetQueue(prefab);
-            ArrowProjectile projectile = queue.Count > 0 ? queue.Dequeue() : Create(prefab);
+            Arrow prefab = definition.ProjectilePrefab;
+            Queue<Arrow> queue = GetQueue(prefab);
+            Arrow projectile = queue.Count > 0 ? queue.Dequeue() : Create(prefab);
             activeOrigins[projectile] = prefab;
             projectile.gameObject.SetActive(true);
             projectile.PrepareForPool(p => Return(prefab, p));
@@ -43,22 +43,22 @@ namespace AOG.Duel
 
         public void ReturnAll()
         {
-            var snapshot = new List<KeyValuePair<ArrowProjectile, ArrowProjectile>>(activeOrigins);
-            foreach (KeyValuePair<ArrowProjectile, ArrowProjectile> entry in snapshot)
+            var snapshot = new List<KeyValuePair<Arrow, Arrow>>(activeOrigins);
+            foreach (KeyValuePair<Arrow, Arrow> entry in snapshot)
             {
                 Return(entry.Value, entry.Key);
             }
         }
 
-        private ArrowProjectile Create(ArrowProjectile prefab)
+        private Arrow Create(Arrow prefab)
         {
-            ArrowProjectile projectile = Instantiate(prefab, transform);
+            Arrow projectile = Instantiate(prefab, transform);
             projectile.gameObject.name = prefab.gameObject.name;
             projectile.gameObject.SetActive(false);
             return projectile;
         }
 
-        private void Return(ArrowProjectile prefab, ArrowProjectile projectile)
+        private void Return(Arrow prefab, Arrow projectile)
         {
             if (projectile == null) return;
             activeOrigins.Remove(projectile);
@@ -68,11 +68,11 @@ namespace AOG.Duel
             GetQueue(prefab).Enqueue(projectile);
         }
 
-        private Queue<ArrowProjectile> GetQueue(ArrowProjectile prefab)
+        private Queue<Arrow> GetQueue(Arrow prefab)
         {
-            if (!available.TryGetValue(prefab, out Queue<ArrowProjectile> queue))
+            if (!available.TryGetValue(prefab, out Queue<Arrow> queue))
             {
-                queue = new Queue<ArrowProjectile>();
+                queue = new Queue<Arrow>();
                 available.Add(prefab, queue);
             }
             return queue;

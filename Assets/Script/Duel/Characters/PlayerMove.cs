@@ -1,0 +1,94 @@
+using UnityEngine;
+
+namespace AOG.Duel
+{
+    [RequireComponent(typeof(Rigidbody2D), typeof(Stats))]
+    public sealed class PlayerMove : MonoBehaviour
+    {
+        [SerializeField] private float minimumX = -8f;
+        [SerializeField] private float maximumX = 8f;
+        [SerializeField, Min(0f)] private float movingThreshold = 0.05f;
+
+        private Rigidbody2D body;
+        private Stats stats;
+        private float movementInput;
+        private bool gameplayMovementAllowed;
+        private bool actionMovementAllowed = true;
+        private bool isDashing;
+        private float dashDirection;
+        private float dashSpeed;
+
+        public bool IsDashing => isDashing;
+        public bool IsMoving => isDashing || Mathf.Abs(movementInput) > movingThreshold;
+
+        private void Awake()
+        {
+            body = GetComponent<Rigidbody2D>();
+            stats = GetComponent<Stats>();
+        }
+
+        private void FixedUpdate()
+        {
+            float velocityX = 0f;
+            if (gameplayMovementAllowed)
+            {
+                velocityX = isDashing ? dashDirection * dashSpeed :
+                    (actionMovementAllowed ? movementInput * stats.MoveSpeed : 0f);
+            }
+            Vector2 velocity = GetVelocity();
+            SetVelocity(new Vector2(velocityX, velocity.y));
+            Vector2 position = body.position;
+            position.x = Mathf.Clamp(position.x, minimumX, maximumX);
+            if (!Mathf.Approximately(position.x, body.position.x))
+            {
+                body.position = position;
+                SetVelocity(new Vector2(0f, GetVelocity().y));
+            }
+        }
+
+        public void SetMovementInput(float value) => movementInput = Mathf.Clamp(value, -1f, 1f);
+        public void SetGameplayMovementAllowed(bool allowed)
+        {
+            gameplayMovementAllowed = allowed;
+            if (!allowed) { movementInput = 0f; StopImmediately(); }
+        }
+        public void SetActionMovementAllowed(bool allowed) => actionMovementAllowed = allowed;
+        public void BeginDash(float direction, float speed)
+        {
+            dashDirection = Mathf.Approximately(direction, 0f) ? 1f : Mathf.Sign(direction);
+            dashSpeed = Mathf.Max(0f, speed);
+            isDashing = true;
+        }
+        public void EndDash() => isDashing = false;
+        public void StopImmediately()
+        {
+            isDashing = false;
+            if (body != null) SetVelocity(new Vector2(0f, GetVelocity().y));
+        }
+        public void SetHorizontalBounds(float min, float max)
+        {
+            minimumX = Mathf.Min(min, max);
+            maximumX = Mathf.Max(min, max);
+        }
+        private Vector2 GetVelocity()
+        {
+#if UNITY_6000_0_OR_NEWER
+            return body.linearVelocity;
+#else
+            return body.velocity;
+#endif
+        }
+        private void SetVelocity(Vector2 value)
+        {
+#if UNITY_6000_0_OR_NEWER
+            body.linearVelocity = value;
+#else
+            body.velocity = value;
+#endif
+        }
+        private void OnValidate()
+        {
+            if (minimumX > maximumX) (minimumX, maximumX) = (maximumX, minimumX);
+        }
+    }
+}

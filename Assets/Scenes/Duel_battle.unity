@@ -228,6 +228,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1589749615}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &481478738 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4165326193211423853, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+  m_PrefabInstance: {fileID: 1130811096}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &481478739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481478738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b597e1bf30fad9c4d9389cb0aafe2de4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Bot
+  decisionInterval: 0.5
+  movementChance: 0.65
+  actionChance: 0.35
+--- !u!114 &481478748 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 957973392531507051, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+  m_PrefabInstance: {fileID: 1130811096}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481478738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a1b1770f3b07f439fd8b7e2ed533a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Player
 --- !u!1 &642499285
 GameObject:
   m_ObjectHideFlags: 0
@@ -691,6 +722,79 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!1001 &1130811096
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 957973392531507051, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: teamId
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1530076052815395145, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: releaseArrowByAnimationEvent
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1817898826961239844, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_GravityScale
+      value: 3.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4165326193211423853, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_Name
+      value: Character (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5.6710243
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.036218584
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8664954524116716544, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 719154445166342356, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4165326193211423853, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 481478739}
+  m_SourcePrefab: {fileID: 100100000, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
 --- !u!1001 &1277919985
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -699,6 +803,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1530076052815395145, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: releaseArrowByAnimationEvent
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1817898826961239844, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: m_GravityScale
+      value: 3.6
+      objectReference: {fileID: 0}
     - target: {fileID: 4165326193211423853, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
       propertyPath: m_Name
       value: Character
@@ -748,6 +860,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+--- !u!114 &1280255560 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 957973392531507051, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+  m_PrefabInstance: {fileID: 1277919985}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a1b1770f3b07f439fd8b7e2ed533a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Player
 --- !u!1 &1546984515
 GameObject:
   m_ObjectHideFlags: 0
@@ -1041,6 +1164,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1876664477}
+  - component: {fileID: 1876664479}
+  - component: {fileID: 1876664478}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1063,6 +1188,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1876664478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1876664476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b7ac4132df7b0c41902b8e381efa114, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.GameManager
+  playerOne: {fileID: 1280255560}
+  playerTwo: {fileID: 481478748}
+  projectilePool: {fileID: 1876664479}
+  startAutomatically: 1
+  countdownDuration: 3
+  matchDuration: 90
+--- !u!114 &1876664479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1876664476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 282ad6a5c0137d14e918706a15d6acf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.ArrowPool
+  prewarmCount: 50
+  definitionsToPrewarm:
+  - {fileID: 11400000, guid: e1d0bdb4dd0e9c14a8e1e51657335ef3, type: 2}
 --- !u!1 &2001855615
 GameObject:
   m_ObjectHideFlags: 0
@@ -1176,3 +1334,4 @@ SceneRoots:
   - {fileID: 2001855619}
   - {fileID: 956988229}
   - {fileID: 1277919985}
+  - {fileID: 1130811096}

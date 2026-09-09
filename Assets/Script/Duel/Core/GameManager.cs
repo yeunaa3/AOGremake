@@ -5,12 +5,12 @@ using UnityEngine.SceneManagement;
 
 namespace AOG.Duel
 {
-    public sealed class GameController : MonoBehaviour
+    public sealed class GameManager : MonoBehaviour
     {
         [Header("Participants")]
-        [SerializeField] private DuelCharacter playerOne;
-        [SerializeField] private DuelCharacter playerTwo;
-        [SerializeField] private ProjectilePool projectilePool;
+        [SerializeField] private Player playerOne;
+        [SerializeField] private Player playerTwo;
+        [SerializeField] private ArrowPool projectilePool;
 
         [Header("Rules")]
         [SerializeField] private bool startAutomatically = true;
@@ -19,15 +19,15 @@ namespace AOG.Duel
 
         private Coroutine countdownRoutine;
 
-        public DuelMatchState State { get; private set; } = DuelMatchState.Waiting;
+        public GameState State { get; private set; } = GameState.Waiting;
         public float CountdownRemaining { get; private set; }
         public float MatchTimeRemaining { get; private set; }
-        public DuelCharacter Winner { get; private set; }
+        public Player Winner { get; private set; }
 
-        public event Action<DuelMatchState> StateChanged;
+        public event Action<GameState> StateChanged;
         public event Action<float> CountdownChanged;
         public event Action<float> MatchTimeChanged;
-        public event Action<DuelCharacter> MatchFinished;
+        public event Action<Player> MatchFinished;
 
         private void Start()
         {
@@ -40,7 +40,7 @@ namespace AOG.Duel
 
         private void Update()
         {
-            if (State != DuelMatchState.Playing || matchDuration <= 0f) return;
+            if (State != GameState.Playing || matchDuration <= 0f) return;
 
             MatchTimeRemaining = Mathf.Max(0f, MatchTimeRemaining - Time.deltaTime);
             MatchTimeChanged?.Invoke(MatchTimeRemaining);
@@ -54,7 +54,7 @@ namespace AOG.Duel
         {
             if (playerOne == null || playerTwo == null)
             {
-                Debug.LogError("GameController cần đủ Player One và Player Two.", this);
+                Debug.LogError("GameManager cần đủ Player One và Player Two.", this);
                 return;
             }
 
@@ -73,11 +73,11 @@ namespace AOG.Duel
             countdownRoutine = StartCoroutine(CountdownRoutine());
         }
 
-        public void NotifyCharacterDied(DuelCharacter deadCharacter)
+        public void NotifyCharacterDied(Player deadCharacter)
         {
-            if (State != DuelMatchState.Playing) return;
+            if (State != GameState.Playing) return;
 
-            DuelCharacter winner = deadCharacter == playerOne ? playerTwo : playerOne;
+            Player winner = deadCharacter == playerOne ? playerTwo : playerOne;
             if (!playerOne.Health.IsAlive && !playerTwo.Health.IsAlive)
             {
                 winner = null;
@@ -92,7 +92,7 @@ namespace AOG.Duel
 
         private IEnumerator CountdownRoutine()
         {
-            SetState(DuelMatchState.Countdown);
+            SetState(GameState.Countdown);
             CountdownRemaining = countdownDuration;
             CountdownChanged?.Invoke(CountdownRemaining);
 
@@ -104,28 +104,28 @@ namespace AOG.Duel
             }
 
             countdownRoutine = null;
-            SetState(DuelMatchState.Playing);
+            SetState(GameState.Playing);
             playerOne.SetMatchActive(true);
             playerTwo.SetMatchActive(true);
         }
 
         private void FinishByTimeLimit()
         {
-            DuelCharacter winner = null;
+            Player winner = null;
             if (playerOne.Health.CurrentHealth > playerTwo.Health.CurrentHealth) winner = playerOne;
             if (playerTwo.Health.CurrentHealth > playerOne.Health.CurrentHealth) winner = playerTwo;
             FinishMatch(winner);
         }
 
-        private void FinishMatch(DuelCharacter winner)
+        private void FinishMatch(Player winner)
         {
-            if (State == DuelMatchState.Finished) return;
+            if (State == GameState.Finished) return;
 
             Winner = winner;
             playerOne.SetMatchActive(false);
             playerTwo.SetMatchActive(false);
             projectilePool?.ReturnAll();
-            SetState(DuelMatchState.Finished);
+            SetState(GameState.Finished);
             MatchFinished?.Invoke(winner);
         }
 
@@ -136,7 +136,7 @@ namespace AOG.Duel
             playerTwo.ConfigureForMatch(this, playerOne, 1, projectilePool);
         }
 
-        private void SetState(DuelMatchState state)
+        private void SetState(GameState state)
         {
             if (State == state) return;
             State = state;

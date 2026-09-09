@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    public sealed class DuelBotInput : DuelInputSource
+    public sealed class Bot : InputSource
     {
         [SerializeField, Min(0.1f)] private float decisionInterval = 0.5f;
         [SerializeField, Range(0f, 1f)] private float movementChance = 0.65f;
@@ -10,9 +10,9 @@ namespace AOG.Duel
 
         private float nextDecisionTime;
         private float currentMove;
-        private DuelPlayerCommand pendingCommand;
+        private InputCmd pendingCommand;
 
-        public override DuelPlayerCommand ReadCommand()
+        public override InputCmd ReadCommand()
         {
             if (Time.time >= nextDecisionTime)
             {
@@ -20,7 +20,7 @@ namespace AOG.Duel
                 MakeDecision();
             }
 
-            DuelPlayerCommand result = pendingCommand;
+            InputCmd result = pendingCommand;
             result.Move = currentMove;
             pendingCommand = default;
             return result;

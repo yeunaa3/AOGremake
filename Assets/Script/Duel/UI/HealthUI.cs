@@ -3,9 +3,9 @@ using UnityEngine.UI;
 
 namespace AOG.Duel
 {
-    public sealed class DuelHealthBar : MonoBehaviour
+    public sealed class HealthUI : MonoBehaviour
     {
-        [SerializeField] private DuelHealth health;
+        [SerializeField] private Health health;
         [SerializeField] private Slider slider;
 
         private void Awake()

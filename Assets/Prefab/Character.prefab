@@ -775,6 +775,16 @@ GameObject:
   m_Component:
   - component: {fileID: 8664954524116716544}
   - component: {fileID: 1817898826961239844}
+  - component: {fileID: 957973392531507051}
+  - component: {fileID: 1747435524008901407}
+  - component: {fileID: 1530076052815395145}
+  - component: {fileID: 4893763430014299047}
+  - component: {fileID: 4689829973548253933}
+  - component: {fileID: 601669787793036520}
+  - component: {fileID: 788919201332959915}
+  - component: {fileID: 5622945218401697651}
+  - component: {fileID: 719154445166342356}
+  - component: {fileID: 2826237251451615008}
   m_Layer: 9
   m_Name: Character
   m_TagString: Player
@@ -792,7 +802,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4171960021253098384}
@@ -815,7 +825,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 3.6
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -826,7 +836,158 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 0
+  m_Constraints: 4
+--- !u!114 &957973392531507051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a1b1770f3b07f439fd8b7e2ed533a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Player
+  teamId: 0
+--- !u!114 &1747435524008901407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5be6c02162c5ac14c9ee5da0c8f8ffbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.PlayerMove
+  minimumX: -8
+  maximumX: 8
+  movingThreshold: 0.05
+--- !u!114 &1530076052815395145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acf6695a27f139a4cadf0b065c376ecf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.PlayerAction
+  autoAttackDuration: 0.55
+  autoAttackReleaseTime: 0.32
+  releaseArrowByAnimationEvent: 1
+  dashDuration: 0.2
+  dashSpeed: 14
+  dashCooldown: 2
+  shieldDuration: 0.7
+  shieldCooldown: 4
+  equippedSkills:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+--- !u!114 &4893763430014299047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ae608ec91cdda34c9c689f4082bb450, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.AutoShoot
+  idleDelay: 0.2
+--- !u!114 &4689829973548253933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603e23a6c9d8d0740827ac39188ed802, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Status
+--- !u!114 &601669787793036520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffd83ad859471d045847c74b4c2aa194, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Stats
+  maximumHealth: 100
+  baseMoveSpeed: 2
+  baseAttackSpeed: 0.5
+  referenceAnimationAttackSpeed: 1
+--- !u!114 &788919201332959915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 291064701e9debd4e8362b4c5a552337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.PlayerAnim
+--- !u!114 &5622945218401697651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d1d825942487024f9b2198127ab6360, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Health
+--- !u!114 &719154445166342356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d086f78ae7017247a41dd1219343ad4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.KeyInput
+  moveLeft: 15
+  moveRight: 18
+  dash: 1
+  shield: 51
+  skill1: 41
+  skill2: 42
+  skill3: 43
+  skill4: 44
+--- !u!114 &2826237251451615008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165326193211423853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c01aa0e7868737b418a98cdf1e6c1d25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Gear
+  equippedBow: {fileID: 11400000, guid: b26cb081d75732742a2a524b811df5da, type: 2}
 --- !u!1 &4347938009977863661
 GameObject:
   m_ObjectHideFlags: 0
@@ -1203,6 +1364,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5088110923891505465}
   - component: {fileID: 126940495493332647}
+  - component: {fileID: 8881357545618513374}
   m_Layer: 9
   m_Name: Visual
   m_TagString: Untagged
@@ -1248,6 +1410,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &8881357545618513374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6462904769965651547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ec7b906090af19499962e957a82963b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.AnimEvent
 --- !u!1 &7141953278676522350
 GameObject:
   m_ObjectHideFlags: 0

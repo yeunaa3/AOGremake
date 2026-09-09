@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    public sealed class DuelMatchHUD : MonoBehaviour
+    public sealed class GameUI : MonoBehaviour
     {
-        [SerializeField] private GameController matchManager;
+        [SerializeField] private GameManager matchManager;
         [SerializeField] private TMP_Text countdownText;
         [SerializeField] private TMP_Text timerText;
         [SerializeField] private GameObject resultPanel;
         [SerializeField] private TMP_Text resultText;
-        [SerializeField] private DuelCharacter localPlayer;
+        [SerializeField] private Player localPlayer;
 
         private void OnEnable()
         {
@@ -31,11 +31,11 @@ namespace AOG.Duel
             matchManager.MatchFinished -= HandleMatchFinished;
         }
 
-        private void HandleStateChanged(DuelMatchState state)
+        private void HandleStateChanged(GameState state)
         {
             if (countdownText != null)
             {
-                countdownText.gameObject.SetActive(state == DuelMatchState.Countdown);
+                countdownText.gameObject.SetActive(state == GameState.Countdown);
             }
         }
 
@@ -51,7 +51,7 @@ namespace AOG.Duel
             timerText.text = $"{seconds / 60:00}:{seconds % 60:00}";
         }
 
-        private void HandleMatchFinished(DuelCharacter winner)
+        private void HandleMatchFinished(Player winner)
         {
             if (resultPanel != null) resultPanel.SetActive(true);
             if (resultText == null) return;

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    public abstract class DuelSkillDefinition : ScriptableObject
+    public abstract class SkillData : ScriptableObject
     {
         [Header("Identity")]
         [SerializeField] private string skillId = "skill_id";
@@ -32,7 +32,7 @@ namespace AOG.Duel
         public string AnimationTrigger => animationTrigger;
         public bool AllowMovement => allowMovement;
 
-        public abstract void Execute(DuelSkillContext context);
+        public abstract void Execute(SkillCtx context);
 
         protected virtual void OnValidate()
         {
@@ -40,13 +40,13 @@ namespace AOG.Duel
         }
     }
 
-    public struct DuelSkillContext
+    public struct SkillCtx
     {
-        public DuelCharacter Caster;
-        public DuelCharacter Target;
+        public Player Caster;
+        public Player Target;
         public int Slot;
 
-        public DuelSkillContext(DuelCharacter caster, DuelCharacter target, int slot)
+        public SkillCtx(Player caster, Player target, int slot)
         {
             Caster = caster;
             Target = target;

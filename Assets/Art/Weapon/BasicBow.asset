@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c97008a94119bd34aad36c9d4614096b, type: 3}
-  m_Name: BowDefinition
-  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowDefinition
+  m_Name: BasicBow
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
   bowId: bow_basic
   displayName: Basic Bow
-  icon: {fileID: 21300000, guid: 02841cfcad27faf4d9183151d75b7018, type: 3}
+  icon: {fileID: 0}
   bowSprite: {fileID: 21300000, guid: 02841cfcad27faf4d9183151d75b7018, type: 3}
-  projectile: {fileID: 0}
+  projectile: {fileID: 11400000, guid: e1d0bdb4dd0e9c14a8e1e51657335ef3, type: 2}
   damage: 10
   attackSpeedMultiplier: 1

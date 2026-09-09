@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    public enum DuelMatchState
+    public enum GameState
     {
         Waiting,
         Countdown,
@@ -10,7 +10,7 @@ namespace AOG.Duel
         Finished
     }
 
-    public enum DuelActionState
+    public enum ActionState
     {
         Ready,
         AutoAttacking,
@@ -21,7 +21,7 @@ namespace AOG.Duel
         Dead
     }
 
-    public enum DuelDamageResult
+    public enum DamageResult
     {
         Ignored,
         Blocked,
@@ -29,7 +29,7 @@ namespace AOG.Duel
         Killed
     }
 
-    public struct DuelPlayerCommand
+    public struct InputCmd
     {
         public float Move;
         public bool DashPressed;
@@ -51,14 +51,14 @@ namespace AOG.Duel
         }
     }
 
-    public struct DuelDamageInfo
+    public struct DamageInfo
     {
-        public DuelCharacter Attacker;
+        public Player Attacker;
         public int Amount;
         public bool IgnoreShield;
         public Vector2 HitPoint;
 
-        public DuelDamageInfo(DuelCharacter attacker, int amount, bool ignoreShield, Vector2 hitPoint)
+        public DamageInfo(Player attacker, int amount, bool ignoreShield, Vector2 hitPoint)
         {
             Attacker = attacker;
             Amount = Mathf.Max(0, amount);

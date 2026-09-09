@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    public sealed class DuelMobileInput : DuelInputSource
+    public sealed class TouchInput : InputSource
     {
         private bool leftHeld;
         private bool rightHeld;
@@ -23,9 +23,9 @@ namespace AOG.Duel
             }
         }
 
-        public override DuelPlayerCommand ReadCommand()
+        public override InputCmd ReadCommand()
         {
-            var command = new DuelPlayerCommand
+            var command = new InputCmd
             {
                 Move = (rightHeld ? 1f : 0f) - (leftHeld ? 1f : 0f),
                 DashPressed = dashPressed,

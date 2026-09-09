@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    public sealed class CharacterStatusController : MonoBehaviour
+    public sealed class Status : MonoBehaviour
     {
         public float StunRemaining { get; private set; }
         public float SilenceRemaining { get; private set; }

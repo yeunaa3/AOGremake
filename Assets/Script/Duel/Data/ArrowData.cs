@@ -3,10 +3,10 @@ using UnityEngine;
 namespace AOG.Duel
 {
     [CreateAssetMenu(menuName = "AOG/Duel/Projectile Definition", fileName = "ProjectileDefinition")]
-    public sealed class DuelProjectileDefinition : ScriptableObject
+    public sealed class ArrowData : ScriptableObject
     {
         [Header("Prefab")]
-        [SerializeField] private ArrowProjectile projectilePrefab;
+        [SerializeField] private Arrow projectilePrefab;
 
         [Header("Fallback/skill combat")]
         [Tooltip("Damage mặc định cho skill. Đòn bắn thường sẽ lấy damage từ cung.")]
@@ -19,7 +19,7 @@ namespace AOG.Duel
         [SerializeField, Min(0.1f)] private float maximumLifetime = 4f;
         [SerializeField] private bool rotateAlongPath = true;
 
-        public ArrowProjectile ProjectilePrefab => projectilePrefab;
+        public Arrow ProjectilePrefab => projectilePrefab;
         public int Damage => damage;
         public bool IgnoreShield => ignoreShield;
         public float FlightDuration => flightDuration;
