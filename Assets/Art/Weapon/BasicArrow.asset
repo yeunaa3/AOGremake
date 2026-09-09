@@ -15,7 +15,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 1046340276981905311, guid: 66d432150ac8d494f9d62a61c953a6d1, type: 3}
   damage: 10
   ignoreShield: 0
-  flightDuration: 5
+  flightDuration: 3.6
   arcHeight: 5
   maximumLifetime: 30
   rotateAlongPath: 1
