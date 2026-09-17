@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c97008a94119bd34aad36c9d4614096b, type: 3}
-  m_Name: BasicBow
+  m_Name: devil_bow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
   bowId: bow_basic
   displayName: Basic Bow
   icon: {fileID: 0}
-  bowSprite: {fileID: 21300000, guid: 02841cfcad27faf4d9183151d75b7018, type: 3}
-  projectile: {fileID: 11400000, guid: e1d0bdb4dd0e9c14a8e1e51657335ef3, type: 2}
+  bowSprite: {fileID: 21300000, guid: 84afaa69561bed1458c6f1eab8cb4f61, type: 3}
+  arrowSprite: {fileID: 21300000, guid: 14612f17fcf1d2544a1ca4690ad0f3c7, type: 3}
   damage: 10
   attackSpeedMultiplier: 1

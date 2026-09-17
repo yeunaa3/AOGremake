@@ -2,89 +2,48 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
+    // Script này chỉ làm 2 việc: lật nhân vật và gửi Parameter vào Animator.
     public sealed class PlayerAnim : MonoBehaviour
     {
         private Animator animator;
-        private Transform visualRoot;
-
-        private float visualScaleX = 1f;
+        private Transform visual;
+        private float normalX;
 
         private void Awake()
         {
             animator = GetComponentInChildren<Animator>();
-            if (animator != null) visualRoot = animator.transform;
-            if (visualRoot != null) visualScaleX = Mathf.Abs(visualRoot.localScale.x);
+            visual = animator == null ? null : animator.transform;
+            if (visual != null) normalX = Mathf.Abs(visual.localScale.x);
         }
 
-        public void SetMoving(bool moving)
+        public void Face(float direction)
         {
-            SetBoolIfPresent("IsMoving", moving);
-            SetFloatIfPresent("MoveSpeed", moving ? 1f : 0f);
+            if (visual == null || direction == 0f) return;
+            Vector3 scale = visual.localScale;
+            scale.x = normalX * Mathf.Sign(direction);
+            visual.localScale = scale;
         }
 
-        public void SetAttackSpeed(float multiplier)
+        public void Values(bool moving, bool stunned, bool silenced, bool shielding, float attackSpeed)
         {
-            SetFloatIfPresent("AttackSpeed", Mathf.Max(0.05f, multiplier));
+            Bool("IsMoving", moving);
+            Bool("IsStunned", stunned);
+            Bool("IsSilenced", silenced);
+            Bool("IsShielding", shielding);
+            Float("MoveSpeed", moving ? 1f : 0f);
+            Float("AttackSpeed", attackSpeed);
         }
 
-        public void SetFacing(float direction)
+        // Dùng trực tiếp ba hàm này khi bạn thêm Parameter mới.
+        public void Trigger(string name) { if (Has(name, AnimatorControllerParameterType.Trigger)) animator.SetTrigger(name); }
+        public void Bool(string name, bool value) { if (Has(name, AnimatorControllerParameterType.Bool)) animator.SetBool(name, value); }
+        public void Float(string name, float value) { if (Has(name, AnimatorControllerParameterType.Float)) animator.SetFloat(name, value); }
+
+        private bool Has(string name, AnimatorControllerParameterType type)
         {
-            if (visualRoot == null || Mathf.Approximately(direction, 0f)) return;
-
-            Vector3 scale = visualRoot.localScale;
-            scale.x = visualScaleX * Mathf.Sign(direction);
-            visualRoot.localScale = scale;
-        }
-
-        public void PlayAutoAttack() => SetTriggerIfPresent("AutoAttack");
-        public void PlayDash() => SetTriggerIfPresent("Dash");
-        public void PlayShield() => SetTriggerIfPresent("Shield");
-        public void PlayHit() => SetTriggerIfPresent("Hit");
-        public void PlayStun() => SetTriggerIfPresent("Stun");
-        public void PlayDeath() => SetTriggerIfPresent("Die");
-
-        public void PlaySkill(string triggerName, int slot)
-        {
-            string resolvedTrigger = string.IsNullOrWhiteSpace(triggerName)
-                ? $"Skill{slot + 1}"
-                : triggerName;
-            SetTriggerIfPresent(resolvedTrigger);
-        }
-
-        private void SetTriggerIfPresent(string parameterName)
-        {
-            if (animator != null && HasParameter(parameterName, AnimatorControllerParameterType.Trigger))
-            {
-                animator.SetTrigger(parameterName);
-            }
-        }
-
-        private void SetBoolIfPresent(string parameterName, bool value)
-        {
-            if (animator != null && HasParameter(parameterName, AnimatorControllerParameterType.Bool))
-            {
-                animator.SetBool(parameterName, value);
-            }
-        }
-
-        private void SetFloatIfPresent(string parameterName, float value)
-        {
-            if (animator != null && HasParameter(parameterName, AnimatorControllerParameterType.Float))
-            {
-                animator.SetFloat(parameterName, value);
-            }
-        }
-
-        private bool HasParameter(string parameterName, AnimatorControllerParameterType type)
-        {
-            foreach (AnimatorControllerParameter parameter in animator.parameters)
-            {
-                if (parameter.type == type && parameter.name == parameterName)
-                {
-                    return true;
-                }
-            }
-
+            if (animator == null) return false;
+            foreach (AnimatorControllerParameter item in animator.parameters)
+                if (item.name == name && item.type == type) return true;
             return false;
         }
     }

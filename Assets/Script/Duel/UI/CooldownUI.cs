@@ -16,7 +16,7 @@ namespace AOG.Duel
 
     public sealed class CooldownUI : MonoBehaviour
     {
-        [SerializeField] private Player character;
+        [SerializeField] private PlayerController character;
         [SerializeField] private DuelActionSlot slot;
         [SerializeField] private Image cooldownFill;
         [SerializeField] private TMP_Text cooldownText;
@@ -24,7 +24,7 @@ namespace AOG.Duel
 
         private void Update()
         {
-            if (character == null || character.ActionController == null) return;
+            if (character == null || character.Action == null) return;
 
             GetCooldown(out float remaining, out float duration, out bool configured);
             float normalized = duration > 0f ? remaining / duration : 0f;
@@ -38,15 +38,15 @@ namespace AOG.Duel
             if (button != null)
             {
                 button.interactable = configured
-                    && character.CanUseSpecialActions
-                    && character.ActionController.IsReady
+                    && character.CanSkill
+                    && character.Action.Ready
                     && remaining <= 0f;
             }
         }
 
         private void GetCooldown(out float remaining, out float duration, out bool configured)
         {
-            PlayerAction actions = character.ActionController;
+            PlayerAction actions = character.Action;
             configured = true;
 
             switch (slot)

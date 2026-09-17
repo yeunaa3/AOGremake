@@ -8,8 +8,12 @@ namespace AOG.Duel
     {
         private Rigidbody2D body;
         private Collider2D hitbox;
-        private Player owner;
-        private ArrowData definition;
+        private SpriteRenderer visual;
+        private PlayerController owner;
+        [SerializeField, Min(0.05f)] private float flightDuration = 3.6f;
+        [SerializeField] private float arcHeight = 5f;
+        [SerializeField, Min(0.1f)] private float maximumLifetime = 30f;
+        [SerializeField] private bool rotateAlongPath = true;
         private Vector2 startPoint;
         private Vector2 controlPoint;
         private Vector2 endPoint;
@@ -20,12 +24,16 @@ namespace AOG.Duel
         private bool reachedEnd;
         private float endGraceRemaining;
         private int damage;
+        private ArrowEffect effect;
+        private int effectPower;
+        private float effectDuration;
         private Action<Arrow> returnToPool;
 
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
             hitbox = GetComponent<Collider2D>();
+            visual = GetComponentInChildren<SpriteRenderer>(true);
             body.bodyType = RigidbodyType2D.Kinematic;
             body.gravityScale = 0f;
             body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
@@ -34,10 +42,10 @@ namespace AOG.Duel
 
         private void FixedUpdate()
         {
-            if (!flying || definition == null) return;
+            if (!flying) return;
 
             lifetime += Time.fixedDeltaTime;
-            if (lifetime >= definition.MaximumLifetime)
+            if (lifetime >= maximumLifetime)
             {
                 Despawn();
                 return;
@@ -51,12 +59,12 @@ namespace AOG.Duel
             }
 
             elapsed += Time.fixedDeltaTime;
-            float t = Mathf.Clamp01(elapsed / definition.FlightDuration);
+            float t = Mathf.Clamp01(elapsed / flightDuration);
             Vector2 nextPoint = EvaluateBezier(t);
             body.MovePosition(nextPoint);
 
             Vector2 direction = nextPoint - previousPoint;
-            if (definition.RotateAlongPath && direction.sqrMagnitude > 0.000001f)
+            if (rotateAlongPath && direction.sqrMagnitude > 0.000001f)
             {
                 float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
                 body.SetRotation(angle);
@@ -71,30 +79,31 @@ namespace AOG.Duel
         }
 
         public void Launch(
-            Player projectileOwner,
-            ArrowData projectileDefinition,
+            PlayerController projectileOwner,
             Vector2 start,
             Vector2 targetSnapshot,
             float arcHeightOffset,
             int shotDamage,
-            Action<Arrow> onDespawn)
+            Sprite arrowSprite,
+            ArrowEffect shotEffect = ArrowEffect.None,
+            int shotEffectPower = 0,
+            float shotEffectDuration = 0f)
         {
             owner = projectileOwner;
-            definition = projectileDefinition;
             startPoint = start;
             endPoint = targetSnapshot;
             controlPoint = (startPoint + endPoint) * 0.5f
-                + Vector2.up * (definition.ArcHeight + arcHeightOffset);
+                + Vector2.up * (arcHeight + arcHeightOffset);
             previousPoint = startPoint;
             elapsed = 0f;
             lifetime = 0f;
             reachedEnd = false;
             endGraceRemaining = 0f;
             damage = Mathf.Max(0, shotDamage);
-            if (onDespawn != null)
-            {
-                returnToPool = onDespawn;
-            }
+            effect = shotEffect;
+            effectPower = Mathf.Max(0, shotEffectPower);
+            effectDuration = Mathf.Max(0f, shotEffectDuration);
+            if (visual != null) visual.sprite = arrowSprite;
             flying = true;
 
             transform.position = startPoint;
@@ -112,8 +121,10 @@ namespace AOG.Duel
             flying = false;
             reachedEnd = false;
             owner = null;
-            definition = null;
             damage = 0;
+            effect = ArrowEffect.None;
+            effectPower = 0;
+            effectDuration = 0f;
             returnToPool = null;
             if (hitbox != null) hitbox.enabled = false;
         }
@@ -128,24 +139,15 @@ namespace AOG.Duel
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (!flying || owner == null || definition == null) return;
+            if (!flying || owner == null) return;
             if (other.transform == owner.transform || other.transform.IsChildOf(owner.transform)) return;
 
-            Health targetHealth = other.GetComponentInParent<Health>();
-            if (targetHealth == null)
-            {
-                Despawn();
-                return;
-            }
+            PlayerController target = other.GetComponentInParent<PlayerController>();
+            if (target == null) { Despawn(); return; }
+            if (target.Team == owner.Team) return;
 
-            Player targetCharacter = targetHealth.GetComponentInParent<Player>();
-            if (targetCharacter == null || targetCharacter.TeamId == owner.TeamId) return;
-
-            targetHealth.TakeDamage(new DamageInfo(
-                owner,
-                damage,
-                definition.IgnoreShield,
-                transform.position));
+            target.Stats.TakeDamage(new DamageInfo(owner, damage, false, transform.position,
+                effect, effectPower, effectDuration));
             Despawn();
         }
 

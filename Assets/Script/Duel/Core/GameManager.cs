@@ -8,8 +8,8 @@ namespace AOG.Duel
     public sealed class GameManager : MonoBehaviour
     {
         [Header("Participants")]
-        [SerializeField] private Player playerOne;
-        [SerializeField] private Player playerTwo;
+        [SerializeField] private PlayerController playerOne;
+        [SerializeField] private PlayerController playerTwo;
         [SerializeField] private ArrowPool projectilePool;
 
         [Header("Rules")]
@@ -22,12 +22,12 @@ namespace AOG.Duel
         public GameState State { get; private set; } = GameState.Waiting;
         public float CountdownRemaining { get; private set; }
         public float MatchTimeRemaining { get; private set; }
-        public Player Winner { get; private set; }
+        public PlayerController Winner { get; private set; }
 
         public event Action<GameState> StateChanged;
         public event Action<float> CountdownChanged;
         public event Action<float> MatchTimeChanged;
-        public event Action<Player> MatchFinished;
+        public event Action<PlayerController> MatchFinished;
 
         private void Start()
         {
@@ -54,7 +54,7 @@ namespace AOG.Duel
         {
             if (playerOne == null || playerTwo == null)
             {
-                Debug.LogError("GameManager cần đủ Player One và Player Two.", this);
+                Debug.LogError("GameManager cần đủ PlayerController One và PlayerController Two.", this);
                 return;
             }
 
@@ -65,20 +65,20 @@ namespace AOG.Duel
 
             projectilePool?.ReturnAll();
             ConfigureParticipants();
-            playerOne.PrepareForMatch();
-            playerTwo.PrepareForMatch();
+            playerOne.ResetPlayer();
+            playerTwo.ResetPlayer();
             Winner = null;
             MatchTimeRemaining = matchDuration;
             MatchTimeChanged?.Invoke(MatchTimeRemaining);
             countdownRoutine = StartCoroutine(CountdownRoutine());
         }
 
-        public void NotifyCharacterDied(Player deadCharacter)
+        public void NotifyCharacterDied(PlayerController deadCharacter)
         {
             if (State != GameState.Playing) return;
 
-            Player winner = deadCharacter == playerOne ? playerTwo : playerOne;
-            if (!playerOne.Health.IsAlive && !playerTwo.Health.IsAlive)
+            PlayerController winner = deadCharacter == playerOne ? playerTwo : playerOne;
+            if (!playerOne.Stats.Alive && !playerTwo.Stats.Alive)
             {
                 winner = null;
             }
@@ -105,25 +105,25 @@ namespace AOG.Duel
 
             countdownRoutine = null;
             SetState(GameState.Playing);
-            playerOne.SetMatchActive(true);
-            playerTwo.SetMatchActive(true);
+            playerOne.Play(true);
+            playerTwo.Play(true);
         }
 
         private void FinishByTimeLimit()
         {
-            Player winner = null;
-            if (playerOne.Health.CurrentHealth > playerTwo.Health.CurrentHealth) winner = playerOne;
-            if (playerTwo.Health.CurrentHealth > playerOne.Health.CurrentHealth) winner = playerTwo;
+            PlayerController winner = null;
+            if (playerOne.Stats.Hp > playerTwo.Stats.Hp) winner = playerOne;
+            if (playerTwo.Stats.Hp > playerOne.Stats.Hp) winner = playerTwo;
             FinishMatch(winner);
         }
 
-        private void FinishMatch(Player winner)
+        private void FinishMatch(PlayerController winner)
         {
             if (State == GameState.Finished) return;
 
             Winner = winner;
-            playerOne.SetMatchActive(false);
-            playerTwo.SetMatchActive(false);
+            playerOne.Play(false);
+            playerTwo.Play(false);
             projectilePool?.ReturnAll();
             SetState(GameState.Finished);
             MatchFinished?.Invoke(winner);
@@ -132,8 +132,8 @@ namespace AOG.Duel
         private void ConfigureParticipants()
         {
             if (playerOne == null || playerTwo == null) return;
-            playerOne.ConfigureForMatch(this, playerTwo, 0, projectilePool);
-            playerTwo.ConfigureForMatch(this, playerOne, 1, projectilePool);
+            playerOne.Setup(this, playerTwo, 0, projectilePool);
+            playerTwo.Setup(this, playerOne, 1, projectilePool);
         }
 
         private void SetState(GameState state)

@@ -3,410 +3,152 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
+    // Mọi hành động chiến đấu nằm ở đây, viết thẳng để dễ đọc.
+    [RequireComponent(typeof(PlayerController))]
+    [RequireComponent(typeof(PlayerMove))]
+    [RequireComponent(typeof(PlayerStats))]
+    [RequireComponent(typeof(PlayerAnim))]
     public sealed class PlayerAction : MonoBehaviour
     {
-        [Header("References")]
-        private Player owner;
-        private PlayerMove motor;
-        private PlayerAnim animationController;
-        private Stats stats;
-        private Status statusController;
-
-        [Header("Basic attack")]
-        [SerializeField, Min(0.01f)] private float autoAttackDuration = 0.55f;
-        [SerializeField, Min(0f)] private float autoAttackReleaseTime = 0.32f;
-        [Tooltip("Bật khi clip có Animation Event gọi ReleaseArrow.")]
-        [SerializeField] private bool releaseArrowByAnimationEvent;
-
         [Header("Dash")]
-        [SerializeField, Min(0.01f)] private float dashDuration = 0.2f;
-        [SerializeField, Min(0f)] private float dashSpeed = 14f;
-        [SerializeField, Min(0f)] private float dashCooldown = 2f;
+        [SerializeField] private float dashTime = .2f;
+        [SerializeField] private float dashSpeed = 14f;
+        [SerializeField] private float dashCooldown = 2f;
+        [Header("Khiên")]
+        [SerializeField] private float shieldTime = .7f;
+        [SerializeField] private float shieldCooldown = 4f;
+        [Header("4 Skill")]
+        [SerializeField] private SkillData[] skills = new SkillData[4];
 
-        [Header("Shield")]
-        [SerializeField, Min(0.01f)] private float shieldDuration = 0.7f;
-        [SerializeField, Min(0f)] private float shieldCooldown = 4f;
+        private PlayerController player;
+        private PlayerMove move;
+        private PlayerStats stats;
+        private PlayerAnim anim;
+        private float time;
+        private float dashLeft;
+        private float shieldLeft;
+        private readonly float[] skillLeft = new float[4];
+        private int skillSlot = -1;
+        private bool didEffect;
 
-        [Header("Loadout")]
-        [SerializeField] private SkillData[] equippedSkills = new SkillData[4];
-
-        private readonly float[] skillCooldownRemaining = new float[4];
-        private Action activeCallback;
-        private Action finishCallback;
-        private float actionElapsed;
-        private float actionDuration;
-        private float activeTime;
-        private bool activeTriggered;
-        private int activeSkillSlot = -1;
-        private float pendingCooldown;
-        private bool autoAttackReleased;
-
-        public ActionState CurrentState { get; private set; } = ActionState.Ready;
-        public bool IsReady => CurrentState == ActionState.Ready;
-        public bool IsShieldActive { get; private set; }
-        public float DashCooldownRemaining { get; private set; }
-        public float ShieldCooldownRemaining { get; private set; }
+        public ActionState State { get; private set; } = ActionState.Ready;
+        public bool Ready => State == ActionState.Ready;
+        public bool ShieldOn => State == ActionState.Shielding;
+        public float DashCooldownRemaining => dashLeft;
+        public float ShieldCooldownRemaining => shieldLeft;
         public float DashCooldownDuration => dashCooldown;
         public float ShieldCooldownDuration => shieldCooldown;
-        public int SkillCount => equippedSkills != null ? equippedSkills.Length : 0;
-
-        public event Action<ActionState> StateChanged;
 
         private void Awake()
         {
-            owner = GetComponent<Player>();
-            motor = GetComponent<PlayerMove>();
-            animationController = GetComponent<PlayerAnim>();
-            stats = GetComponent<Stats>();
-            statusController = GetComponent<Status>();
-            EnsureFourSkillSlots();
+            player = GetComponent<PlayerController>();
+            move = GetComponent<PlayerMove>();
+            stats = GetComponent<PlayerStats>();
+            anim = GetComponent<PlayerAnim>();
+            if (skills == null || skills.Length != 4) Array.Resize(ref skills, 4);
         }
 
         private void Update()
         {
-            TickCooldowns(Time.deltaTime);
-            SynchronizeStunState();
+            dashLeft = Mathf.Max(0f, dashLeft - Time.deltaTime);
+            shieldLeft = Mathf.Max(0f, shieldLeft - Time.deltaTime);
+            for (int i = 0; i < 4; i++) skillLeft[i] = Mathf.Max(0f, skillLeft[i] - Time.deltaTime);
 
-            if (CurrentState == ActionState.Ready
-                || CurrentState == ActionState.Dead
-                || CurrentState == ActionState.Stunned)
+            if (stats.Stunned && State != ActionState.Stunned && State != ActionState.Dead)
             {
+                State = ActionState.Stunned; time = 0f; move.Lock(true); move.Stop(); anim.Trigger("Stun");
+            }
+            if (!stats.Stunned && State == ActionState.Stunned) { State = ActionState.Ready; move.Lock(false); }
+            if (Ready || State == ActionState.Stunned || State == ActionState.Dead) return;
+
+            time += Time.deltaTime;
+
+            if (State == ActionState.AutoAttacking)
+            {
+                // Shot tự lặp; mỗi Animation Event sẽ bắn một mũi tên.
                 return;
             }
-
-            actionElapsed += Time.deltaTime;
-            if (!activeTriggered && actionElapsed >= activeTime)
+            else if (State == ActionState.Dashing)
             {
-                TriggerActiveMoment();
+                if (time >= dashTime) { move.Stop(); State = ActionState.Ready; }
             }
-
-            if (actionElapsed >= actionDuration)
+            else if (State == ActionState.Shielding)
             {
-                FinishCurrentAction();
+                if (time >= shieldTime) State = ActionState.Ready;
             }
-        }
-
-        public bool TryAutoAttack()
-        {
-            if (!CanBeginBasicAttack()) return false;
-
-            float attackAnimationSpeed = stats != null ? stats.AttackAnimationSpeed : 1f;
-            float effectiveDuration = autoAttackDuration / attackAnimationSpeed;
-            float effectiveReleaseTime = autoAttackReleaseTime / attackAnimationSpeed;
-            autoAttackReleased = false;
-
-            return BeginAction(
-                ActionState.AutoAttacking,
-                effectiveDuration,
-                Mathf.Min(effectiveReleaseTime, effectiveDuration),
-                0f,
-                true,
-                releaseArrowByAnimationEvent ? null : ReleaseAutoAttack,
-                () => owner.SetLoadedArrowVisible(true),
-                () =>
+            else if (State == ActionState.UsingSkill)
+            {
+                SkillData skill = skills[skillSlot];
+                if (!didEffect && time >= skill.ActiveTime)
                 {
-                    owner.SetLoadedArrowVisible(true);
-                    animationController.PlayAutoAttack();
-                });
-        }
-
-        public bool TryDash(float requestedDirection, float facingDirection)
-        {
-            if (!CanBeginSpecialAction() || DashCooldownRemaining > 0f) return false;
-
-            float direction = Mathf.Abs(requestedDirection) > 0.01f
-                ? requestedDirection
-                : facingDirection;
-
-            return BeginAction(
-                ActionState.Dashing,
-                dashDuration,
-                0f,
-                dashCooldown,
-                true,
-                () => motor.BeginDash(direction, dashSpeed),
-                () => motor.EndDash(),
-                () => animationController.PlayDash());
-        }
-
-        public bool TryShield()
-        {
-            if (!CanBeginSpecialAction() || ShieldCooldownRemaining > 0f) return false;
-
-            return BeginAction(
-                ActionState.Shielding,
-                shieldDuration,
-                0f,
-                shieldCooldown,
-                true,
-                () => IsShieldActive = true,
-                () => IsShieldActive = false,
-                () => animationController.PlayShield());
-        }
-
-        public bool TrySkill(int slot)
-        {
-            if (!CanBeginSpecialAction() || !IsValidSkillSlot(slot)) return false;
-            if (skillCooldownRemaining[slot] > 0f) return false;
-
-            SkillData skill = equippedSkills[slot];
-            if (skill == null) return false;
-
-            activeSkillSlot = slot;
-            return BeginAction(
-                ActionState.UsingSkill,
-                skill.ActionDuration,
-                skill.ActiveTime,
-                skill.Cooldown,
-                skill.AllowMovement,
-                () => skill.Execute(new SkillCtx(owner, owner.Opponent, slot)),
-                null,
-                () => animationController.PlaySkill(skill.AnimationTrigger, slot));
-        }
-
-        public void ApplyStun(float duration)
-        {
-            statusController?.ApplyStun(duration);
-        }
-
-        public void ApplySilence(float duration)
-        {
-            statusController?.ApplySilence(duration);
-        }
-
-        public void ReleaseAutoAttackFromAnimation()
-        {
-            if (!releaseArrowByAnimationEvent) return;
-            ReleaseAutoAttack();
-        }
-
-        public void MarkDead()
-        {
-            CancelCurrentAction(false);
-            SetState(ActionState.Dead);
-            motor.SetActionMovementAllowed(false);
-            motor.StopImmediately();
-            animationController.PlayDeath();
-        }
-
-        public void StopForMatchEnd()
-        {
-            if (CurrentState == ActionState.Dead) return;
-            CancelCurrentAction(false);
-            SetState(ActionState.Ready);
-        }
-
-        public void ResetActions()
-        {
-            CancelCurrentAction(false);
-            DashCooldownRemaining = 0f;
-            ShieldCooldownRemaining = 0f;
-            for (int i = 0; i < skillCooldownRemaining.Length; i++)
-            {
-                skillCooldownRemaining[i] = 0f;
-            }
-            SetState(ActionState.Ready);
-        }
-
-        public SkillData GetSkill(int slot)
-        {
-            return IsValidSkillSlot(slot) ? equippedSkills[slot] : null;
-        }
-
-        public float GetSkillCooldownRemaining(int slot)
-        {
-            return slot >= 0 && slot < skillCooldownRemaining.Length
-                ? skillCooldownRemaining[slot]
-                : 0f;
-        }
-
-        public void SetSkill(int slot, SkillData skill)
-        {
-            EnsureFourSkillSlots();
-            if (slot >= 0 && slot < equippedSkills.Length)
-            {
-                equippedSkills[slot] = skill;
-                skillCooldownRemaining[slot] = 0f;
+                    didEffect = true;
+                    skill.Execute(new SkillCtx(player, player.Enemy, skillSlot));
+                }
+                if (time >= skill.ActionDuration) { move.Lock(false); State = ActionState.Ready; }
             }
         }
 
-        private bool BeginAction(
-            ActionState state,
-            float duration,
-            float effectTime,
-            float cooldownAfterFinish,
-            bool allowMovement,
-            Action onActive,
-            Action onFinish,
-            Action onAnimation)
+        public bool Attack()
         {
-            actionElapsed = 0f;
-            actionDuration = Mathf.Max(0.01f, duration);
-            activeTime = Mathf.Clamp(effectTime, 0f, actionDuration);
-            pendingCooldown = Mathf.Max(0f, cooldownAfterFinish);
-            activeCallback = onActive;
-            finishCallback = onFinish;
-            activeTriggered = false;
-
-            motor.SetActionMovementAllowed(allowMovement);
-            SetState(state);
-            onAnimation?.Invoke();
-
-            if (activeTime <= 0f)
-            {
-                TriggerActiveMoment();
-            }
-
+            if (!Ready || !player.CanAttack) return false;
+            State = ActionState.AutoAttacking;
+            time = 0f;
+            anim.Trigger("AutoAttack");
             return true;
         }
 
-        private void TriggerActiveMoment()
+        public bool Dash(float direction)
         {
-            activeTriggered = true;
-            Action callback = activeCallback;
-            activeCallback = null;
-            callback?.Invoke();
+            if (!Ready || !player.CanSkill || dashLeft > 0f) return false;
+            State = ActionState.Dashing;
+            time = 0f;
+            dashLeft = dashTime + dashCooldown;
+            move.Dash(direction, dashSpeed);
+            anim.Trigger("Dash");
+            return true;
         }
 
-        private void FinishCurrentAction()
+        public bool Shield()
         {
-            ActionState finishedState = CurrentState;
-            int finishedSkillSlot = activeSkillSlot;
-            float cooldown = pendingCooldown;
-
-            Action callback = finishCallback;
-            ClearRuntimeAction();
-            callback?.Invoke();
-            motor.SetActionMovementAllowed(true);
-
-            if (finishedState == ActionState.Dashing)
-            {
-                DashCooldownRemaining = cooldown;
-            }
-            else if (finishedState == ActionState.Shielding)
-            {
-                ShieldCooldownRemaining = cooldown;
-            }
-            else if (finishedState == ActionState.UsingSkill && finishedSkillSlot >= 0)
-            {
-                skillCooldownRemaining[finishedSkillSlot] = cooldown;
-            }
-
-            SetState(ActionState.Ready);
+            if (!Ready || !player.CanSkill || shieldLeft > 0f) return false;
+            State = ActionState.Shielding;
+            time = 0f;
+            shieldLeft = shieldTime + shieldCooldown;
+            anim.Trigger("Shield");
+            return true;
         }
 
-        private void CancelCurrentAction(bool returnToReady)
+        public bool Skill(int slot)
         {
-            Action callback = finishCallback;
-            ClearRuntimeAction();
-            callback?.Invoke();
-            IsShieldActive = false;
-            motor.EndDash();
-            motor.SetActionMovementAllowed(true);
-
-            if (returnToReady)
-            {
-                SetState(ActionState.Ready);
-            }
+            if (!Ready || !player.CanSkill || slot < 0 || slot > 3 || skills[slot] == null || skillLeft[slot] > 0f) return false;
+            State = ActionState.UsingSkill;
+            time = 0f;
+            didEffect = false;
+            skillSlot = slot;
+            skillLeft[slot] = skills[slot].ActionDuration + skills[slot].Cooldown;
+            move.Lock(!skills[slot].AllowMovement);
+            anim.Trigger(string.IsNullOrWhiteSpace(skills[slot].AnimationTrigger) ? $"Skill{slot + 1}" : skills[slot].AnimationTrigger);
+            return true;
         }
 
-        private void ClearRuntimeAction()
+        public void ReleaseArrowFromClip()
         {
-            activeCallback = null;
-            finishCallback = null;
-            actionElapsed = 0f;
-            actionDuration = 0f;
-            activeTime = 0f;
-            activeTriggered = false;
-            pendingCooldown = 0f;
-            activeSkillSlot = -1;
-            autoAttackReleased = false;
+            if (State == ActionState.AutoAttacking) player.Shoot();
         }
 
-        private void TickCooldowns(float deltaTime)
+        public void CancelAttack()
         {
-            DashCooldownRemaining = Mathf.Max(0f, DashCooldownRemaining - deltaTime);
-            ShieldCooldownRemaining = Mathf.Max(0f, ShieldCooldownRemaining - deltaTime);
-            for (int i = 0; i < skillCooldownRemaining.Length; i++)
-            {
-                skillCooldownRemaining[i] = Mathf.Max(0f, skillCooldownRemaining[i] - deltaTime);
-            }
+            if (State != ActionState.AutoAttacking) return;
+            State = ActionState.Ready;
+            player.ShowArrow(true);
         }
 
-        private bool CanBeginBasicAttack()
-        {
-            return CurrentState == ActionState.Ready
-                && owner != null
-                && owner.CanBasicAttack;
-        }
-
-        private bool CanBeginSpecialAction()
-        {
-            return CurrentState == ActionState.Ready
-                && owner != null
-                && owner.CanUseSpecialActions;
-        }
-
-        private void ReleaseAutoAttack()
-        {
-            if (CurrentState != ActionState.AutoAttacking || autoAttackReleased) return;
-            autoAttackReleased = true;
-            owner.SetLoadedArrowVisible(false);
-            owner.FireBasicArrow();
-        }
-
-        private void SynchronizeStunState()
-        {
-            bool stunned = statusController != null && statusController.IsStunned;
-            if (stunned)
-            {
-                if (CurrentState != ActionState.Dead && CurrentState != ActionState.Stunned)
-                {
-                    CancelCurrentAction(false);
-                    motor.SetActionMovementAllowed(false);
-                    motor.StopImmediately();
-                    SetState(ActionState.Stunned);
-                    animationController.PlayStun();
-                }
-                return;
-            }
-
-            if (CurrentState == ActionState.Stunned)
-            {
-                motor.SetActionMovementAllowed(true);
-                SetState(ActionState.Ready);
-            }
-        }
-
-        private bool IsValidSkillSlot(int slot)
-        {
-            return equippedSkills != null && slot >= 0 && slot < equippedSkills.Length;
-        }
-
-        private void EnsureFourSkillSlots()
-        {
-            if (equippedSkills != null && equippedSkills.Length == 4) return;
-
-            var resized = new SkillData[4];
-            if (equippedSkills != null)
-            {
-                int count = Mathf.Min(equippedSkills.Length, resized.Length);
-                for (int i = 0; i < count; i++) resized[i] = equippedSkills[i];
-            }
-            equippedSkills = resized;
-        }
-
-        private void SetState(ActionState state)
-        {
-            if (CurrentState == state) return;
-            CurrentState = state;
-            StateChanged?.Invoke(state);
-        }
-
-        private void OnValidate()
-        {
-            autoAttackReleaseTime = Mathf.Clamp(autoAttackReleaseTime, 0f, autoAttackDuration);
-            EnsureFourSkillSlots();
-        }
+        public void Stun(float seconds) => stats.Stun(seconds);
+        public void Silence(float seconds) => stats.Silence(seconds);
+        public void Die() { State = ActionState.Dead; move.Lock(true); move.Stop(); anim.Trigger("Die"); }
+        public void Stop() { if (State != ActionState.Dead) { State = ActionState.Ready; move.Lock(false); move.Stop(); } }
+        public void ResetAction() { State = ActionState.Ready; time = dashLeft = shieldLeft = 0f; skillSlot = -1; didEffect = false; Array.Clear(skillLeft, 0, 4); move.Lock(false); }
+        public SkillData GetSkill(int slot) => slot >= 0 && slot < 4 ? skills[slot] : null;
+        public float GetSkillCooldownRemaining(int slot) => slot >= 0 && slot < 4 ? skillLeft[slot] : 0f;
     }
 }

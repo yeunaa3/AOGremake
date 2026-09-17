@@ -5,32 +5,20 @@ namespace AOG.Duel
 {
     public sealed class HealthUI : MonoBehaviour
     {
-        [SerializeField] private Health health;
+        [SerializeField] private PlayerStats stats;
         [SerializeField] private Slider slider;
-
-        private void Awake()
-        {
-            if (slider == null) slider = GetComponent<Slider>();
-        }
-
+        private void Awake() { if (slider == null) slider = GetComponent<Slider>(); }
         private void OnEnable()
         {
-            if (health == null) return;
-            health.HealthChanged += HandleHealthChanged;
-            HandleHealthChanged(health.CurrentHealth, health.MaximumHealth);
+            if (stats == null) return;
+            stats.HpChanged += UpdateBar;
+            UpdateBar(stats.Hp, stats.MaxHp);
         }
-
-        private void OnDisable()
-        {
-            if (health != null) health.HealthChanged -= HandleHealthChanged;
-        }
-
-        private void HandleHealthChanged(int current, int maximum)
+        private void OnDisable() { if (stats != null) stats.HpChanged -= UpdateBar; }
+        private void UpdateBar(int hp, int max)
         {
             if (slider == null) return;
-            slider.minValue = 0f;
-            slider.maxValue = maximum;
-            slider.value = current;
+            slider.minValue = 0; slider.maxValue = max; slider.value = hp;
         }
     }
 }

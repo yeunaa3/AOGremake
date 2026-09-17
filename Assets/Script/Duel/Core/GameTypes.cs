@@ -29,6 +29,13 @@ namespace AOG.Duel
         Killed
     }
 
+    public enum ArrowEffect
+    {
+        None,
+        Burn,
+        Freeze
+    }
+
     public struct InputCmd
     {
         public float Move;
@@ -53,17 +60,24 @@ namespace AOG.Duel
 
     public struct DamageInfo
     {
-        public Player Attacker;
+        public PlayerController Attacker;
         public int Amount;
         public bool IgnoreShield;
         public Vector2 HitPoint;
+        public ArrowEffect Effect;
+        public int EffectPower;
+        public float EffectDuration;
 
-        public DamageInfo(Player attacker, int amount, bool ignoreShield, Vector2 hitPoint)
+        public DamageInfo(PlayerController attacker, int amount, bool ignoreShield, Vector2 hitPoint,
+            ArrowEffect effect = ArrowEffect.None, int effectPower = 0, float effectDuration = 0f)
         {
             Attacker = attacker;
             Amount = Mathf.Max(0, amount);
             IgnoreShield = ignoreShield;
             HitPoint = hitPoint;
+            Effect = effect;
+            EffectPower = Mathf.Max(0, effectPower);
+            EffectDuration = Mathf.Max(0f, effectDuration);
         }
     }
 }

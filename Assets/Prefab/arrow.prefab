@@ -179,3 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8599784939c706b48a84b5b18a9c1f32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Arrow
+  flightDuration: 3.6
+  arcHeight: 5
+  maximumLifetime: 30
+  rotateAlongPath: 1

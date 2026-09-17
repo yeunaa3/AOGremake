@@ -42,11 +42,11 @@ namespace AOG.Duel
 
     public struct SkillCtx
     {
-        public Player Caster;
-        public Player Target;
+        public PlayerController Caster;
+        public PlayerController Target;
         public int Slot;
 
-        public SkillCtx(Player caster, Player target, int slot)
+        public SkillCtx(PlayerController caster, PlayerController target, int slot)
         {
             Caster = caster;
             Target = target;

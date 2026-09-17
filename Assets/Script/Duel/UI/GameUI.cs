@@ -10,7 +10,7 @@ namespace AOG.Duel
         [SerializeField] private TMP_Text timerText;
         [SerializeField] private GameObject resultPanel;
         [SerializeField] private TMP_Text resultText;
-        [SerializeField] private Player localPlayer;
+        [SerializeField] private PlayerController localPlayer;
 
         private void OnEnable()
         {
@@ -51,7 +51,7 @@ namespace AOG.Duel
             timerText.text = $"{seconds / 60:00}:{seconds % 60:00}";
         }
 
-        private void HandleMatchFinished(Player winner)
+        private void HandleMatchFinished(PlayerController winner)
         {
             if (resultPanel != null) resultPanel.SetActive(true);
             if (resultText == null) return;
