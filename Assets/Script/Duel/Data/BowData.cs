@@ -5,14 +5,16 @@ namespace AOG.Duel
     [CreateAssetMenu(menuName = "AOG/Duel/Bow Definition", fileName = "BowData")]
     public sealed class BowData : ScriptableObject
     {
-        [Header("Identity")]
+        [Header("Bow and arrow set")]
         [SerializeField] private string bowId = "bow_basic";
         [SerializeField] private string displayName = "Basic Bow";
         [SerializeField] private Sprite icon;
         [SerializeField] private Sprite bowSprite;
 
-        [Header("Basic attack")]
+        [Tooltip("Mọi mũi tên thường và mũi tên từ skill đều lấy sprite này.")]
         [SerializeField] private Sprite arrowSprite;
+
+        [Header("Stats")]
         [SerializeField, Min(0)] private int damage = 10;
         [Tooltip("1 = không đổi, 1.5 = nhanh hơn 50%, 0.7 = chậm hơn 30%.")]
         [SerializeField, Min(0.05f)] private float attackSpeedMultiplier = 1f;

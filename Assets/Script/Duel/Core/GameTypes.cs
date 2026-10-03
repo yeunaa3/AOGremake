@@ -33,7 +33,12 @@ namespace AOG.Duel
     {
         None,
         Burn,
-        Freeze
+        Poison,
+        Freeze,
+        Stun,
+        Silence,
+        Slow,
+        KnockUp
     }
 
     public struct InputCmd

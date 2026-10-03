@@ -1160,6 +1160,7 @@ MonoBehaviour:
   dashCooldown: 2
   shieldTime: 0.7
   shieldCooldown: 4
+  loadout: {fileID: 11400000, guid: 5f8063d25c5750a4a8725e46ffb8c3d4, type: 2}
   skills:
   - {fileID: 0}
   - {fileID: 0}

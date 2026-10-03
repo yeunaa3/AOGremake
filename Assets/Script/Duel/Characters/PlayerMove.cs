@@ -14,8 +14,10 @@ namespace AOG.Duel
         private float dashDir;
         private float dashSpeed;
 
-        public bool Moving => dashing || Mathf.Abs(input) > 0.05f;
+        public bool Moving => dashing || (canMove && Mathf.Abs(input) > 0.05f);
+        public bool WantsMove => Mathf.Abs(input) > 0.05f;
         public bool Dashing => dashing;
+        public bool IsAirborne => Mathf.Abs(body.linearVelocity.y) > 0.1f;
 
         private void Awake() { body = GetComponent<Rigidbody2D>(); stats = GetComponent<PlayerStats>(); }
         private void FixedUpdate()

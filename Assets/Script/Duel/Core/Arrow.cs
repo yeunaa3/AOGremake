@@ -20,6 +20,8 @@ namespace AOG.Duel
         private Vector2 previousPoint;
         private float elapsed;
         private float lifetime;
+        private ProjectilePath path;
+        private float shotSpeedMultiplier = 1f;
         private bool flying;
         private bool reachedEnd;
         private float endGraceRemaining;
@@ -27,6 +29,10 @@ namespace AOG.Duel
         private ArrowEffect effect;
         private int effectPower;
         private float effectDuration;
+        private float lifeSteal;
+        private int resetCooldownSlot = -1;
+        private GameObject worldEffectPrefab;
+        private bool worldEffectCreated;
         private Action<Arrow> returnToPool;
 
         private void Awake()
@@ -58,9 +64,12 @@ namespace AOG.Duel
                 return;
             }
 
-            elapsed += Time.fixedDeltaTime;
+            float ownerSpeed = owner == null ? 1f : owner.Stats.ProjectileSpeedMultiplier;
+            elapsed += Time.fixedDeltaTime * shotSpeedMultiplier * ownerSpeed;
             float t = Mathf.Clamp01(elapsed / flightDuration);
-            Vector2 nextPoint = EvaluateBezier(t);
+            Vector2 nextPoint = path == ProjectilePath.NormalArc
+                ? EvaluateBezier(t)
+                : Vector2.Lerp(startPoint, endPoint, t);
             body.MovePosition(nextPoint);
 
             Vector2 direction = nextPoint - previousPoint;
@@ -74,6 +83,7 @@ namespace AOG.Duel
             if (t >= 1f)
             {
                 reachedEnd = true;
+                CreateWorldEffect(endPoint);
                 endGraceRemaining = 0.08f;
             }
         }
@@ -82,12 +92,17 @@ namespace AOG.Duel
             PlayerController projectileOwner,
             Vector2 start,
             Vector2 targetSnapshot,
+            ProjectilePath projectilePath,
             float arcHeightOffset,
             int shotDamage,
             Sprite arrowSprite,
+            float speedMultiplier = 1f,
             ArrowEffect shotEffect = ArrowEffect.None,
             int shotEffectPower = 0,
-            float shotEffectDuration = 0f)
+            float shotEffectDuration = 0f,
+            float shotLifeSteal = 0f,
+            GameObject shotWorldEffect = null,
+            int shotResetCooldownSlot = -1)
         {
             owner = projectileOwner;
             startPoint = start;
@@ -95,6 +110,8 @@ namespace AOG.Duel
             controlPoint = (startPoint + endPoint) * 0.5f
                 + Vector2.up * (arcHeight + arcHeightOffset);
             previousPoint = startPoint;
+            path = projectilePath;
+            shotSpeedMultiplier = Mathf.Max(0.01f, speedMultiplier);
             elapsed = 0f;
             lifetime = 0f;
             reachedEnd = false;
@@ -103,6 +120,10 @@ namespace AOG.Duel
             effect = shotEffect;
             effectPower = Mathf.Max(0, shotEffectPower);
             effectDuration = Mathf.Max(0f, shotEffectDuration);
+            lifeSteal = Mathf.Clamp01(shotLifeSteal);
+            resetCooldownSlot = shotResetCooldownSlot;
+            worldEffectPrefab = shotWorldEffect;
+            worldEffectCreated = false;
             if (visual != null) visual.sprite = arrowSprite;
             flying = true;
 
@@ -125,6 +146,11 @@ namespace AOG.Duel
             effect = ArrowEffect.None;
             effectPower = 0;
             effectDuration = 0f;
+            lifeSteal = 0f;
+            resetCooldownSlot = -1;
+            shotSpeedMultiplier = 1f;
+            worldEffectPrefab = null;
+            worldEffectCreated = false;
             returnToPool = null;
             if (hitbox != null) hitbox.enabled = false;
         }
@@ -142,13 +168,35 @@ namespace AOG.Duel
             if (!flying || owner == null) return;
             if (other.transform == owner.transform || other.transform.IsChildOf(owner.transform)) return;
 
+            SkillObject obstacle = other.GetComponentInParent<SkillObject>();
+            if (obstacle != null)
+            {
+                if (obstacle.Team == owner.Team) return;
+                obstacle.TakeDamage(damage);
+                CreateWorldEffect(transform.position);
+                Despawn();
+                return;
+            }
+
             PlayerController target = other.GetComponentInParent<PlayerController>();
-            if (target == null) { Despawn(); return; }
+            if (target == null) { CreateWorldEffect(transform.position); Despawn(); return; }
             if (target.Team == owner.Team) return;
 
-            target.Stats.TakeDamage(new DamageInfo(owner, damage, false, transform.position,
+            int dealt = target.Stats.TakeDamage(new DamageInfo(owner, damage, false, transform.position,
                 effect, effectPower, effectDuration));
+            if (dealt > 0 && lifeSteal > 0f) owner.Stats.Heal(Mathf.RoundToInt(dealt * lifeSteal));
+            if (dealt > 0 && resetCooldownSlot >= 0) owner.Action.ResetSkillCooldown(resetCooldownSlot);
+            CreateWorldEffect(transform.position);
             Despawn();
+        }
+
+        private void CreateWorldEffect(Vector2 position)
+        {
+            if (worldEffectCreated || worldEffectPrefab == null) return;
+            worldEffectCreated = true;
+            GameObject created = Instantiate(worldEffectPrefab, position, Quaternion.identity);
+            AreaEffect area = created.GetComponent<AreaEffect>();
+            if (area != null) area.Setup(owner);
         }
 
         private void Despawn()

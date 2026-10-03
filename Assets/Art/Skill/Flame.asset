@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f3d3b57a9756c94eac0f10f35e3735c, type: 3}
+  m_Name: Flame
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.PowerArrowSkill
+  skillId: 26
+  displayName: Flame
+  description: 
+  icon: {fileID: 9037657003246435468, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rarity: 1
+  cooldown: 8
+  animation: 1
+  arrowBuff:
+    arrowCount: 1
+    damageMultiplier: 1
+    speedMultiplier: 1
+    effect: 1
+    effectPower: 36
+    effectDuration: 3
+    lifeSteal: 0
+    worldEffectPrefab: {fileID: 0}
+    resetCooldownOnHit: 0

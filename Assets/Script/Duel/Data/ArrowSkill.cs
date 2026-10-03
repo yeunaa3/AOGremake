@@ -2,25 +2,18 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    [CreateAssetMenu(menuName = "AOG/Duel/Skills/Projectile Volley", fileName = "Skill_ProjectileVolley")]
+    [CreateAssetMenu(menuName = "AOG/Duel/Skills/Shoot", fileName = "Skill_Shoot")]
     public sealed class ArrowSkill : SkillData
     {
-        [SerializeField, Min(1)] private int projectileCount = 3;
-        [SerializeField, Min(0f)] private float delayBetweenProjectiles = 0.08f;
-        [SerializeField] private float arcHeightStep = 0.7f;
+        [SerializeField] private ShotData shot = new ShotData();
 
-        public override void Execute(SkillCtx context)
+        public override SkillKind Kind => SkillKind.Shoot;
+        public override SkillMoveMode MoveMode => SkillMoveMode.Locked;
+
+        public override void Use(SkillCtx context)
         {
-            if (context.Caster == null || context.Target == null)
-            {
-                return;
-            }
-
-            context.Caster.Volley(
-                context.Target,
-                projectileCount,
-                delayBetweenProjectiles,
-                arcHeightStep);
+            if (context.Caster == null) return;
+            context.Caster.ShootSkill(shot, context.Slot);
         }
     }
 }

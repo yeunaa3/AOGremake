@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 575294d0cd587f140a0fd6fd0b21da87, type: 3}
+  m_Name: SkillFrames
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SkillFrames
+  common: {fileID: -5967389716555767858, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rare: {fileID: 2144403317074240994, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  heroic: {fileID: 1105846969870720183, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  legendary: {fileID: -6648506666610403905, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}

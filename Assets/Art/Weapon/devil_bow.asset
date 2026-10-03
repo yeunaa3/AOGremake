@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
   bowId: bow_basic
   displayName: Basic Bow
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 84afaa69561bed1458c6f1eab8cb4f61, type: 3}
   bowSprite: {fileID: 21300000, guid: 84afaa69561bed1458c6f1eab8cb4f61, type: 3}
   arrowSprite: {fileID: 21300000, guid: 14612f17fcf1d2544a1ca4690ad0f3c7, type: 3}
   damage: 10
