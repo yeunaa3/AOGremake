@@ -8,19 +8,30 @@ namespace AOG.Duel
         [SerializeField] private Arrow arrowPrefab;
         [SerializeField, Min(0)] private int prewarmCount = 12;
 
-        private readonly Queue<Arrow> available = new Queue<Arrow>();
+        private readonly Dictionary<Arrow, Queue<Arrow>> available = new Dictionary<Arrow, Queue<Arrow>>();
+        private readonly Dictionary<Arrow, Arrow> sourcePrefab = new Dictionary<Arrow, Arrow>();
         private readonly HashSet<Arrow> active = new HashSet<Arrow>();
+
+        public Vector3 DefaultProjectileScale => arrowPrefab == null
+            ? Vector3.one
+            : arrowPrefab.transform.localScale;
 
         private void Awake()
         {
             if (arrowPrefab == null) return;
-            for (int i = 0; i < prewarmCount; i++) Return(Create());
+            for (int i = 0; i < prewarmCount; i++) Return(Create(arrowPrefab));
         }
 
-        public Arrow Spawn()
+        public Arrow Spawn(Arrow requestedPrefab = null)
         {
-            if (arrowPrefab == null) return null;
-            Arrow projectile = available.Count > 0 ? available.Dequeue() : Create();
+            Arrow prefab = requestedPrefab != null ? requestedPrefab : arrowPrefab;
+            if (prefab == null) return null;
+            if (!available.TryGetValue(prefab, out Queue<Arrow> queue))
+            {
+                queue = new Queue<Arrow>();
+                available.Add(prefab, queue);
+            }
+            Arrow projectile = queue.Count > 0 ? queue.Dequeue() : Create(prefab);
             active.Add(projectile);
             projectile.gameObject.SetActive(true);
             projectile.PrepareForPool(Return);
@@ -33,11 +44,12 @@ namespace AOG.Duel
             foreach (Arrow projectile in snapshot) Return(projectile);
         }
 
-        private Arrow Create()
+        private Arrow Create(Arrow prefab)
         {
-            Arrow projectile = Instantiate(arrowPrefab, transform);
-            projectile.gameObject.name = arrowPrefab.gameObject.name;
+            Arrow projectile = Instantiate(prefab, transform);
+            projectile.gameObject.name = prefab.gameObject.name;
             projectile.gameObject.SetActive(false);
+            sourcePrefab[projectile] = prefab;
             return projectile;
         }
 
@@ -48,7 +60,14 @@ namespace AOG.Duel
             projectile.ResetProjectile();
             projectile.transform.SetParent(transform, false);
             projectile.gameObject.SetActive(false);
-            available.Enqueue(projectile);
+            if (!sourcePrefab.TryGetValue(projectile, out Arrow prefab)) prefab = arrowPrefab;
+            if (prefab == null) return;
+            if (!available.TryGetValue(prefab, out Queue<Arrow> queue))
+            {
+                queue = new Queue<Arrow>();
+                available.Add(prefab, queue);
+            }
+            queue.Enqueue(projectile);
         }
 
     }

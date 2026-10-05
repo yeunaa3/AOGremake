@@ -2,16 +2,18 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    [CreateAssetMenu(menuName = "AOG/Duel/Skills/Directional Move", fileName = "Skill_DirectionalMove")]
     public sealed class MoveSkill : SkillData
     {
         [SerializeField, Min(0.1f)] private float moveSpeed = 10f;
         [SerializeField] private bool shootOnEvent;
         [SerializeField] private ShotData shot = new ShotData();
 
-        public override SkillKind Kind => SkillKind.Move;
-        public override SkillMoveMode MoveMode => SkillMoveMode.Directional;
-        public override float MoveSpeed => moveSpeed;
+        public override SkillType Type => SkillType.PlayerAndSpawn;
+
+        public override void Begin(SkillCtx context)
+        {
+            context.Caster?.StartSkillMove(context.Direction, moveSpeed);
+        }
 
         public override void Use(SkillCtx context)
         {

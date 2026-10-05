@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace AOG.Duel
 {
@@ -31,7 +32,23 @@ namespace AOG.Duel
         private readonly float[] skillLeft = new float[4];
         private int skillSlot = -1;
         private float skillDirection = 1f;
-        private float channelTime;
+        private bool normalArrowShown;
+        private bool normalArrowFired;
+        private bool skillEffectDone;
+        private bool skillVisualShown;
+
+        [Header("Đánh thường - thời gian của clip gốc")]
+        [InspectorName("Show Arrow Time")]
+        [Tooltip("Giây trong clip mà hình mũi tên xuất hiện trên tay.")]
+        [SerializeField, Min(0f)] private float normalShowArrowTime;
+        [FormerlySerializedAs("normalShotTime")]
+        [InspectorName("Shoot Time")]
+        [Tooltip("Giây trong clip mà tên trên tay biến mất và mũi tên thật được bắn ra.")]
+        [SerializeField, Min(0f)] private float normalShootTime = .32f;
+        [FormerlySerializedAs("normalAttackDuration")]
+        [InspectorName("Duration")]
+        [Tooltip("Tổng thời lượng một vòng clip đánh thường, chưa nhân tốc độ đánh.")]
+        [SerializeField, Min(.01f)] private float normalDuration = .55f;
 
         public ActionState State { get; private set; } = ActionState.Ready;
         public bool Ready => State == ActionState.Ready;
@@ -52,12 +69,16 @@ namespace AOG.Duel
 
         private void Update()
         {
+            // Không trừ hồi chiêu trong thời gian đếm ngược hoặc sau khi trận đã kết thúc.
+            if (!player.Alive) return;
+
             dashLeft = Mathf.Max(0f, dashLeft - Time.deltaTime);
             shieldLeft = Mathf.Max(0f, shieldLeft - Time.deltaTime);
             for (int i = 0; i < 4; i++) skillLeft[i] = Mathf.Max(0f, skillLeft[i] - Time.deltaTime);
 
             if (stats.Stunned && State != ActionState.Stunned && State != ActionState.Dead)
             {
+                EndCurrentSkill();
                 State = ActionState.Stunned;
                 skillSlot = -1;
                 time = 0f;
@@ -72,7 +93,27 @@ namespace AOG.Duel
 
             if (State == ActionState.AutoAttacking)
             {
-                // Shot tự lặp; mỗi Animation Event sẽ bắn một mũi tên.
+                float clipSpeed = Mathf.Max(.05f, stats.ClipSpeed);
+                float showAt = normalShowArrowTime / clipSpeed;
+                float shotAt = normalShootTime / clipSpeed;
+                float cycleDuration = Mathf.Max(shotAt + .01f, normalDuration / clipSpeed);
+                if (!normalArrowShown && time >= showAt)
+                {
+                    normalArrowShown = true;
+                    player.ShowHeldArrows(1, 0f);
+                }
+                if (!normalArrowFired && time >= shotAt)
+                {
+                    normalArrowFired = true;
+                    player.HideHeldArrows();
+                    player.Shoot();
+                }
+                if (time >= cycleDuration)
+                {
+                    time -= cycleDuration;
+                    normalArrowShown = false;
+                    normalArrowFired = false;
+                }
                 return;
             }
             else if (State == ActionState.Dashing)
@@ -87,20 +128,20 @@ namespace AOG.Duel
             {
                 SkillData skill = GetSkill(skillSlot);
                 if (skill == null) { EndSkillFromClip(); return; }
-                if (skill.MoveMode == SkillMoveMode.CancelOnMove && move.WantsMove)
+                if (skill.CancelOnMove && move.WantsMove)
                 {
                     EndSkillFromClip();
                     return;
                 }
-                if (skill is ChannelSkill channel)
+                if (!skillVisualShown && skill.ShowVisualTime >= 0f && time >= skill.ShowVisualTime)
                 {
-                    channelTime += Time.deltaTime;
-                    if (channelTime >= channel.TickInterval)
-                    {
-                        channelTime -= channel.TickInterval;
-                        skill.Use(new SkillCtx(player, player.Enemy, skillSlot, skillDirection));
-                    }
+                    skillVisualShown = true;
+                    skill.ShowVisual(CurrentSkillContext());
                 }
+                if (skill.UseOnce && !skillEffectDone && time >= skill.EffectTime)
+                    UseSkillFromClip();
+                skill.Tick(CurrentSkillContext(), Time.deltaTime);
+                if (time >= skill.Duration) EndSkillFromClip();
             }
         }
 
@@ -109,6 +150,13 @@ namespace AOG.Duel
             if (!Ready || !player.CanAttack) return false;
             State = ActionState.AutoAttacking;
             time = 0f;
+            normalArrowShown = false;
+            normalArrowFired = false;
+            if (normalShowArrowTime <= 0f)
+            {
+                normalArrowShown = true;
+                player.ShowHeldArrows(1, 0f);
+            }
             anim.Trigger("AutoAttack");
             return true;
         }
@@ -138,37 +186,33 @@ namespace AOG.Duel
         {
             SkillData skill = GetSkill(slot);
             if (State == ActionState.AutoAttacking) CancelAttack();
-            if (!Ready || !player.CanSkill || skill == null || skill.Kind == SkillKind.Passive || skillLeft[slot] > 0f) return false;
+            if (!Ready || !player.CanSkill || skill == null || skill.Passive || skillLeft[slot] > 0f) return false;
             State = ActionState.UsingSkill;
             time = 0f;
             skillSlot = slot;
             skillDirection = Mathf.Sign(direction == 0f ? player.Face : direction);
-            channelTime = 0f;
+            skillEffectDone = false;
+            skillVisualShown = false;
             skillLeft[slot] = skill.Cooldown;
 
-            if (skill.MoveMode == SkillMoveMode.Free)
+            move.Lock(skill.LockMovement);
+            if (skill.LockMovement) move.Stop();
+            SkillCtx context = CurrentSkillContext();
+            skill.Begin(context);
+            if (skill.ShowVisualTime == 0f)
             {
-                move.Lock(false);
-            }
-            else if (skill.MoveMode == SkillMoveMode.Directional)
-            {
-                move.Lock(true);
-                move.Dash(skillDirection, skill.MoveSpeed);
-            }
-            else
-            {
-                move.Lock(true);
-                move.Stop();
+                skillVisualShown = true;
+                skill.ShowVisual(context);
             }
 
-            if (skill.Animation == SkillAnimation.None)
+            if (string.IsNullOrWhiteSpace(skill.AnimationTrigger))
             {
                 UseSkillFromClip();
                 EndSkillFromClip();
             }
             else
             {
-                anim.PlaySkill(skill.Animation);
+                anim.Trigger(skill.AnimationTrigger);
             }
             return true;
         }
@@ -176,6 +220,8 @@ namespace AOG.Duel
         public void UseSkillFromClip()
         {
             if (State != ActionState.UsingSkill) return;
+            if (skillEffectDone) return;
+            skillEffectDone = true;
             SkillData skill = GetSkill(skillSlot);
             skill?.Use(new SkillCtx(player, player.Enemy, skillSlot, skillDirection));
         }
@@ -183,10 +229,10 @@ namespace AOG.Duel
         public void EndSkillFromClip()
         {
             if (State != ActionState.UsingSkill) return;
+            EndCurrentSkill();
             move.Stop();
             move.Lock(false);
             skillSlot = -1;
-            channelTime = 0f;
             State = ActionState.Ready;
         }
 
@@ -195,7 +241,7 @@ namespace AOG.Duel
             for (int i = 0; i < 4; i++)
             {
                 SkillData skill = GetSkill(i);
-                if (skill != null && skill.Kind == SkillKind.Passive)
+                if (skill != null && skill.Passive)
                     skill.Use(new SkillCtx(player, player.Enemy, i, player.Face));
             }
         }
@@ -205,29 +251,48 @@ namespace AOG.Duel
             if (slot >= 0 && slot < 4) skillLeft[slot] = 0f;
         }
 
-        public void ReleaseArrowFromClip()
-        {
-            if (State == ActionState.AutoAttacking)
-                player.Shoot();
-        }
-
         public void CancelAttack()
         {
             if (State != ActionState.AutoAttacking) return;
+            player.HideHeldArrows();
             State = ActionState.Ready;
-            player.ShowArrow(true);
         }
 
         public void Stun(float seconds) => stats.Stun(seconds);
         public void Silence(float seconds) => stats.Silence(seconds);
-        public void Die() { State = ActionState.Dead; move.Lock(true); move.Stop(); anim.Trigger("Die"); }
-        public void Stop() { if (State != ActionState.Dead) { State = ActionState.Ready; skillSlot = -1; move.Lock(false); move.Stop(); } }
-        public void ResetAction() { State = ActionState.Ready; time = dashLeft = shieldLeft = channelTime = 0f; skillSlot = -1; skillDirection = 1f; Array.Clear(skillLeft, 0, 4); move.Lock(false); }
+        public void Die() { player.HideHeldArrows(); EndCurrentSkill(); skillSlot = -1; State = ActionState.Dead; move.Lock(true); move.Stop(); anim.Trigger("Die"); }
+        public void Stop() { if (State != ActionState.Dead) { player.HideHeldArrows(); EndCurrentSkill(); State = ActionState.Ready; skillSlot = -1; move.Lock(false); move.Stop(); } }
+        public void ResetAction()
+        {
+            player.HideHeldArrows();
+            State = ActionState.Ready;
+            time = dashLeft = shieldLeft = 0f;
+            skillSlot = -1;
+            skillDirection = 1f;
+            normalArrowShown = false;
+            normalArrowFired = false;
+            skillEffectDone = false;
+            skillVisualShown = false;
+            for (int i = 0; i < 4; i++)
+            {
+                SkillData skill = GetSkill(i);
+                skillLeft[i] = skill != null && !skill.Passive ? skill.Cooldown : 0f;
+            }
+            move.Lock(false);
+        }
         public SkillData GetSkill(int slot)
         {
             if (slot < 0 || slot > 3) return null;
             return loadout != null ? loadout.GetSkill(slot) : skills[slot];
         }
         public float GetSkillCooldownRemaining(int slot) => slot >= 0 && slot < 4 ? skillLeft[slot] : 0f;
+
+        private SkillCtx CurrentSkillContext() => new SkillCtx(player, player.Enemy, skillSlot, skillDirection);
+
+        private void EndCurrentSkill()
+        {
+            if (skillSlot < 0) return;
+            GetSkill(skillSlot)?.End(CurrentSkillContext());
+        }
     }
 }

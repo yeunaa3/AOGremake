@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    [CreateAssetMenu(menuName = "AOG/Duel/Skills/Summon", fileName = "Skill_Summon")]
     public sealed class SummonSkill : SkillData
     {
         [SerializeField] private GameObject prefab;
@@ -11,8 +10,7 @@ namespace AOG.Duel
         [SerializeField, Min(1)] private int count = 1;
         [SerializeField, Min(0f)] private float spacing = 1f;
 
-        public override SkillKind Kind => SkillKind.Summon;
-        public override SkillMoveMode MoveMode => SkillMoveMode.Locked;
+        public override SkillType Type => SkillType.SpawnOnly;
 
         public override void Use(SkillCtx context)
         {

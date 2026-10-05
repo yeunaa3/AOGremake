@@ -38,13 +38,6 @@ namespace AOG.Duel
         public void Trigger(string name) { if (Has(name, AnimatorControllerParameterType.Trigger)) animator.SetTrigger(name); }
         public void Bool(string name, bool value) { if (Has(name, AnimatorControllerParameterType.Bool)) animator.SetBool(name, value); }
         public void Float(string name, float value) { if (Has(name, AnimatorControllerParameterType.Float)) animator.SetFloat(name, value); }
-        public void Int(string name, int value) { if (Has(name, AnimatorControllerParameterType.Int)) animator.SetInteger(name, value); }
-
-        public void PlaySkill(SkillAnimation animation)
-        {
-            Int("SkillAnim", (int)animation);
-            Trigger("UseSkill");
-        }
 
         private bool Has(string name, AnimatorControllerParameterType type)
         {

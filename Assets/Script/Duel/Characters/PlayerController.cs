@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace AOG.Duel
 {
@@ -19,9 +21,17 @@ namespace AOG.Duel
         private PlayerAnim anim;
         private ArrowPool pool;
         private GameManager game;
-        private Transform arrowPoint;
+        private Transform arrowHoldPoint;
+        private Transform arrowSpawnPoint;
         private Transform aimPoint;
-        private GameObject loadedArrow;
+        private Transform summonPoint;
+        private SpriteRenderer bowVisual;
+        private readonly List<SpriteRenderer> heldArrows = new List<SpriteRenderer>();
+        [Header("Tên đang cầm (tạo bằng code)")]
+        [FormerlySerializedAs("heldArrowScale")]
+        [Tooltip("Hệ số chỉnh thêm sau khi code đã tự khớp kích thước với prefab tên bay. Để (1, 1) nếu không cần chỉnh.")]
+        [SerializeField] private Vector2 heldArrowScaleMultiplier = Vector2.one;
+        [SerializeField] private int heldArrowSortingOrder = 4;
         private bool playing;
         private int poweredArrowCount;
         private ArrowBuffData arrowBuff;
@@ -47,11 +57,14 @@ namespace AOG.Duel
             action = GetComponent<PlayerAction>();
             autoShoot = GetComponent<AutoShoot>();
             anim = GetComponent<PlayerAnim>();
-            arrowPoint = Find("arrowspawnpoint");
+            arrowHoldPoint = Find("arrowholdpoint");
+            arrowSpawnPoint = Find("arrowspawnpoint");
+            // Prefab cũ chưa tách điểm vẫn hoạt động được.
+            if (arrowHoldPoint == null) arrowHoldPoint = arrowSpawnPoint;
             aimPoint = Find("aimtarget");
-            Transform arrow = Find("arrowVisual");
-            loadedArrow = arrow == null ? null : arrow.gameObject;
-            ShowArrow(false);
+            summonPoint = Find("summonpoint");
+            Transform bow = Find("bow");
+            bowVisual = bow == null ? null : bow.GetComponent<SpriteRenderer>();
         }
 
         private void Update()
@@ -103,24 +116,22 @@ namespace AOG.Duel
             poweredArrowCount = 0;
             arrowBuff = null;
             arrowBuffSkillSlot = -1;
-            ShowArrow(false);
         }
 
         public void Play(bool on)
         {
             playing = on && stats.Alive;
             move.Match(playing);
-            ShowArrow(playing);
             if (playing) action.StartPassives();
             if (!playing) action.Stop();
         }
 
         public void Shoot()
         {
-            if (stats.ArrowSprite == null || Enemy == null || arrowPoint == null) return;
+            if (stats.ArrowSprite == null || Enemy == null || arrowSpawnPoint == null) return;
             bool powered = poweredArrowCount > 0;
             float damageMultiplier = powered ? arrowBuff.damageMultiplier : 1f;
-            bool fired = Fire(arrowPoint.position, Enemy.Aim, ProjectilePath.NormalArc, 0f,
+            bool fired = Fire(arrowSpawnPoint.position, Enemy.Aim, ProjectilePath.NormalArc, 0f,
                 Mathf.RoundToInt(stats.Damage * damageMultiplier), stats.ArrowSprite,
                 powered ? arrowBuff.speedMultiplier : 1f,
                 powered ? arrowBuff.effect : ArrowEffect.None,
@@ -149,6 +160,12 @@ namespace AOG.Duel
             poweredArrowCount = Mathf.Max(1, buff.arrowCount);
         }
 
+        public void StartSkillMove(float direction, float speed)
+        {
+            move.Lock(true);
+            move.Dash(direction, speed);
+        }
+
         public void ShootSkill(ShotData shot, int skillSlot)
         {
             if (shot == null || Enemy == null || (shot.onlyHitAirborne && !Enemy.IsAirborne)) return;
@@ -170,7 +187,7 @@ namespace AOG.Duel
             {
                 float spread = first + i * shot.spacing;
                 Vector2 target = Enemy.Aim;
-                Vector2 start = arrowPoint != null ? arrowPoint.position : transform.position;
+                Vector2 start = arrowSpawnPoint != null ? arrowSpawnPoint.position : transform.position;
                 if (shot.spawnNearTarget || shot.path == ProjectilePath.Falling)
                 {
                     start = Enemy.Aim + new Vector2(shot.spawnOffset.x * Face, shot.spawnOffset.y);
@@ -215,9 +232,91 @@ namespace AOG.Duel
             }
         }
 
-        public void ShowArrow(bool show)
+        // Hệ spawn mới: prefab tự quyết định hành vi; Skill chỉ chọn điểm xuất hiện và số lượng.
+        public void Spawn(SpawnData data, int skillSlot)
         {
-            if (loadedArrow != null) loadedArrow.SetActive(show);
+            if (data == null || data.prefab == null || Enemy == null) return;
+
+            Vector2 start;
+            if (data.spawnPoint == SpawnPoint.AboveEnemy)
+                start = Enemy.summonPoint != null ? Enemy.summonPoint.position : Enemy.transform.position + Vector3.up * 3f;
+            else if (data.spawnPoint == SpawnPoint.AbovePlayer)
+                start = summonPoint != null ? summonPoint.position : transform.position + Vector3.up * 3f;
+            else
+                start = arrowSpawnPoint != null ? arrowSpawnPoint.position : transform.position;
+            start += new Vector2(data.offset.x * Face, data.offset.y);
+
+            int count = Mathf.Max(1, data.count);
+            Arrow projectilePrefab = data.prefab.GetComponent<Arrow>();
+            if (projectilePrefab != null)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    float targetY = count == 1 ? 0f : Mathf.Lerp(-data.targetRadius, data.targetRadius, i / (count - 1f));
+                    Arrow projectile = pool == null ? null : pool.Spawn(projectilePrefab);
+                    if (projectile == null) continue;
+                    Sprite sprite = stats.ArrowSprite;
+                    projectile.Launch(this, start, Enemy.Aim + Vector2.up * targetY,
+                        data.path, data.arc,
+                        Mathf.RoundToInt(stats.Damage * data.damageMultiplier), sprite,
+                        data.speedMultiplier, shotResetCooldownSlot: -1);
+                }
+                return;
+            }
+
+            float first = -(count - 1) * data.spacing * 0.5f;
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 position = start + Vector2.right * (first + i * data.spacing);
+                GameObject created = Instantiate(data.prefab, position, Quaternion.identity);
+                SkillObject skillObject = created.GetComponent<SkillObject>();
+                if (skillObject != null) skillObject.Setup(this);
+            }
+        }
+
+        public void ShowHeldArrows(int amount, float fanAngle)
+        {
+            HideHeldArrows();
+            if (arrowHoldPoint == null) return;
+
+            Sprite sprite = stats.ArrowSprite;
+            if (sprite == null) return;
+
+            int count = Mathf.Max(1, amount);
+            Vector3 projectileScale = pool == null ? Vector3.one : pool.DefaultProjectileScale;
+            Vector3 parentScale = arrowHoldPoint.lossyScale;
+            Vector3 matchingLocalScale = new Vector3(
+                projectileScale.x / Mathf.Max(.0001f, Mathf.Abs(parentScale.x)),
+                projectileScale.y / Mathf.Max(.0001f, Mathf.Abs(parentScale.y)),
+                1f);
+            while (heldArrows.Count < count)
+            {
+                GameObject item = new GameObject("HeldArrow_" + heldArrows.Count);
+                item.transform.SetParent(arrowHoldPoint, false);
+                heldArrows.Add(item.AddComponent<SpriteRenderer>());
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                SpriteRenderer item = heldArrows[i];
+                float angle = count == 1 ? 0f : Mathf.Lerp(-fanAngle * .5f, fanAngle * .5f, i / (count - 1f));
+                item.sprite = sprite;
+                item.sortingLayerID = bowVisual != null ? bowVisual.sortingLayerID : 0;
+                item.sortingOrder = heldArrowSortingOrder;
+                item.transform.localPosition = Vector3.zero;
+                item.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+                item.transform.localScale = new Vector3(
+                    matchingLocalScale.x * heldArrowScaleMultiplier.x,
+                    matchingLocalScale.y * heldArrowScaleMultiplier.y,
+                    1f);
+                item.gameObject.SetActive(true);
+            }
+        }
+
+        public void HideHeldArrows()
+        {
+            foreach (SpriteRenderer item in heldArrows)
+                if (item != null) item.gameObject.SetActive(false);
         }
 
         public void Hit() => anim.Trigger("Hit");
@@ -226,7 +325,6 @@ namespace AOG.Duel
         {
             playing = false;
             move.Match(false);
-            ShowArrow(false);
             action.Die();
             game?.NotifyCharacterDied(this);
         }

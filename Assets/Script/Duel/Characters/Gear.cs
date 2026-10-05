@@ -8,7 +8,6 @@ namespace AOG.Duel
         [Header("Equipment")]
         [SerializeField] private BowData equippedBow;
         private SpriteRenderer bowRenderer;
-        private SpriteRenderer arrowRenderer;
 
         public bool HasBow => equippedBow != null;
         public int BowDamage => equippedBow != null ? equippedBow.Damage : 0;
@@ -19,9 +18,7 @@ namespace AOG.Duel
         private void Awake()
         {
             Transform bow = FindChild("bow");
-            Transform arrow = FindChild("arrowVisual");
             bowRenderer = bow != null ? bow.GetComponent<SpriteRenderer>() : null;
-            arrowRenderer = arrow != null ? arrow.GetComponent<SpriteRenderer>() : null;
             ApplyBowVisual();
         }
         public void EquipBow(BowData bow)
@@ -33,7 +30,6 @@ namespace AOG.Duel
         private void ApplyBowVisual()
         {
             if (bowRenderer != null && equippedBow != null && equippedBow.BowSprite != null) bowRenderer.sprite = equippedBow.BowSprite;
-            if (arrowRenderer != null && equippedBow != null && equippedBow.ArrowSprite != null) arrowRenderer.sprite = equippedBow.ArrowSprite;
         }
         private Transform FindChild(string childName)
         {

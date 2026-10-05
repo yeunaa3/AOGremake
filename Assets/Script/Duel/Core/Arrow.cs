@@ -4,21 +4,32 @@ using UnityEngine;
 namespace AOG.Duel
 {
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
-    public sealed class Arrow : MonoBehaviour
+    public class Arrow : MonoBehaviour
     {
         private Rigidbody2D body;
         private Collider2D hitbox;
         private SpriteRenderer visual;
         private PlayerController owner;
-        [SerializeField, Min(0.05f)] private float flightDuration = 3.6f;
-        [SerializeField] private float arcHeight = 5f;
+        [Tooltip("Tốc độ bay theo đơn vị Unity mỗi giây. Gần hay xa đều giữ tốc độ này.")]
+        [SerializeField, Min(0.1f)] private float flightSpeed = 5f;
+        [Header("Độ cao đường bay vòng cung")]
+        [Tooltip("Độ cao thấp nhất khi hai nhân vật ở gần nhau.")]
+        [SerializeField, Min(0f)] private float minimumArcHeight = 1f;
+        [Tooltip("Mỗi 1 đơn vị khoảng cách sẽ cộng thêm bao nhiêu độ cao.")]
+        [SerializeField, Min(0f)] private float arcHeightPerDistance = .45f;
+        [Tooltip("Giới hạn độ cao để mũi tên không bay quá cao khi hai nhân vật ở rất xa.")]
+        [SerializeField, Min(0f)] private float maximumArcHeight = 7f;
         [SerializeField, Min(0.1f)] private float maximumLifetime = 30f;
         [SerializeField] private bool rotateAlongPath = true;
         private Vector2 startPoint;
         private Vector2 controlPoint;
         private Vector2 endPoint;
         private Vector2 previousPoint;
-        private float elapsed;
+        private const int PathSamples = 24;
+        private readonly float[] pathDistances = new float[PathSamples + 1];
+        private float pathLength;
+        private float traveledDistance;
+        private int pathSampleIndex;
         private float lifetime;
         private ProjectilePath path;
         private float shotSpeedMultiplier = 1f;
@@ -65,8 +76,25 @@ namespace AOG.Duel
             }
 
             float ownerSpeed = owner == null ? 1f : owner.Stats.ProjectileSpeedMultiplier;
-            elapsed += Time.fixedDeltaTime * shotSpeedMultiplier * ownerSpeed;
-            float t = Mathf.Clamp01(elapsed / flightDuration);
+            traveledDistance += Time.fixedDeltaTime * flightSpeed * shotSpeedMultiplier * ownerSpeed;
+            float t;
+            if (path == ProjectilePath.NormalArc)
+            {
+                while (pathSampleIndex < PathSamples &&
+                       pathDistances[pathSampleIndex] < traveledDistance)
+                    pathSampleIndex++;
+
+                int upper = Mathf.Clamp(pathSampleIndex, 1, PathSamples);
+                float part = Mathf.InverseLerp(
+                    pathDistances[upper - 1],
+                    pathDistances[upper],
+                    traveledDistance);
+                t = Mathf.Clamp01((upper - 1 + part) / PathSamples);
+            }
+            else
+            {
+                t = pathLength <= .0001f ? 1f : Mathf.Clamp01(traveledDistance / pathLength);
+            }
             Vector2 nextPoint = path == ProjectilePath.NormalArc
                 ? EvaluateBezier(t)
                 : Vector2.Lerp(startPoint, endPoint, t);
@@ -107,12 +135,32 @@ namespace AOG.Duel
             owner = projectileOwner;
             startPoint = start;
             endPoint = targetSnapshot;
+            float distance = Vector2.Distance(startPoint, endPoint);
+            float automaticArcHeight = Mathf.Clamp(
+                distance * arcHeightPerDistance,
+                minimumArcHeight,
+                Mathf.Max(minimumArcHeight, maximumArcHeight));
+            float peakHeight = Mathf.Max(0f, automaticArcHeight + arcHeightOffset);
             controlPoint = (startPoint + endPoint) * 0.5f
-                + Vector2.up * (arcHeight + arcHeightOffset);
-            previousPoint = startPoint;
+                + Vector2.up * (peakHeight * 2f);
             path = projectilePath;
+            previousPoint = startPoint;
+            pathLength = 0f;
+            pathDistances[0] = 0f;
+            Vector2 sampleBefore = startPoint;
+            for (int i = 1; i <= PathSamples; i++)
+            {
+                float sampleT = i / (float)PathSamples;
+                Vector2 sample = path == ProjectilePath.NormalArc
+                    ? EvaluateBezier(sampleT)
+                    : Vector2.Lerp(startPoint, endPoint, sampleT);
+                pathLength += Vector2.Distance(sampleBefore, sample);
+                pathDistances[i] = pathLength;
+                sampleBefore = sample;
+            }
             shotSpeedMultiplier = Mathf.Max(0.01f, speedMultiplier);
-            elapsed = 0f;
+            traveledDistance = 0f;
+            pathSampleIndex = 1;
             lifetime = 0f;
             reachedEnd = false;
             endGraceRemaining = 0f;
@@ -124,7 +172,7 @@ namespace AOG.Duel
             resetCooldownSlot = shotResetCooldownSlot;
             worldEffectPrefab = shotWorldEffect;
             worldEffectCreated = false;
-            if (visual != null) visual.sprite = arrowSprite;
+            if (visual != null && arrowSprite != null) visual.sprite = arrowSprite;
             flying = true;
 
             transform.position = startPoint;
@@ -184,11 +232,15 @@ namespace AOG.Duel
 
             int dealt = target.Stats.TakeDamage(new DamageInfo(owner, damage, false, transform.position,
                 effect, effectPower, effectDuration));
+            OnHitPlayer(target, dealt);
             if (dealt > 0 && lifeSteal > 0f) owner.Stats.Heal(Mathf.RoundToInt(dealt * lifeSteal));
             if (dealt > 0 && resetCooldownSlot >= 0) owner.Action.ResetSkillCooldown(resetCooldownSlot);
             CreateWorldEffect(transform.position);
             Despawn();
         }
+
+        // Prefab tên độc/băng/lửa có thể kế thừa Arrow và chỉ override phần này.
+        protected virtual void OnHitPlayer(PlayerController target, int dealt) { }
 
         private void CreateWorldEffect(Vector2 position)
         {

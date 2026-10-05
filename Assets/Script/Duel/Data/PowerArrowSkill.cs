@@ -2,13 +2,11 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    [CreateAssetMenu(menuName = "AOG/Duel/Skills/Enhance Arrows", fileName = "Skill_EnhanceArrows")]
     public sealed class PowerArrowSkill : SkillData
     {
         [SerializeField] private ArrowBuffData arrowBuff = new ArrowBuffData();
 
-        public override SkillKind Kind => SkillKind.EnhanceArrow;
-        public override SkillMoveMode MoveMode => SkillMoveMode.Free;
+        public override SkillType Type => SkillType.PlayerOnly;
 
         public override void Use(SkillCtx context)
         {

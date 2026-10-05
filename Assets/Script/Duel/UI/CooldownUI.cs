@@ -113,7 +113,7 @@ namespace AOG.Duel
 
             int skillSlot = (int)slot - (int)DuelActionSlot.Skill1;
             SkillData skill = actions.GetSkill(skillSlot);
-            configured = skill != null && skill.Kind != SkillKind.Passive;
+            configured = skill != null && !skill.Passive;
             remaining = actions.GetSkillCooldownRemaining(skillSlot);
             duration = skill != null ? skill.Cooldown : 0f;
         }

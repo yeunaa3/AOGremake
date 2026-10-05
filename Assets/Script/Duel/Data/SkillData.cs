@@ -10,29 +10,29 @@ namespace AOG.Duel
         Legendary
     }
 
-    public enum SkillKind { EnhanceArrow, Shoot, Summon, Move, Buff, Channel, Passive }
+    public enum SkillType { PlayerOnly, SpawnOnly, PlayerAndSpawn }
 
-    public enum SkillMoveMode { Free, Locked, Directional, CancelOnMove }
-
-    // Chỉ xác định State nào trong Player Animator sẽ chạy.
-    // Clip thật được đặt hoàn toàn trong Animator, không đặt trong SkillData.
-    public enum SkillAnimation
-    {
-        None,
-        ArcShot,
-        StraightShot,
-        SkyShot,
-        Flip,
-        JumpShot,
-        Summon,
-        Buff,
-        Channel,
-        Move,
-        Beam
-    }
+    public enum SpawnPoint { Bow, AbovePlayer, AboveEnemy }
 
     public enum ProjectilePath { NormalArc, Straight, Falling, Beam }
     public enum ShotFormation { Fan, ParallelVertical, ParallelHorizontal }
+
+    [System.Serializable]
+    public sealed class SpawnData
+    {
+        public GameObject prefab;
+        public SpawnPoint spawnPoint = SpawnPoint.Bow;
+        [Min(1)] public int count = 1;
+        public Vector2 offset;
+        [Tooltip("Bán kính các điểm đích quanh Enemy. N tên sẽ chia đều từ -Radius đến +Radius.")]
+        [Min(0f)] public float targetRadius;
+        [Tooltip("Khoảng cách giữa các vật thể không phải projectile.")]
+        [Min(0f)] public float spacing;
+        public ProjectilePath path = ProjectilePath.NormalArc;
+        public float arc;
+        [Min(0f)] public float damageMultiplier = 1f;
+        [Min(0.01f)] public float speedMultiplier = 1f;
+    }
 
     [System.Serializable]
     public sealed class ShotData
@@ -95,9 +95,21 @@ namespace AOG.Duel
         [Tooltip("Bắt đầu tính ngay khi bấm skill.")]
         [SerializeField, Min(0f)] private float cooldown = 5f;
 
-        [Header("Animation")]
-        [Tooltip("Chọn kiểu chuyển động đã được tạo thành State trong Player Animator.")]
-        [SerializeField] private SkillAnimation animation = SkillAnimation.ArcShot;
+        [Header("Use")]
+        [Tooltip("Tên Trigger của State animation skill. Để trống nếu skill không có animation.")]
+        [SerializeField] private string animationTrigger;
+        [SerializeField] private bool lockMovement = true;
+        [SerializeField] private bool cancelOnMove;
+        [Header("Timing")]
+        [InspectorName("Show Arrow Time")]
+        [Tooltip("Giây trong clip mà hình mũi tên xuất hiện. Đặt -1 nếu skill không có hình cần hiện.")]
+        [SerializeField, Min(-1f)] private float showTime = -1f;
+        [InspectorName("Shoot Time")]
+        [Tooltip("Giây trong clip mà tác dụng skill xảy ra hoặc projectile được bắn.")]
+        [SerializeField, Min(0f)] private float effectTime = .25f;
+        [InspectorName("Duration")]
+        [Tooltip("Tổng thời lượng clip trước khi được dùng hành động khác.")]
+        [SerializeField, Min(.01f)] private float duration = .6f;
 
         public string SkillId => skillId;
         public string DisplayName => displayName;
@@ -105,11 +117,20 @@ namespace AOG.Duel
         public Sprite Icon => icon;
         public SkillRarity Rarity => rarity;
         public float Cooldown => cooldown;
-        public SkillAnimation Animation => animation;
-        public abstract SkillKind Kind { get; }
-        public abstract SkillMoveMode MoveMode { get; }
-        public virtual float MoveSpeed => 0f;
+        public string AnimationTrigger => animationTrigger;
+        public bool LockMovement => lockMovement;
+        public bool CancelOnMove => cancelOnMove;
+        public float EffectTime => effectTime;
+        public float Duration => duration;
+        public virtual bool Passive => false;
+        public virtual bool UseOnce => true;
+        public float ShowVisualTime => showTime;
+        public abstract SkillType Type { get; }
+        public virtual void Begin(SkillCtx context) { }
+        public virtual void ShowVisual(SkillCtx context) { }
+        public virtual void Tick(SkillCtx context, float deltaTime) { }
         public abstract void Use(SkillCtx context);
+        public virtual void End(SkillCtx context) { }
     }
 
     public struct SkillCtx
