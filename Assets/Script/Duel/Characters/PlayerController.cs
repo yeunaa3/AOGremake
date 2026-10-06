@@ -72,7 +72,7 @@ namespace AOG.Duel
             if (!Alive || inputs == null || inputs.Length == 0)
             {
                 move.Input(0f);
-                anim.Values(false, stats.Stunned, stats.Silenced, action.ShieldOn, stats.ClipSpeed);
+                anim.Values(false, stats.Stunned, stats.Frozen, stats.Silenced, action.ShieldOn, stats.ClipSpeed);
                 return;
             }
 
@@ -89,11 +89,13 @@ namespace AOG.Duel
                 cmd.Skill3Pressed |= next.Skill3Pressed;
                 cmd.Skill4Pressed |= next.Skill4Pressed;
             }
-            float direction = CanMove ? cmd.Move : 0f;
+            bool usingSkill = action.State == ActionState.UsingSkill;
+            float direction = CanMove && !usingSkill ? cmd.Move : 0f;
             move.Input(direction);
             if (move.Moving) action.CancelAttack();
-            anim.Face(Mathf.Abs(direction) > 0.05f ? direction : Face);
-            anim.Values(move.Moving, stats.Stunned, stats.Silenced, action.ShieldOn, stats.ClipSpeed);
+            // Trong lúc dùng skill luôn nhìn Enemy; phím A/D không được đổi hướng.
+            anim.Face(usingSkill ? Face : Mathf.Abs(direction) > 0.05f ? direction : Face);
+            anim.Values(move.Moving, stats.Stunned, stats.Frozen, stats.Silenced, action.ShieldOn, stats.ClipSpeed);
 
             if (!CanSkill) return;
             if (cmd.DashPressed) { action.Dash(direction == 0f ? Face : direction); return; }
@@ -218,6 +220,17 @@ namespace AOG.Duel
             }
         }
 
+        // Dùng cho các skill bắn một mũi tên từ cung và có hiệu ứng riêng.
+        public bool ShootArrow(ProjectilePath path, float damageMultiplier, float speedMultiplier,
+            ArrowEffect effect, int effectPower, float effectDuration)
+        {
+            if (Enemy == null || arrowSpawnPoint == null || stats.ArrowSprite == null) return false;
+            return Fire(arrowSpawnPoint.position, Enemy.Aim, path, 0f,
+                Mathf.RoundToInt(stats.Damage * Mathf.Max(0f, damageMultiplier)),
+                stats.ArrowSprite, Mathf.Max(.01f, speedMultiplier), effect,
+                effectPower, effectDuration, 0f, null, -1);
+        }
+
         public void SpawnSkillObject(GameObject prefab, bool nearTarget, Vector2 offset, int count, float spacing)
         {
             if (prefab == null) return;
@@ -259,7 +272,10 @@ namespace AOG.Duel
                     projectile.Launch(this, start, Enemy.Aim + Vector2.up * targetY,
                         data.path, data.arc,
                         Mathf.RoundToInt(stats.Damage * data.damageMultiplier), sprite,
-                        data.speedMultiplier, shotResetCooldownSlot: -1);
+                        data.speedMultiplier,
+                        data.hasEffect ? data.effect : ArrowEffect.None,
+                        data.effectPower, data.effectDuration,
+                        shotResetCooldownSlot: -1);
                 }
                 return;
             }

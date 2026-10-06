@@ -86,7 +86,12 @@ namespace AOG.Duel
                 move.Stop();
                 anim.Trigger("Stun");
             }
-            if (!stats.Stunned && State == ActionState.Stunned) { State = ActionState.Ready; move.Lock(false); }
+            if (!stats.Stunned && State == ActionState.Stunned)
+            {
+                State = ActionState.Ready;
+                move.Lock(false);
+                anim.EndSkillAnimation();
+            }
             if (Ready || State == ActionState.Stunned || State == ActionState.Dead) return;
 
             time += Time.deltaTime;
@@ -185,8 +190,12 @@ namespace AOG.Duel
         public bool Skill(int slot, float direction)
         {
             SkillData skill = GetSkill(slot);
+            bool canInterruptAttack = Ready || State == ActionState.AutoAttacking;
+            if (!canInterruptAttack || !player.CanSkill || skill == null || skill.Passive || skillLeft[slot] > 0f)
+                return false;
+
+            // Chỉ hủy đánh thường sau khi chắc chắn skill thật sự được phép dùng.
             if (State == ActionState.AutoAttacking) CancelAttack();
-            if (!Ready || !player.CanSkill || skill == null || skill.Passive || skillLeft[slot] > 0f) return false;
             State = ActionState.UsingSkill;
             time = 0f;
             skillSlot = slot;
@@ -195,8 +204,11 @@ namespace AOG.Duel
             skillVisualShown = false;
             skillLeft[slot] = skill.Cooldown;
 
-            move.Lock(skill.LockMovement);
-            if (skill.LockMovement) move.Stop();
+            // Mọi skill đều khóa điều khiển di chuyển và khóa mặt về phía Enemy.
+            // Skill đặc biệt vẫn có thể tự đẩy nhân vật bằng StartSkillMove().
+            move.Lock(true);
+            move.Stop();
+            anim.Face(player.Face);
             SkillCtx context = CurrentSkillContext();
             skill.Begin(context);
             if (skill.ShowVisualTime == 0f)
@@ -234,6 +246,7 @@ namespace AOG.Duel
             move.Lock(false);
             skillSlot = -1;
             State = ActionState.Ready;
+            anim.EndSkillAnimation();
         }
 
         public void StartPassives()

@@ -33,7 +33,6 @@ namespace AOG.Duel
             }
             Arrow projectile = queue.Count > 0 ? queue.Dequeue() : Create(prefab);
             active.Add(projectile);
-            projectile.gameObject.SetActive(true);
             projectile.PrepareForPool(Return);
             return projectile;
         }

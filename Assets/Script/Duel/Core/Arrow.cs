@@ -9,6 +9,8 @@ namespace AOG.Duel
         private Rigidbody2D body;
         private Collider2D hitbox;
         private SpriteRenderer visual;
+        private SpriteRenderer effectVisual;
+        private static Sprite freezeTipSprite;
         private PlayerController owner;
         [Tooltip("Tốc độ bay theo đơn vị Unity mỗi giây. Gần hay xa đều giữ tốc độ này.")]
         [SerializeField, Min(0.1f)] private float flightSpeed = 5f;
@@ -24,6 +26,7 @@ namespace AOG.Duel
         private Vector2 startPoint;
         private Vector2 controlPoint;
         private Vector2 endPoint;
+        private Vector2 straightDirection;
         private Vector2 previousPoint;
         private const int PathSamples = 24;
         private readonly float[] pathDistances = new float[PathSamples + 1];
@@ -76,7 +79,18 @@ namespace AOG.Duel
             }
 
             float ownerSpeed = owner == null ? 1f : owner.Stats.ProjectileSpeedMultiplier;
-            traveledDistance += Time.fixedDeltaTime * flightSpeed * shotSpeedMultiplier * ownerSpeed;
+            float moveDistance = Time.fixedDeltaTime * flightSpeed * shotSpeedMultiplier * ownerSpeed;
+            if (path == ProjectilePath.Straight)
+            {
+                Vector2 nextStraightPoint = body.position + straightDirection * moveDistance;
+                body.MovePosition(nextStraightPoint);
+                if (rotateAlongPath && straightDirection.sqrMagnitude > .000001f)
+                    body.SetRotation(Mathf.Atan2(straightDirection.y, straightDirection.x) * Mathf.Rad2Deg);
+                previousPoint = nextStraightPoint;
+                return;
+            }
+
+            traveledDistance += moveDistance;
             float t;
             if (path == ProjectilePath.NormalArc)
             {
@@ -135,6 +149,7 @@ namespace AOG.Duel
             owner = projectileOwner;
             startPoint = start;
             endPoint = targetSnapshot;
+            straightDirection = (targetSnapshot - startPoint).normalized;
             float distance = Vector2.Distance(startPoint, endPoint);
             float automaticArcHeight = Mathf.Clamp(
                 distance * arcHeightPerDistance,
@@ -173,11 +188,23 @@ namespace AOG.Duel
             worldEffectPrefab = shotWorldEffect;
             worldEffectCreated = false;
             if (visual != null && arrowSprite != null) visual.sprite = arrowSprite;
-            flying = true;
+            ShowArrowEffect(shotEffect);
 
-            transform.position = startPoint;
+            Vector2 firstDirection = path == ProjectilePath.NormalArc
+                ? controlPoint - startPoint
+                : endPoint - startPoint;
+            float firstAngle = firstDirection.sqrMagnitude > .000001f
+                ? Mathf.Atan2(firstDirection.y, firstDirection.x) * Mathf.Rad2Deg
+                : 0f;
+
+            transform.SetPositionAndRotation(
+                startPoint,
+                rotateAlongPath ? Quaternion.Euler(0f, 0f, firstAngle) : transform.rotation);
             gameObject.SetActive(true);
+            body.position = startPoint;
+            if (rotateAlongPath) body.rotation = firstAngle;
             hitbox.enabled = true;
+            flying = true;
         }
 
         public void PrepareForPool(Action<Arrow> onDespawn)
@@ -199,6 +226,7 @@ namespace AOG.Duel
             shotSpeedMultiplier = 1f;
             worldEffectPrefab = null;
             worldEffectCreated = false;
+            if (effectVisual != null) effectVisual.gameObject.SetActive(false);
             returnToPool = null;
             if (hitbox != null) hitbox.enabled = false;
         }
@@ -209,6 +237,51 @@ namespace AOG.Duel
             return inverse * inverse * startPoint
                 + 2f * inverse * t * controlPoint
                 + t * t * endPoint;
+        }
+
+        private void ShowArrowEffect(ArrowEffect arrowEffect)
+        {
+            if (arrowEffect != ArrowEffect.Freeze || visual == null || visual.sprite == null)
+            {
+                if (effectVisual != null) effectVisual.gameObject.SetActive(false);
+                return;
+            }
+
+            if (freezeTipSprite == null)
+            {
+                Texture2D texture = new Texture2D(5, 5, TextureFormat.RGBA32, false);
+                texture.name = "Freeze Arrow Tip";
+                texture.filterMode = FilterMode.Point;
+                texture.wrapMode = TextureWrapMode.Clamp;
+                Color clear = new Color(0f, 0f, 0f, 0f);
+                for (int y = 0; y < 5; y++)
+                for (int x = 0; x < 5; x++)
+                {
+                    int distance = Mathf.Abs(x - 2) + Mathf.Abs(y - 2);
+                    texture.SetPixel(x, y, distance > 2
+                        ? clear
+                        : distance == 0 ? Color.white : new Color(.15f, .85f, 1f, 1f));
+                }
+                texture.Apply();
+                freezeTipSprite = Sprite.Create(texture, new Rect(0, 0, 5, 5),
+                    new Vector2(.5f, .5f), 20f);
+                freezeTipSprite.name = "Freeze Arrow Tip";
+            }
+
+            if (effectVisual == null)
+            {
+                GameObject tip = new GameObject("FreezeTip");
+                tip.transform.SetParent(visual.transform, false);
+                effectVisual = tip.AddComponent<SpriteRenderer>();
+            }
+
+            effectVisual.sprite = freezeTipSprite;
+            effectVisual.sortingLayerID = visual.sortingLayerID;
+            effectVisual.sortingOrder = visual.sortingOrder + 1;
+            effectVisual.transform.localPosition = new Vector3(visual.sprite.bounds.max.x, 0f, 0f);
+            effectVisual.transform.localRotation = Quaternion.identity;
+            effectVisual.transform.localScale = Vector3.one;
+            effectVisual.gameObject.SetActive(true);
         }
 
         private void OnTriggerEnter2D(Collider2D other)

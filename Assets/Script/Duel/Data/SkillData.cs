@@ -32,6 +32,12 @@ namespace AOG.Duel
         public float arc;
         [Min(0f)] public float damageMultiplier = 1f;
         [Min(0.01f)] public float speedMultiplier = 1f;
+        [Header("Hiệu ứng khi trúng")]
+        public bool hasEffect;
+        public ArrowEffect effect;
+        [Tooltip("Sát thương mỗi lần của độc/lửa, hoặc phần trăm tốc độ còn lại của Slow.")]
+        [Min(0)] public int effectPower;
+        [Min(0f)] public float effectDuration;
     }
 
     [System.Serializable]

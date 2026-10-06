@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerSkillLoadout
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SkillLoadout
   skills:
-  - {fileID: 11400000, guid: f161b082ed9d2e44a9f979a824040208, type: 2}
-  - {fileID: 11400000, guid: 8ed2dd188f5a29d41bb8155d1577fd08, type: 2}
+  - {fileID: 11400000, guid: b7d6c8f9e0a14253c4d5e6f708192a3b, type: 2}
+  - {fileID: 11400000, guid: a5958571e6a0cbf4e92de846b24c7600, type: 2}
   - {fileID: 11400000, guid: 81d07ca4c293a1f4e97fe018ee1459f1, type: 2}
   - {fileID: 11400000, guid: 11b6c847a9afa974a8167ce3bf34285d, type: 2}

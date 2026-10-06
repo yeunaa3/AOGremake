@@ -102,7 +102,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6688573736509035971}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -183,5 +183,5 @@ MonoBehaviour:
   minimumArcHeight: 1
   arcHeightPerDistance: 0.22
   maximumArcHeight: 10
-  maximumLifetime: 36
+  maximumLifetime: 48.6
   rotateAlongPath: 1

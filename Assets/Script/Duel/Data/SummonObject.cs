@@ -2,20 +2,21 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    // Skill 05: bắn N projectile cùng lúc, chia đều quanh điểm ngắm của Enemy.
-    [CreateAssetMenu(menuName = "AOG/Duel/Skills/Spawn Only/05 Multi Arrow", fileName = "Skill05_MultiArrow")]
-    public sealed class Skill05 : SkillData
+    // Dùng cho mọi skill tạo projectile hoặc vật thể ngay lúc thi triển.
+    [CreateAssetMenu(menuName = "Skill/SummonObject", fileName = "NewSummonObject")]
+    public sealed class SummonObject : SkillData
     {
-        [Header("Vật thể được bắn")]
+        [Header("Vật thể được gọi ra")]
         [SerializeField] private SpawnData spawn = new SpawnData();
-        [Tooltip("Góc xòe của N hình mũi tên đang được cầm trên tay.")]
+        [Tooltip("Bật nếu projectile cần xuất hiện trên tay trước lúc bắn.")]
+        [SerializeField] private bool showInHand;
         [SerializeField, Range(0f, 180f)] private float heldFanAngle = 35f;
 
         public override SkillType Type => SkillType.SpawnOnly;
 
         public override void ShowVisual(SkillCtx context)
         {
-            if (context.Caster != null)
+            if (showInHand && context.Caster != null)
                 context.Caster.ShowHeldArrows(spawn.count, heldFanAngle);
         }
 

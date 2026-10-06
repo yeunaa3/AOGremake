@@ -17,6 +17,7 @@ namespace AOG.Duel
         private float moveBuff = 1f;
         private float damageBuff = 1f;
         private float stunTime;
+        private float freezeTime;
         private float silenceTime;
         private float slowTime;
         private float slowMultiplier = 1f;
@@ -47,7 +48,8 @@ namespace AOG.Duel
         public float ClipSpeed => AttackSpeed;
         public int Damage => Mathf.RoundToInt(gear.BowDamage * damageBuff);
         public Sprite ArrowSprite => gear.ArrowSprite;
-        public bool Stunned => stunTime > 0f;
+        public bool Frozen => freezeTime > 0f;
+        public bool Stunned => stunTime > 0f || Frozen;
         public bool Silenced => silenceTime > 0f;
         public bool CanMove => !Stunned;
         public bool CanAttack => !Stunned;
@@ -65,6 +67,7 @@ namespace AOG.Duel
         private void Update()
         {
             stunTime = Mathf.Max(0f, stunTime - Time.deltaTime);
+            freezeTime = Mathf.Max(0f, freezeTime - Time.deltaTime);
             silenceTime = Mathf.Max(0f, silenceTime - Time.deltaTime);
             invulnerableTime = Mathf.Max(0f, invulnerableTime - Time.deltaTime);
             immuneTime = Mathf.Max(0f, immuneTime - Time.deltaTime);
@@ -99,7 +102,7 @@ namespace AOG.Duel
         {
             Hp = maxHp;
             moveBuff = damageBuff = 1f;
-            stunTime = silenceTime = slowTime = buffTime = 0f;
+            stunTime = freezeTime = silenceTime = slowTime = buffTime = 0f;
             invulnerableTime = immuneTime = burnTime = poisonTime = 0f;
             burnTick = poisonTick = 0f;
             burnDamage = poisonDamage = 0;
@@ -168,7 +171,7 @@ namespace AOG.Duel
 
         public void Cleanse()
         {
-            stunTime = silenceTime = slowTime = burnTime = poisonTime = 0f;
+            stunTime = freezeTime = silenceTime = slowTime = burnTime = poisonTime = 0f;
             poisonDamage = burnDamage = 0;
             slowMultiplier = 1f;
         }
@@ -190,6 +193,8 @@ namespace AOG.Duel
                     poisonAttacker = hit.Attacker;
                     break;
                 case ArrowEffect.Freeze:
+                    freezeTime = Mathf.Max(freezeTime, hit.EffectDuration);
+                    break;
                 case ArrowEffect.Stun:
                 case ArrowEffect.KnockUp:
                     Stun(hit.EffectDuration);

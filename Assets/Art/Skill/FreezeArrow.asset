@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e7d6450081bc374590da90ff332f781, type: 3}
+  m_Name: FreezeArrow
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
+  skillId: freeze_arrow
+  displayName: Freeze Arrow
+  description: Ban thang mot mui ten, trung dich se dong bang hoan toan.
+  icon: {fileID: -8810120499982162568, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rarity: 3
+  cooldown: 8
+  animationTrigger: FreezeArrow
+  lockMovement: 1
+  cancelOnMove: 0
+  showTime: 0.2
+  effectTime: 0.76
+  duration: 1
+  spawn:
+    prefab: {fileID: 6688573736509035971, guid: 66d432150ac8d494f9d62a61c953a6d1, type: 3}
+    spawnPoint: 0
+    count: 1
+    offset: {x: 0, y: 0}
+    targetRadius: 0
+    spacing: 0
+    path: 1
+    arc: 0
+    damageMultiplier: 1
+    speedMultiplier: 1
+    hasEffect: 1
+    effect: 3
+    effectPower: 0
+    effectDuration: 2
+  showInHand: 1
+  heldFanAngle: 0
