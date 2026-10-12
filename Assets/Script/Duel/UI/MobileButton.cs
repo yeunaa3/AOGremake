@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace AOG.Duel
 {
@@ -19,9 +20,42 @@ namespace AOG.Duel
     {
         [SerializeField] private TouchInput input;
         [SerializeField] private MobileAction action;
+        [SerializeField] private KeyInput keyboardInput;
+        [Header("Hiệu ứng nhấn")]
+        [SerializeField, Range(.5f, 1f)] private float pressedScale = .9f;
+        [SerializeField, Min(1f)] private float pressSpeed = 25f;
+        private Button button;
+        private Vector3 normalScale;
+        private bool pointerHeld;
+        private int heldPointerId;
+        private bool keyWasHeld;
+        private bool keyboardPressed;
+
+        private void Awake()
+        {
+            button = GetComponent<Button>();
+            normalScale = transform.localScale;
+            if (keyboardInput == null && input != null) keyboardInput = input.GetComponent<KeyInput>();
+        }
+
+        private bool CanPress => button == null || button.IsInteractable();
+
+        private void LateUpdate()
+        {
+            bool held = keyboardInput != null && keyboardInput.IsHeld(action);
+            if (held && !keyWasHeld && CanPress) keyboardPressed = true;
+            if (!held) keyboardPressed = false;
+            keyWasHeld = held;
+            Vector3 target = normalScale * (pointerHeld || keyboardPressed ? pressedScale : 1f);
+            transform.localScale = Vector3.Lerp(transform.localScale, target,
+                1f - Mathf.Exp(-pressSpeed * Time.unscaledDeltaTime));
+        }
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (eventData.button != PointerEventData.InputButton.Left || !CanPress || pointerHeld) return;
+            pointerHeld = true;
+            heldPointerId = eventData.pointerId;
             if (input == null) return;
 
             switch (action)
@@ -39,9 +73,31 @@ namespace AOG.Duel
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            if (!pointerHeld || eventData.pointerId != heldPointerId) return;
+            pointerHeld = false;
+            ReleaseMovement();
+        }
+
+        private void ReleaseMovement()
+        {
             if (input == null) return;
             if (action == MobileAction.MoveLeft) input.SetLeftHeld(false);
             if (action == MobileAction.MoveRight) input.SetRightHeld(false);
+        }
+
+        private void OnDisable()
+        {
+            pointerHeld = keyboardPressed = keyWasHeld = false;
+            ReleaseMovement();
+            transform.localScale = normalScale;
+        }
+
+        private void OnApplicationFocus(bool focused)
+        {
+            if (focused) return;
+            pointerHeld = keyboardPressed = keyWasHeld = false;
+            ReleaseMovement();
+            transform.localScale = normalScale;
         }
     }
 }

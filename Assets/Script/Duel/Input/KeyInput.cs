@@ -17,6 +17,26 @@ namespace AOG.Duel
         [SerializeField] private Key skill3 = Key.Digit3;
         [SerializeField] private Key skill4 = Key.Digit4;
 
+        // UI đọc trạng thái phím theo đúng cấu hình đang điều khiển nhân vật.
+        public bool IsHeld(MobileAction action)
+        {
+            if (!isActiveAndEnabled || Keyboard.current == null) return false;
+            Key key;
+            switch (action)
+            {
+                case MobileAction.MoveLeft: key = moveLeft; break;
+                case MobileAction.MoveRight: key = moveRight; break;
+                case MobileAction.Dash: key = dash; break;
+                case MobileAction.Shield: key = shield; break;
+                case MobileAction.Skill1: key = skill1; break;
+                case MobileAction.Skill2: key = skill2; break;
+                case MobileAction.Skill3: key = skill3; break;
+                case MobileAction.Skill4: key = skill4; break;
+                default: return false;
+            }
+            return key != Key.None && Keyboard.current[key].isPressed;
+        }
+
         public override InputCmd ReadCommand()
         {
             Keyboard keyboard = Keyboard.current;

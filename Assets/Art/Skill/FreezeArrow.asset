@@ -18,7 +18,7 @@ MonoBehaviour:
   icon: {fileID: -8810120499982162568, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 3
   cooldown: 8
-  animationTrigger: FreezeArrow
+  animationTrigger: Low
   lockMovement: 1
   cancelOnMove: 0
   showTime: 0.2
@@ -35,6 +35,7 @@ MonoBehaviour:
     arc: 0
     damageMultiplier: 1
     speedMultiplier: 1
+    groundDuration: 2
     hasEffect: 1
     effect: 3
     effectPower: 0

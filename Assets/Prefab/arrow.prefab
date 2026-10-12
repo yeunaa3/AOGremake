@@ -29,10 +29,11 @@ Transform:
   m_GameObject: {fileID: 6688573736509035971}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.003, y: -0.006, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2, y: 1.45, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 7233260428808071874}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3034125887291973792
@@ -155,7 +156,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.004570592}
+  m_Offset: {x: 0.21453725, y: 0.004570592}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.13547143, y: 0.49999994}
@@ -165,7 +166,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.59, y: 0.114294045}
+  m_Size: {x: 0.58586097, y: 0.114294045}
   m_EdgeRadius: 0
 --- !u!114 &1046340276981905311
 MonoBehaviour:
@@ -183,5 +184,49 @@ MonoBehaviour:
   minimumArcHeight: 1
   arcHeightPerDistance: 0.22
   maximumArcHeight: 10
-  maximumLifetime: 48.6
+  maximumLifetime: 60
   rotateAlongPath: 1
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  groundLifetime: 2
+  groundFadeTime: 0.5
+  groundEffects:
+  - effect: 0
+    prefab: {fileID: 0}
+  legacyGroundFirePrefab: {fileID: 0}
+  trails:
+  - effect: 3
+    prefab: {fileID: 6399403723404837957, guid: 05295442cf915b849a43dce86d360ebb, type: 3}
+  trailRemainTime: 1
+--- !u!1 &7809280229036523137
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7233260428808071874}
+  m_Layer: 10
+  m_Name: TrailPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7233260428808071874
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7809280229036523137}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.44, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5352950844171551019}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

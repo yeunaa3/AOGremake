@@ -18,7 +18,7 @@ MonoBehaviour:
   icon: {fileID: 6873380534569638714, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 0
   cooldown: 5
-  animationTrigger: ManyArrow
+  animationTrigger: Mid
   lockMovement: 1
   cancelOnMove: 0
   showTime: 0.2
@@ -29,12 +29,13 @@ MonoBehaviour:
     spawnPoint: 0
     count: 4
     offset: {x: 0, y: 0}
-    targetRadius: 1.5
+    targetRadius: 1.36
     spacing: 0
     path: 0
     arc: 0
     damageMultiplier: 1
     speedMultiplier: 1
+    groundDuration: 2
     hasEffect: 0
     effect: 0
     effectPower: 0

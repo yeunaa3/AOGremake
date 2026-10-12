@@ -72,7 +72,8 @@ namespace AOG.Duel
             if (!Alive || inputs == null || inputs.Length == 0)
             {
                 move.Input(0f);
-                anim.Values(false, stats.Stunned, stats.Frozen, stats.Silenced, action.ShieldOn, stats.ClipSpeed);
+                anim.Values(false, stats.Stunned, stats.Frozen, stats.Burning,
+                    stats.Silenced, action.ShieldOn, stats.ClipSpeed);
                 return;
             }
 
@@ -95,7 +96,8 @@ namespace AOG.Duel
             if (move.Moving) action.CancelAttack();
             // Trong lúc dùng skill luôn nhìn Enemy; phím A/D không được đổi hướng.
             anim.Face(usingSkill ? Face : Mathf.Abs(direction) > 0.05f ? direction : Face);
-            anim.Values(move.Moving, stats.Stunned, stats.Frozen, stats.Silenced, action.ShieldOn, stats.ClipSpeed);
+            anim.Values(move.Moving, stats.Stunned, stats.Frozen, stats.Burning,
+                stats.Silenced, action.ShieldOn, stats.ClipSpeed);
 
             if (!CanSkill) return;
             if (cmd.DashPressed) { action.Dash(direction == 0f ? Face : direction); return; }
@@ -275,7 +277,8 @@ namespace AOG.Duel
                         data.speedMultiplier,
                         data.hasEffect ? data.effect : ArrowEffect.None,
                         data.effectPower, data.effectDuration,
-                        shotResetCooldownSlot: -1);
+                        shotResetCooldownSlot: -1,
+                        shotGroundLifetime: data.groundDuration);
                 }
                 return;
             }

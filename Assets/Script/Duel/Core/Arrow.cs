@@ -1,16 +1,30 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace AOG.Duel
 {
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public class Arrow : MonoBehaviour
     {
+        [Serializable]
+        private sealed class TrailSetting
+        {
+            public ArrowEffect effect;
+            public ParticleSystem prefab;
+        }
+
+        [Serializable]
+        private sealed class GroundEffectSetting
+        {
+            public ArrowEffect effect;
+            public AreaEffect prefab;
+        }
+
         private Rigidbody2D body;
         private Collider2D hitbox;
         private SpriteRenderer visual;
-        private SpriteRenderer effectVisual;
-        private static Sprite freezeTipSprite;
+        private Transform trailPoint;
         private PlayerController owner;
         [Tooltip("Tốc độ bay theo đơn vị Unity mỗi giây. Gần hay xa đều giữ tốc độ này.")]
         [SerializeField, Min(0.1f)] private float flightSpeed = 5f;
@@ -23,6 +37,24 @@ namespace AOG.Duel
         [SerializeField, Min(0f)] private float maximumArcHeight = 7f;
         [SerializeField, Min(0.1f)] private float maximumLifetime = 30f;
         [SerializeField] private bool rotateAlongPath = true;
+        [Header("Mũi tên cắm xuống đất")]
+        [Tooltip("Layer của mặt đất. Nếu Layer có tên Ground thì code cũng tự nhận.")]
+        [SerializeField] private LayerMask groundLayers;
+        [Tooltip("Tổng thời gian mũi tên nằm trên đất, gồm cả thời gian mờ dần.")]
+        [SerializeField, Min(0.1f)] private float groundLifetime = 2f;
+        [Tooltip("Khoảng cuối của Ground Lifetime dùng để giảm Alpha.")]
+        [SerializeField, Min(0.01f)] private float groundFadeTime = .5f;
+        [Header("Hiệu ứng tại điểm va chạm")]
+        [Tooltip("Prefab vùng hiệu ứng được tạo tại điểm tên chạm người hoặc mặt đất.")]
+        [InspectorName("Impact Effects")]
+        [SerializeField] private GroundEffectSetting[] groundEffects;
+        [FormerlySerializedAs("groundFirePrefab")]
+        [SerializeField, HideInInspector] private AreaEffect legacyGroundFirePrefab;
+        [Header("Vệt hiệu ứng khi bay")]
+        [Tooltip("Mỗi dòng nối một Arrow Effect với một prefab Particle.")]
+        [SerializeField] private TrailSetting[] trails;
+        [Tooltip("Sau khi mũi tên biến mất, các hạt cũ còn lại bao lâu.")]
+        [SerializeField, Min(0f)] private float trailRemainTime = 1f;
         private Vector2 startPoint;
         private Vector2 controlPoint;
         private Vector2 endPoint;
@@ -37,8 +69,10 @@ namespace AOG.Duel
         private ProjectilePath path;
         private float shotSpeedMultiplier = 1f;
         private bool flying;
-        private bool reachedEnd;
-        private float endGraceRemaining;
+        private bool stuckInGround;
+        private float groundTime;
+        private float activeGroundLifetime = 2f;
+        private Color normalColor = Color.white;
         private int damage;
         private ArrowEffect effect;
         private int effectPower;
@@ -47,6 +81,7 @@ namespace AOG.Duel
         private int resetCooldownSlot = -1;
         private GameObject worldEffectPrefab;
         private bool worldEffectCreated;
+        private ParticleSystem activeTrail;
         private Action<Arrow> returnToPool;
 
         private void Awake()
@@ -54,6 +89,8 @@ namespace AOG.Duel
             body = GetComponent<Rigidbody2D>();
             hitbox = GetComponent<Collider2D>();
             visual = GetComponentInChildren<SpriteRenderer>(true);
+            trailPoint = transform.Find("TrailPoint");
+            MigrateGroundEffects();
             body.bodyType = RigidbodyType2D.Kinematic;
             body.gravityScale = 0f;
             body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
@@ -64,17 +101,24 @@ namespace AOG.Duel
         {
             if (!flying) return;
 
+            if (stuckInGround)
+            {
+                groundTime += Time.fixedDeltaTime;
+                float fadeStart = Mathf.Max(0f, activeGroundLifetime - groundFadeTime);
+                if (visual != null && groundTime >= fadeStart)
+                {
+                    Color color = normalColor;
+                    color.a *= 1f - Mathf.InverseLerp(fadeStart, activeGroundLifetime, groundTime);
+                    visual.color = color;
+                }
+                if (groundTime >= activeGroundLifetime) Despawn();
+                return;
+            }
+
             lifetime += Time.fixedDeltaTime;
             if (lifetime >= maximumLifetime)
             {
                 Despawn();
-                return;
-            }
-
-            if (reachedEnd)
-            {
-                endGraceRemaining -= Time.fixedDeltaTime;
-                if (endGraceRemaining <= 0f) Despawn();
                 return;
             }
 
@@ -124,9 +168,11 @@ namespace AOG.Duel
             previousPoint = nextPoint;
             if (t >= 1f)
             {
-                reachedEnd = true;
-                CreateWorldEffect(endPoint);
-                endGraceRemaining = 0.08f;
+                // Nếu hụt Enemy, tiếp tục theo hướng cuối cho tới khi chạm Ground.
+                straightDirection = direction.sqrMagnitude > .000001f
+                    ? direction.normalized
+                    : (endPoint - controlPoint).normalized;
+                path = ProjectilePath.Straight;
             }
         }
 
@@ -144,7 +190,8 @@ namespace AOG.Duel
             float shotEffectDuration = 0f,
             float shotLifeSteal = 0f,
             GameObject shotWorldEffect = null,
-            int shotResetCooldownSlot = -1)
+            int shotResetCooldownSlot = -1,
+            float shotGroundLifetime = -1f)
         {
             owner = projectileOwner;
             startPoint = start;
@@ -177,8 +224,9 @@ namespace AOG.Duel
             traveledDistance = 0f;
             pathSampleIndex = 1;
             lifetime = 0f;
-            reachedEnd = false;
-            endGraceRemaining = 0f;
+            stuckInGround = false;
+            groundTime = 0f;
+            activeGroundLifetime = shotGroundLifetime > 0f ? shotGroundLifetime : groundLifetime;
             damage = Mathf.Max(0, shotDamage);
             effect = shotEffect;
             effectPower = Mathf.Max(0, shotEffectPower);
@@ -187,8 +235,13 @@ namespace AOG.Duel
             resetCooldownSlot = shotResetCooldownSlot;
             worldEffectPrefab = shotWorldEffect;
             worldEffectCreated = false;
-            if (visual != null && arrowSprite != null) visual.sprite = arrowSprite;
-            ShowArrowEffect(shotEffect);
+            if (visual != null)
+            {
+                if (arrowSprite != null) visual.sprite = arrowSprite;
+                normalColor = visual.color;
+                normalColor.a = 1f;
+                visual.color = normalColor;
+            }
 
             Vector2 firstDirection = path == ProjectilePath.NormalArc
                 ? controlPoint - startPoint
@@ -204,6 +257,7 @@ namespace AOG.Duel
             body.position = startPoint;
             if (rotateAlongPath) body.rotation = firstAngle;
             hitbox.enabled = true;
+            StartTrail(shotEffect);
             flying = true;
         }
 
@@ -215,7 +269,9 @@ namespace AOG.Duel
         public void ResetProjectile()
         {
             flying = false;
-            reachedEnd = false;
+            stuckInGround = false;
+            groundTime = 0f;
+            activeGroundLifetime = groundLifetime;
             owner = null;
             damage = 0;
             effect = ArrowEffect.None;
@@ -226,7 +282,7 @@ namespace AOG.Duel
             shotSpeedMultiplier = 1f;
             worldEffectPrefab = null;
             worldEffectCreated = false;
-            if (effectVisual != null) effectVisual.gameObject.SetActive(false);
+            FinishTrail();
             returnToPool = null;
             if (hitbox != null) hitbox.enabled = false;
         }
@@ -239,55 +295,60 @@ namespace AOG.Duel
                 + t * t * endPoint;
         }
 
-        private void ShowArrowEffect(ArrowEffect arrowEffect)
+        private void StartTrail(ArrowEffect arrowEffect)
         {
-            if (arrowEffect != ArrowEffect.Freeze || visual == null || visual.sprite == null)
-            {
-                if (effectVisual != null) effectVisual.gameObject.SetActive(false);
-                return;
-            }
+            FinishTrail();
 
-            if (freezeTipSprite == null)
+            ParticleSystem prefab = null;
+            if (trails != null)
             {
-                Texture2D texture = new Texture2D(5, 5, TextureFormat.RGBA32, false);
-                texture.name = "Freeze Arrow Tip";
-                texture.filterMode = FilterMode.Point;
-                texture.wrapMode = TextureWrapMode.Clamp;
-                Color clear = new Color(0f, 0f, 0f, 0f);
-                for (int y = 0; y < 5; y++)
-                for (int x = 0; x < 5; x++)
+                foreach (TrailSetting setting in trails)
                 {
-                    int distance = Mathf.Abs(x - 2) + Mathf.Abs(y - 2);
-                    texture.SetPixel(x, y, distance > 2
-                        ? clear
-                        : distance == 0 ? Color.white : new Color(.15f, .85f, 1f, 1f));
+                    if (setting == null || setting.effect != arrowEffect) continue;
+                    prefab = setting.prefab;
+                    break;
                 }
-                texture.Apply();
-                freezeTipSprite = Sprite.Create(texture, new Rect(0, 0, 5, 5),
-                    new Vector2(.5f, .5f), 20f);
-                freezeTipSprite.name = "Freeze Arrow Tip";
             }
+            if (prefab == null) return;
 
-            if (effectVisual == null)
+            Transform point = trailPoint != null ? trailPoint : transform;
+            activeTrail = Instantiate(prefab, point.position, point.rotation, point);
+            activeTrail.transform.localPosition = Vector3.zero;
+
+            // Một prefab có thể chứa nhiều lớp Particle con (ví dụ hai ảnh tuyết).
+            // World khiến mọi hạt đã sinh ra nằm lại trên đường bay.
+            foreach (ParticleSystem layer in activeTrail.GetComponentsInChildren<ParticleSystem>(true))
             {
-                GameObject tip = new GameObject("FreezeTip");
-                tip.transform.SetParent(visual.transform, false);
-                effectVisual = tip.AddComponent<SpriteRenderer>();
+                ParticleSystem.MainModule main = layer.main;
+                main.simulationSpace = ParticleSystemSimulationSpace.World;
+                main.stopAction = ParticleSystemStopAction.None;
             }
+            activeTrail.Play(true);
+        }
 
-            effectVisual.sprite = freezeTipSprite;
-            effectVisual.sortingLayerID = visual.sortingLayerID;
-            effectVisual.sortingOrder = visual.sortingOrder + 1;
-            effectVisual.transform.localPosition = new Vector3(visual.sprite.bounds.max.x, 0f, 0f);
-            effectVisual.transform.localRotation = Quaternion.identity;
-            effectVisual.transform.localScale = Vector3.one;
-            effectVisual.gameObject.SetActive(true);
+        private void FinishTrail()
+        {
+            if (activeTrail == null) return;
+
+            ParticleSystem trail = activeTrail;
+            activeTrail = null;
+            trail.transform.SetParent(null, true);
+            trail.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            Destroy(trail.gameObject, trailRemainTime);
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (!flying || owner == null) return;
             if (other.transform == owner.transform || other.transform.IsChildOf(owner.transform)) return;
+
+            if (stuckInGround)
+            {
+                return;
+            }
+
+            ColliderDistance2D contactInfo = Physics2D.Distance(hitbox, other);
+            Vector2 contact = contactInfo.isValid ? contactInfo.pointB : other.ClosestPoint(body.position);
 
             SkillObject obstacle = other.GetComponentInParent<SkillObject>();
             if (obstacle != null)
@@ -300,16 +361,77 @@ namespace AOG.Duel
             }
 
             PlayerController target = other.GetComponentInParent<PlayerController>();
-            if (target == null) { CreateWorldEffect(transform.position); Despawn(); return; }
+            if (target == null)
+            {
+                if (IsGround(other)) StickInGround(contact);
+                else { CreateWorldEffect(transform.position); Despawn(); }
+                return;
+            }
             if (target.Team == owner.Team) return;
 
-            int dealt = target.Stats.TakeDamage(new DamageInfo(owner, damage, false, transform.position,
+            int dealt = target.Stats.TakeDamage(new DamageInfo(owner, damage, false, contact,
                 effect, effectPower, effectDuration));
             OnHitPlayer(target, dealt);
             if (dealt > 0 && lifeSteal > 0f) owner.Stats.Heal(Mathf.RoundToInt(dealt * lifeSteal));
             if (dealt > 0 && resetCooldownSlot >= 0) owner.Action.ResetSkillCooldown(resetCooldownSlot);
-            CreateWorldEffect(transform.position);
+            CreateImpactEffects(contact);
             Despawn();
+        }
+
+        private bool IsGround(Collider2D other)
+        {
+            int layerBit = 1 << other.gameObject.layer;
+            if ((groundLayers.value & layerBit) != 0) return true;
+            return string.Equals(LayerMask.LayerToName(other.gameObject.layer), "Ground",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void StickInGround(Vector2 contact)
+        {
+            stuckInGround = true;
+            groundTime = 0f;
+            CreateImpactEffects(contact);
+            FinishTrail();
+
+            // Tên nằm đất chỉ còn hình ảnh; không nhận va chạm hay gây damage/status.
+            if (hitbox != null) hitbox.enabled = false;
+        }
+
+        private void CreateImpactEffects(Vector2 contact)
+        {
+            CreateWorldEffect(contact);
+            AreaEffect prefab = FindGroundEffect();
+            if (prefab == null) return;
+            AreaEffect zone = Instantiate(prefab, contact, Quaternion.identity);
+            zone.SetupStatusZone(owner, effect, effectPower, effectDuration, activeGroundLifetime);
+        }
+
+        private AreaEffect FindGroundEffect()
+        {
+            if (effect == ArrowEffect.None || groundEffects == null) return null;
+            foreach (GroundEffectSetting setting in groundEffects)
+                if (setting != null && setting.effect == effect) return setting.prefab;
+            return null;
+        }
+
+        private void OnValidate() => MigrateGroundEffects();
+
+        // Giữ reference cột lửa đã gán trước khi chuyển sang danh sách chung.
+        private void MigrateGroundEffects()
+        {
+            if (legacyGroundFirePrefab == null) return;
+            if (groundEffects == null) groundEffects = new GroundEffectSetting[0];
+            foreach (GroundEffectSetting setting in groundEffects)
+            {
+                if (setting == null || setting.effect != ArrowEffect.Burn) continue;
+                legacyGroundFirePrefab = null;
+                return;
+            }
+            int index = groundEffects.Length;
+            Array.Resize(ref groundEffects, index + 1);
+            groundEffects[index] = new GroundEffectSetting
+                { effect = ArrowEffect.Burn, prefab = legacyGroundFirePrefab };
+            legacyGroundFirePrefab = null;
         }
 
         // Prefab tên độc/băng/lửa có thể kế thừa Arrow và chỉ override phần này.
@@ -329,6 +451,7 @@ namespace AOG.Duel
             if (!flying) return;
             flying = false;
             if (hitbox != null) hitbox.enabled = false;
+            FinishTrail();
 
             Action<Arrow> callback = returnToPool;
             returnToPool = null;

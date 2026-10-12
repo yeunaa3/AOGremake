@@ -15,6 +15,8 @@ namespace AOG.Duel
 
         private readonly Dictionary<PlayerController, float> nextHit = new Dictionary<PlayerController, float>();
         private PlayerController owner;
+        private bool statusOnly;
+        private readonly HashSet<PlayerController> affectedTargets = new HashSet<PlayerController>();
 
         private void Awake() => GetComponent<Collider2D>().isTrigger = true;
         private void Update()
@@ -25,8 +27,39 @@ namespace AOG.Duel
 
         public void Setup(PlayerController source) => owner = source;
 
+        // Vùng dưới đất truyền hiệu ứng tương ứng, không gây damage va chạm của tên.
+        public void SetupStatusZone(PlayerController source, ArrowEffect status,
+            int power, float duration, float seconds)
+        {
+            owner = source;
+            statusOnly = true;
+            effect = status;
+            effectPower = power;
+            effectDuration = duration;
+            lifetime = Mathf.Max(.05f, seconds);
+            affectedTargets.Clear();
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (statusOnly) ApplyGroundStatus(other);
+        }
+
+        private void ApplyGroundStatus(Collider2D other)
+        {
+            PlayerController target = other.GetComponentInParent<PlayerController>();
+            if (target == null || owner == null || target.Team == owner.Team) return;
+            if (!affectedTargets.Add(target)) return;
+            target.Stats.ApplyStatus(owner, effect, effectPower, effectDuration);
+        }
+
         private void OnTriggerStay2D(Collider2D other)
         {
+            if (statusOnly)
+            {
+                ApplyGroundStatus(other);
+                return;
+            }
             PlayerController target = other.GetComponentInParent<PlayerController>();
             if (target == null || owner == null || target.Team == owner.Team) return;
             if (nextHit.TryGetValue(target, out float time) && Time.time < time) return;

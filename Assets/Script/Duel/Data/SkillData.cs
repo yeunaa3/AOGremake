@@ -32,6 +32,9 @@ namespace AOG.Duel
         public float arc;
         [Min(0f)] public float damageMultiplier = 1f;
         [Min(0.01f)] public float speedMultiplier = 1f;
+        [Header("Khi cắm xuống đất")]
+        [Tooltip("Thời gian mũi tên nằm trên đất. Mặc định 2 giây.")]
+        [Min(0.1f)] public float groundDuration = 2f;
         [Header("Hiệu ứng khi trúng")]
         public bool hasEffect;
         public ArrowEffect effect;

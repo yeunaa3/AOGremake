@@ -49,6 +49,8 @@ namespace AOG.Duel
         public int Damage => Mathf.RoundToInt(gear.BowDamage * damageBuff);
         public Sprite ArrowSprite => gear.ArrowSprite;
         public bool Frozen => freezeTime > 0f;
+        public bool Burning => burnTime > 0f;
+        public bool Poisoned => poisonTime > 0f;
         public bool Stunned => stunTime > 0f || Frozen;
         public bool Silenced => silenceTime > 0f;
         public bool CanMove => !Stunned;
@@ -142,6 +144,12 @@ namespace AOG.Duel
         }
         public void Stun(float seconds) => stunTime = Mathf.Max(stunTime, seconds);
         public void Silence(float seconds) => silenceTime = Mathf.Max(silenceTime, seconds);
+        public void ApplyStatus(PlayerController attacker, ArrowEffect effect, int power, float duration)
+        {
+            if (!Alive || invulnerableTime > 0f || immuneTime > 0f || effect == ArrowEffect.None) return;
+            ApplyEffect(new DamageInfo(attacker, 0, true, transform.position,
+                effect, power, duration));
+        }
         public void SetBuff(float move, float damage)
         {
             moveBuff = Mathf.Max(0f, move);
@@ -211,8 +219,9 @@ namespace AOG.Duel
 
         private void TickDamage(ref float remaining, ref float tick, int damage, PlayerController attacker)
         {
-            if (remaining <= 0f || damage <= 0) return;
+            if (remaining <= 0f) return;
             remaining = Mathf.Max(0f, remaining - Time.deltaTime);
+            if (damage <= 0) return;
             tick -= Time.deltaTime;
             if (tick > 0f) return;
             tick += 1f;

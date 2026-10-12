@@ -7,7 +7,8 @@ namespace AOG.Duel
     public sealed class PlayerAnim : MonoBehaviour
     {
         private Animator animator;
-        private Animator effectAnimator;
+        private Animator[] effectAnimators = new Animator[0];
+        private PlayerStats stats;
         private Transform visual;
         private float normalX;
         private Transform[] frozenParts;
@@ -18,12 +19,20 @@ namespace AOG.Duel
 
         private void Awake()
         {
+            stats = GetComponent<PlayerStats>();
             animator = GetComponentInChildren<Animator>();
             visual = animator == null ? null : animator.transform;
             if (visual == null) return;
 
             Transform effect = visual.Find("Effect");
-            if (effect != null) effectAnimator = effect.GetComponent<Animator>();
+            if (effect != null)
+            {
+                // Mỗi object con có Animator và SpriteRenderer riêng, chạy đồng thời.
+                var effects = new List<Animator>();
+                foreach (Animator item in effect.GetComponentsInChildren<Animator>(true))
+                    if (item.transform != effect) effects.Add(item);
+                effectAnimators = effects.ToArray();
+            }
 
             normalX = Mathf.Abs(visual.localScale.x);
 
@@ -46,7 +55,8 @@ namespace AOG.Duel
             visual.localScale = scale;
         }
 
-        public void Values(bool moving, bool stunned, bool frozen, bool silenced, bool shielding, float attackSpeed)
+        public void Values(bool moving, bool stunned, bool frozen, bool burning,
+            bool silenced, bool shielding, float attackSpeed)
         {
             Bool("IsMoving", moving);
             Bool("IsStunned", stunned);
@@ -55,6 +65,8 @@ namespace AOG.Duel
             Float("MoveSpeed", moving ? 1f : 0f);
             Float("AttackSpeed", attackSpeed);
             EffectBool("IsFrozen", frozen);
+            EffectBool("IsBurning", burning);
+            EffectBool("IsPoisoned", stats != null && stats.Poisoned);
 
             if (frozen && !poseFrozen)
             {
@@ -91,9 +103,17 @@ namespace AOG.Duel
         public void Bool(string name, bool value) { if (Has(animator, name, AnimatorControllerParameterType.Bool)) animator.SetBool(name, value); }
         public void Float(string name, float value) { if (Has(animator, name, AnimatorControllerParameterType.Float)) animator.SetFloat(name, value); }
 
-        // Parameter của Animator riêng nằm trên object Effect.
-        public void EffectTrigger(string name) { if (Has(effectAnimator, name, AnimatorControllerParameterType.Trigger)) effectAnimator.SetTrigger(name); }
-        public void EffectBool(string name, bool value) { if (Has(effectAnimator, name, AnimatorControllerParameterType.Bool)) effectAnimator.SetBool(name, value); }
+        // Chỉ gửi vào những Animator con có đúng Parameter tương ứng.
+        public void EffectTrigger(string name)
+        {
+            foreach (Animator item in effectAnimators)
+                if (Has(item, name, AnimatorControllerParameterType.Trigger)) item.SetTrigger(name);
+        }
+        public void EffectBool(string name, bool value)
+        {
+            foreach (Animator item in effectAnimators)
+                if (Has(item, name, AnimatorControllerParameterType.Bool)) item.SetBool(name, value);
+        }
 
         // Code chủ động thoát clip skill, không phụ thuộc transition dễ bị kẹt trong Animator.
         public void EndSkillAnimation()
