@@ -12,6 +12,15 @@ namespace AOG.Duel
         {
             public ArrowEffect effect;
             public ParticleSystem prefab;
+            [Tooltip("Điểm phát hạt. Bỏ trống thì dùng TrailPoint trên mũi tên.")]
+            public Transform spawnPoint;
+        }
+
+        [Serializable]
+        private sealed class FlightAnimationSetting
+        {
+            public ArrowEffect effect;
+            public string trigger;
         }
 
         [Serializable]
@@ -25,6 +34,10 @@ namespace AOG.Duel
         private Collider2D hitbox;
         private SpriteRenderer visual;
         private Transform trailPoint;
+        private Transform flightEffectRoot;
+        private Animator flightEffectAnimator;
+        [Header("Animation hiệu ứng khi bay")]
+        [SerializeField] private FlightAnimationSetting[] flightAnimations;
         private PlayerController owner;
         [Tooltip("Tốc độ bay theo đơn vị Unity mỗi giây. Gần hay xa đều giữ tốc độ này.")]
         [SerializeField, Min(0.1f)] private float flightSpeed = 5f;
@@ -81,6 +94,7 @@ namespace AOG.Duel
         private int resetCooldownSlot = -1;
         private GameObject worldEffectPrefab;
         private bool worldEffectCreated;
+        private readonly RaycastHit2D[] groundProbe = new RaycastHit2D[1];
         private ParticleSystem activeTrail;
         private Action<Arrow> returnToPool;
 
@@ -90,6 +104,10 @@ namespace AOG.Duel
             hitbox = GetComponent<Collider2D>();
             visual = GetComponentInChildren<SpriteRenderer>(true);
             trailPoint = transform.Find("TrailPoint");
+            flightEffectRoot = transform.Find("Effect");
+            if (flightEffectRoot != null)
+                flightEffectAnimator = flightEffectRoot.GetComponent<Animator>();
+            StopFlightEffect();
             MigrateGroundEffects();
             body.bodyType = RigidbodyType2D.Kinematic;
             body.gravityScale = 0f;
@@ -258,6 +276,7 @@ namespace AOG.Duel
             if (rotateAlongPath) body.rotation = firstAngle;
             hitbox.enabled = true;
             StartTrail(shotEffect);
+            StartFlightEffect(shotEffect);
             flying = true;
         }
 
@@ -283,6 +302,7 @@ namespace AOG.Duel
             worldEffectPrefab = null;
             worldEffectCreated = false;
             FinishTrail();
+            StopFlightEffect();
             returnToPool = null;
             if (hitbox != null) hitbox.enabled = false;
         }
@@ -295,32 +315,60 @@ namespace AOG.Duel
                 + t * t * endPoint;
         }
 
+        private void StartFlightEffect(ArrowEffect arrowEffect)
+        {
+            StopFlightEffect();
+            if (flightEffectAnimator == null || flightEffectAnimator.runtimeAnimatorController == null
+                || flightAnimations == null) return;
+            foreach (FlightAnimationSetting setting in flightAnimations)
+            {
+                if (setting == null || setting.effect != arrowEffect || string.IsNullOrEmpty(setting.trigger)) continue;
+                foreach (AnimatorControllerParameter parameter in flightEffectAnimator.parameters)
+                {
+                    if (parameter.name != setting.trigger || parameter.type != AnimatorControllerParameterType.Trigger) continue;
+                    flightEffectRoot.gameObject.SetActive(true);
+                    flightEffectAnimator.Rebind();
+                    flightEffectAnimator.Update(0f);
+                    flightEffectAnimator.SetTrigger(setting.trigger);
+                    flightEffectAnimator.Update(0f);
+                    return;
+                }
+            }
+        }
+
+        private void StopFlightEffect()
+        {
+            if (flightEffectRoot != null) flightEffectRoot.gameObject.SetActive(false);
+        }
+
         private void StartTrail(ArrowEffect arrowEffect)
         {
             FinishTrail();
 
             ParticleSystem prefab = null;
+            Transform configuredPoint = null;
             if (trails != null)
             {
                 foreach (TrailSetting setting in trails)
                 {
                     if (setting == null || setting.effect != arrowEffect) continue;
                     prefab = setting.prefab;
+                    configuredPoint = setting.spawnPoint;
                     break;
                 }
             }
             if (prefab == null) return;
 
-            Transform point = trailPoint != null ? trailPoint : transform;
+            Transform point = configuredPoint != null ? configuredPoint
+                : trailPoint != null ? trailPoint : transform;
             activeTrail = Instantiate(prefab, point.position, point.rotation, point);
             activeTrail.transform.localPosition = Vector3.zero;
 
             // Một prefab có thể chứa nhiều lớp Particle con (ví dụ hai ảnh tuyết).
-            // World khiến mọi hạt đã sinh ra nằm lại trên đường bay.
+            // Giữ Simulation Space của từng lớp: Local bám đầu tên, World lưu vệt phía sau.
             foreach (ParticleSystem layer in activeTrail.GetComponentsInChildren<ParticleSystem>(true))
             {
                 ParticleSystem.MainModule main = layer.main;
-                main.simulationSpace = ParticleSystemSimulationSpace.World;
                 main.stopAction = ParticleSystemStopAction.None;
             }
             activeTrail.Play(true);
@@ -334,13 +382,23 @@ namespace AOG.Duel
             activeTrail = null;
             trail.transform.SetParent(null, true);
             trail.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-            Destroy(trail.gameObject, trailRemainTime);
+            // Cho các hạt đã sinh sống hết lifetime, kể cả khi tăng lifetime trên prefab.
+            float remaining = trailRemainTime;
+            foreach (ParticleSystem layer in trail.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                ParticleSystem.MainModule main = layer.main;
+                remaining = Mathf.Max(remaining,
+                    main.startLifetime.constantMax / Mathf.Max(.01f, main.simulationSpeed));
+            }
+            Destroy(trail.gameObject, remaining);
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (!flying || owner == null) return;
             if (other.transform == owner.transform || other.transform.IsChildOf(owner.transform)) return;
+            // Vùng lửa/độc chỉ truyền trạng thái, không phải vật cản chặn tên.
+            if (other.GetComponentInParent<AreaEffect>() != null) return;
 
             if (stuckInGround)
             {
@@ -374,7 +432,7 @@ namespace AOG.Duel
             OnHitPlayer(target, dealt);
             if (dealt > 0 && lifeSteal > 0f) owner.Stats.Heal(Mathf.RoundToInt(dealt * lifeSteal));
             if (dealt > 0 && resetCooldownSlot >= 0) owner.Action.ResetSkillCooldown(resetCooldownSlot);
-            CreateImpactEffects(contact);
+            CreateImpactEffects(contact, target);
             Despawn();
         }
 
@@ -392,13 +450,31 @@ namespace AOG.Duel
             groundTime = 0f;
             CreateImpactEffects(contact);
             FinishTrail();
+            StopFlightEffect();
 
             // Tên nằm đất chỉ còn hình ảnh; không nhận va chạm hay gây damage/status.
             if (hitbox != null) hitbox.enabled = false;
         }
 
-        private void CreateImpactEffects(Vector2 contact)
+        private Vector2 GroundBelow(PlayerController target)
         {
+            int mask = groundLayers.value;
+            int groundLayer = LayerMask.NameToLayer("Ground");
+            if (groundLayer >= 0) mask |= 1 << groundLayer;
+            var filter = new ContactFilter2D();
+            filter.SetLayerMask(mask);
+            filter.useTriggers = false;
+            Vector2 origin = target.Aim + Vector2.up;
+            if (Physics2D.Raycast(origin, Vector2.down, filter, groundProbe, 200f) > 0)
+                return groundProbe[0].point;
+            // Nếu map chưa gán Ground, không để cột lửa xuất hiện ở điểm trúng trên đầu.
+            return target.transform.position;
+        }
+
+        private void CreateImpactEffects(Vector2 contact, PlayerController hitTarget = null)
+        {
+            if (effect == ArrowEffect.Burn && hitTarget != null)
+                contact = GroundBelow(hitTarget);
             CreateWorldEffect(contact);
             AreaEffect prefab = FindGroundEffect();
             if (prefab == null) return;
@@ -452,6 +528,7 @@ namespace AOG.Duel
             flying = false;
             if (hitbox != null) hitbox.enabled = false;
             FinishTrail();
+            StopFlightEffect();
 
             Action<Arrow> callback = returnToPool;
             returnToPool = null;

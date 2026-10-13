@@ -265,13 +265,30 @@ namespace AOG.Duel
             Arrow projectilePrefab = data.prefab.GetComponent<Arrow>();
             if (projectilePrefab != null)
             {
+                Vector2 targetSnapshot = Enemy.Aim;
                 for (int i = 0; i < count; i++)
                 {
                     float targetY = count == 1 ? 0f : Mathf.Lerp(-data.targetRadius, data.targetRadius, i / (count - 1f));
+                    Vector2 launchPoint = start;
+                    Vector2 destination = targetSnapshot + Vector2.up * targetY;
+                    if (data.path == ProjectilePath.Falling)
+                    {
+                        float widthPerArrow = 2f * data.targetRadius / count;
+                        float horizontal = -data.targetRadius + (i + .5f) * widthPerArrow;
+                        if (data.randomizeRain)
+                        {
+                            horizontal += Random.Range(-.5f, .5f) * widthPerArrow * data.horizontalRandomness;
+                            launchPoint.y += Random.Range(-data.spawnHeightVariation, data.spawnHeightVariation);
+                        }
+                        launchPoint.x += horizontal;
+                        // Mỗi tên có một làn riêng; không chụm cả cơn mưa vào một điểm.
+                        destination = targetSnapshot + Vector2.right * horizontal;
+                        launchPoint.y = Mathf.Max(launchPoint.y, destination.y + .5f);
+                    }
                     Arrow projectile = pool == null ? null : pool.Spawn(projectilePrefab);
                     if (projectile == null) continue;
                     Sprite sprite = stats.ArrowSprite;
-                    projectile.Launch(this, start, Enemy.Aim + Vector2.up * targetY,
+                    projectile.Launch(this, launchPoint, destination,
                         data.path, data.arc,
                         Mathf.RoundToInt(stats.Damage * data.damageMultiplier), sprite,
                         data.speedMultiplier,
@@ -283,10 +300,10 @@ namespace AOG.Duel
                 return;
             }
 
-            float first = -(count - 1) * data.spacing * 0.5f;
+            float first = -(count - 1) * data.objectSpacing * 0.5f;
             for (int i = 0; i < count; i++)
             {
-                Vector2 position = start + Vector2.right * (first + i * data.spacing);
+                Vector2 position = start + Vector2.right * (first + i * data.objectSpacing);
                 GameObject created = Instantiate(data.prefab, position, Quaternion.identity);
                 SkillObject skillObject = created.GetComponent<SkillObject>();
                 if (skillObject != null) skillObject.Setup(this);

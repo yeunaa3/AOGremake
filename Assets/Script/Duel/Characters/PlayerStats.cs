@@ -53,6 +53,19 @@ namespace AOG.Duel
         public bool Poisoned => poisonTime > 0f;
         public bool Stunned => stunTime > 0f || Frozen;
         public bool Silenced => silenceTime > 0f;
+        public bool HasStatusEffect(ArrowEffect effect)
+        {
+            switch (effect)
+            {
+                case ArrowEffect.Burn: return Burning;
+                case ArrowEffect.Poison: return Poisoned;
+                case ArrowEffect.Freeze: return Frozen;
+                case ArrowEffect.Stun: return stunTime > 0f;
+                case ArrowEffect.Silence: return Silenced;
+                case ArrowEffect.Slow: return slowTime > 0f;
+                default: return false;
+            }
+        }
         public bool CanMove => !Stunned;
         public bool CanAttack => !Stunned;
         public bool CanUseSkill => !Stunned && !Silenced;

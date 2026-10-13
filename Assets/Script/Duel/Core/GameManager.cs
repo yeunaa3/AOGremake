@@ -12,6 +12,14 @@ namespace AOG.Duel
         [SerializeField] private PlayerController playerTwo;
         [SerializeField] private ArrowPool projectilePool;
 
+        [Header("Vị trí bắt đầu trận")]
+        [SerializeField] private Transform playerSpawn;
+        [SerializeField] private Transform enemySpawn;
+
+        [Header("Thanh máu")]
+        [SerializeField] private HealthUI playerHealthBar;
+        [SerializeField] private HealthUI enemyHealthBar;
+
         [Header("Rules")]
         [SerializeField] private bool startAutomatically = true;
         [SerializeField, Min(0f)] private float countdownDuration = 3f;
@@ -31,11 +39,11 @@ namespace AOG.Duel
 
         private void Start()
         {
-            ConfigureParticipants();
             if (startAutomatically)
             {
                 StartMatch();
             }
+            else ConfigureParticipants();
         }
 
         private void Update()
@@ -67,6 +75,9 @@ namespace AOG.Duel
             ConfigureParticipants();
             playerOne.ResetPlayer();
             playerTwo.ResetPlayer();
+            PlaceAtSpawn(playerOne, playerSpawn);
+            PlaceAtSpawn(playerTwo, enemySpawn);
+            Physics2D.SyncTransforms();
             Winner = null;
             MatchTimeRemaining = matchDuration;
             MatchTimeChanged?.Invoke(MatchTimeRemaining);
@@ -131,9 +142,22 @@ namespace AOG.Duel
 
         private void ConfigureParticipants()
         {
+            playerHealthBar?.Bind(playerOne != null ? playerOne.GetComponent<PlayerStats>() : null);
+            enemyHealthBar?.Bind(playerTwo != null ? playerTwo.GetComponent<PlayerStats>() : null);
             if (playerOne == null || playerTwo == null) return;
             playerOne.Setup(this, playerTwo, 0, projectilePool);
             playerTwo.Setup(this, playerOne, 1, projectilePool);
+        }
+
+        private static void PlaceAtSpawn(PlayerController character, Transform point)
+        {
+            if (character == null || point == null) return;
+            character.transform.position = point.position;
+            Rigidbody2D body = character.GetComponent<Rigidbody2D>();
+            if (body == null) return;
+            body.position = point.position;
+            body.linearVelocity = Vector2.zero;
+            body.angularVelocity = 0f;
         }
 
         private void SetState(GameState state)

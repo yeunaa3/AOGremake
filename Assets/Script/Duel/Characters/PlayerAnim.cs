@@ -3,12 +3,25 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    // Script này chỉ làm 2 việc: lật nhân vật và gửi Parameter vào Animator.
+    // Lật nhân vật, điều khiển animation và hiển thị hiệu ứng trạng thái.
     public sealed class PlayerAnim : MonoBehaviour
     {
         private Animator animator;
         private Animator[] effectAnimators = new Animator[0];
         private PlayerStats stats;
+        [System.Serializable]
+        private sealed class StatusParticleSetting
+        {
+            public ArrowEffect effect;
+            public ParticleSystem prefab;
+            [Tooltip("Điểm bám trong Visual/Effect. Bỏ trống thì dùng Visual/Effect.")]
+            public Transform spawnPoint;
+            [System.NonSerialized] public ParticleSystem instance;
+            [System.NonSerialized] public bool playing;
+        }
+
+        [Header("Particle trạng thái trên người")]
+        [SerializeField] private StatusParticleSetting[] statusParticles;
         private Transform visual;
         private float normalX;
         private Transform[] frozenParts;
@@ -33,6 +46,7 @@ namespace AOG.Duel
                     if (item.transform != effect) effects.Add(item);
                 effectAnimators = effects.ToArray();
             }
+            InitializeStatusParticles(effect != null ? effect : visual);
 
             normalX = Mathf.Abs(visual.localScale.x);
 
@@ -66,6 +80,7 @@ namespace AOG.Duel
             Float("AttackSpeed", attackSpeed);
             EffectBool("IsFrozen", frozen);
             EffectBool("IsBurning", burning);
+            UpdateStatusParticles();
             EffectBool("IsPoisoned", stats != null && stats.Poisoned);
 
             if (frozen && !poseFrozen)
@@ -81,6 +96,52 @@ namespace AOG.Duel
             else if (!frozen)
             {
                 poseFrozen = false;
+            }
+        }
+
+        private void InitializeStatusParticles(Transform defaultPoint)
+        {
+            if (statusParticles == null) return;
+            foreach (StatusParticleSetting setting in statusParticles)
+            {
+                if (setting == null || setting.prefab == null) continue;
+                Transform point = setting.spawnPoint != null ? setting.spawnPoint : defaultPoint;
+                setting.instance = Instantiate(setting.prefab, point.position, point.rotation, point);
+                // Vị trí luôn do điểm bám quyết định, không cộng offset ẩn của prefab.
+                setting.instance.transform.localPosition = Vector3.zero;
+                foreach (ParticleSystem layer in setting.instance.GetComponentsInChildren<ParticleSystem>(true))
+                {
+                    var main = layer.main;
+                    main.playOnAwake = false;
+                    main.stopAction = ParticleSystemStopAction.None;
+                }
+                setting.instance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
+
+        private void UpdateStatusParticles()
+        {
+            if (statusParticles == null) return;
+            foreach (StatusParticleSetting setting in statusParticles)
+            {
+                if (setting == null || setting.instance == null) continue;
+                bool on = stats != null && stats.Alive && stats.HasStatusEffect(setting.effect);
+                if (setting.playing == on) continue;
+                setting.playing = on;
+                if (on) setting.instance.Play(true);
+                else setting.instance.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (statusParticles == null) return;
+            foreach (StatusParticleSetting setting in statusParticles)
+            {
+                if (setting == null) continue;
+                setting.playing = false;
+                if (setting.instance != null)
+                    setting.instance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             }
         }
 
@@ -123,7 +184,7 @@ namespace AOG.Duel
 
         private bool Has(Animator target, string name, AnimatorControllerParameterType type)
         {
-            if (target == null) return false;
+            if (target == null || target.runtimeAnimatorController == null) return false;
             foreach (AnimatorControllerParameter item in target.parameters)
                 if (item.name == name && item.type == type) return true;
             return false;

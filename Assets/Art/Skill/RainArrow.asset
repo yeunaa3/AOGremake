@@ -28,9 +28,12 @@ MonoBehaviour:
     prefab: {fileID: 6688573736509035971, guid: 66d432150ac8d494f9d62a61c953a6d1, type: 3}
     spawnPoint: 2
     count: 10
-    offset: {x: -5, y: 8}
-    targetRadius: 1.36
-    spacing: 5
+    offset: {x: 0, y: 4}
+    targetRadius: 2.5
+    randomizeFalling: 1
+    fallingScatter: 0.8
+    fallingHeightJitter: 1.5
+    spacing: 0
     path: 2
     arc: 0
     damageMultiplier: 1

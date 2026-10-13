@@ -421,6 +421,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 51411023}
   m_CullTransparentMesh: 1
+--- !u!114 &73421214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 617947476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b597e1bf30fad9c4d9389cb0aafe2de4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Bot
+  decisionInterval: 1
+  movementChance: 0.65
+  actionChance: 0.35
 --- !u!1 &76240108
 GameObject:
   m_ObjectHideFlags: 0
@@ -1225,8 +1240,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 601669787793036520, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: maxHp
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 601669787793036520, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
       propertyPath: moveSpeed
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1530076052815395145, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
       propertyPath: arrowTime
@@ -1296,6 +1315,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2300000003}
   m_SourcePrefab: {fileID: 100100000, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+--- !u!1 &617947476 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4165326193211423853, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+  m_PrefabInstance: {fileID: 1521976405}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &634520988
 GameObject:
   m_ObjectHideFlags: 0
@@ -2080,37 +2104,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!1 &888867544
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 888867545}
-  m_Layer: 0
-  m_Name: P_spawn
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &888867545
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 888867544}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.99, y: -2.53, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &892565058
 GameObject:
   m_ObjectHideFlags: 0
@@ -3565,6 +3558,37 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1392793906
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1392793907}
+  m_Layer: 0
+  m_Name: 'P_spawn '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1392793907
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1392793906}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -5, y: -2.25, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1454459285
 GameObject:
   m_ObjectHideFlags: 0
@@ -3811,6 +3835,14 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 4ff1cd4e45bf5784daec32e69507dec4, type: 3}
+    - target: {fileID: 601669787793036520, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: maxHp
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 601669787793036520, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: moveSpeed
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 723369047151242313, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -3859,6 +3891,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 14612f17fcf1d2544a1ca4690ad0f3c7, type: 3}
+    - target: {fileID: 4893763430014299047, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      propertyPath: waitBeforeShoot
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 5100286837162555385, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -3943,10 +3979,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 719154445166342356, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4165326193211423853, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 73421214}
   m_SourcePrefab: {fileID: 100100000, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
 --- !u!1 &1534025062
 GameObject:
@@ -4217,7 +4257,7 @@ Transform:
   m_GameObject: {fileID: 1555351057}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.02, y: -2.25, z: 0}
+  m_LocalPosition: {x: 5, y: -2.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4360,7 +4400,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 957973392531507051, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
   m_PrefabInstance: {fileID: 1521976405}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 617947476}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 36a1b1770f3b07f439fd8b7e2ed533a9, type: 3}
@@ -5311,6 +5351,10 @@ MonoBehaviour:
   playerOne: {fileID: 1610009655}
   playerTwo: {fileID: 1654014861}
   projectilePool: {fileID: 1876664479}
+  playerSpawn: {fileID: 1392793907}
+  enemySpawn: {fileID: 1555351058}
+  playerHealthBar: {fileID: 2200000004}
+  enemyHealthBar: {fileID: 2200000029}
   startAutomatically: 1
   countdownDuration: 5
   matchDuration: 210.2
@@ -5905,32 +5949,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7b89ea307ce19142ac72fdc502e3769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.HealthUI
-  stats: {fileID: 2200000005}
+  stats: {fileID: 0}
   slider: {fileID: 0}
   fill: {fileID: 2200000000}
   hpText: {fileID: 2200000002}
---- !u!114 &2200000005 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 601669787793036520, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
-  m_PrefabInstance: {fileID: 602983572}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2300000004}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffd83ad859471d045847c74b4c2aa194, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Stats
---- !u!114 &2200000006 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 601669787793036520, guid: b07661ad5069c5349a3908cfdfa00546, type: 3}
-  m_PrefabInstance: {fileID: 1521976405}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffd83ad859471d045847c74b4c2aa194, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Stats
 --- !u!1 &2200000011
 GameObject:
   m_ObjectHideFlags: 0
@@ -6269,7 +6291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7b89ea307ce19142ac72fdc502e3769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.HealthUI
-  stats: {fileID: 2200000006}
+  stats: {fileID: 0}
   slider: {fileID: 0}
   fill: {fileID: 2200000022}
   hpText: {fileID: 2200000024}
@@ -6342,8 +6364,8 @@ SceneRoots:
   - {fileID: 1008165912}
   - {fileID: 1876664477}
   - {fileID: 1589749615}
-  - {fileID: 888867545}
   - {fileID: 1555351058}
+  - {fileID: 1392793907}
   - {fileID: 2001855619}
   - {fileID: 956988229}
   - {fileID: 602983572}

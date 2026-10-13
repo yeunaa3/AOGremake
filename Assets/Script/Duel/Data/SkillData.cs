@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace AOG.Duel
 {
@@ -24,10 +25,22 @@ namespace AOG.Duel
         public SpawnPoint spawnPoint = SpawnPoint.Bow;
         [Min(1)] public int count = 1;
         public Vector2 offset;
-        [Tooltip("Bán kính các điểm đích quanh Enemy. N tên sẽ chia đều từ -Radius đến +Radius.")]
+        [Tooltip("Bán kính điểm đích quanh địch. Falling rải theo chiều ngang; các đường bay khác rải theo chiều dọc.")]
         [Min(0f)] public float targetRadius;
-        [Tooltip("Khoảng cách giữa các vật thể không phải projectile.")]
-        [Min(0f)] public float spacing;
+        [Header("Arrow Rain (Falling Path Only)")]
+        [FormerlySerializedAs("randomizeFalling")]
+        public bool randomizeRain;
+        [FormerlySerializedAs("fallingScatter")]
+        [Tooltip("Chỉ áp dụng khi bật ngẫu nhiên mưa tên. 0: mỗi tên nằm giữa ô. 1: chọn vị trí bất kỳ trong ô. Không thay đổi độ rộng vùng mưa.")]
+        [Range(0f, 1f)] public float horizontalRandomness = .8f;
+        [FormerlySerializedAs("fallingHeightJitter")]
+        [Tooltip("Chỉ áp dụng khi bật ngẫu nhiên mưa tên. Ví dụ 2: mỗi tên xuất hiện cao hoặc thấp hơn tối đa 2 đơn vị. Tạo cùng lúc nhưng chạm đất lệch nhịp, không đổi tốc độ bay.")]
+        [Min(0f)] public float spawnHeightVariation = 1.5f;
+        [Header("Summoned Objects (Not Arrows)")]
+        [FormerlySerializedAs("spacing")]
+        [Tooltip("Khoảng cách tâm giữa các vật thể triệu hồi. Không tác dụng với RainArrow hoặc prefab có script Arrow; độ rộng mưa tên chỉnh bằng Target Radius.")]
+        [Min(0f)] public float objectSpacing;
+        [Header("Flight And Damage")]
         public ProjectilePath path = ProjectilePath.NormalArc;
         public float arc;
         [Min(0f)] public float damageMultiplier = 1f;
