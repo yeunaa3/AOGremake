@@ -434,7 +434,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.Bot
   decisionInterval: 1
-  movementChance: 0.65
+  movementChance: 0.524
   actionChance: 0.35
 --- !u!1 &76240108
 GameObject:
@@ -5180,8 +5180,8 @@ MonoBehaviour:
   playerHealthBar: {fileID: 2200000004}
   enemyHealthBar: {fileID: 2200000029}
   startAutomatically: 1
-  countdownDuration: 5
-  matchDuration: 210.2
+  countdownDuration: 3
+  matchDuration: 120
 --- !u!114 &1876664479
 MonoBehaviour:
   m_ObjectHideFlags: 0
