@@ -30,6 +30,15 @@ namespace AOG.Duel
         public void Match(bool on) { matchOn = on; if (!on) Stop(); }
         public void Lock(bool value) => canMove = !value;
         public void Dash(float direction, float speed) { dashDir = Mathf.Sign(direction == 0 ? 1 : direction); dashSpeed = speed; dashing = true; }
+        public void Jump(float direction, float horizontalSpeed, float jumpForce)
+        {
+            dashDir = Mathf.Sign(direction == 0 ? 1 : direction);
+            dashSpeed = Mathf.Max(0f, horizontalSpeed);
+            dashing = dashSpeed > .01f;
+            body.linearVelocity = new Vector2(
+                dashing ? dashDir * dashSpeed : body.linearVelocity.x,
+                Mathf.Max(0f, jumpForce));
+        }
         public void Stop() { input = 0f; dashing = false; }
     }
 }

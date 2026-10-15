@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -37,10 +38,17 @@ namespace AOG.Duel
         private ArrowBuffData arrowBuff;
         private int arrowBuffSkillSlot = -1;
 
+        [Header("Hiệu ứng khi bắn cung")]
+        [Tooltip("Prefab hiệu ứng vòng tròn xuất hiện tại effect ở trong bow khi bắn.")]
+        [SerializeField] private GameObject bowShotEffectPrefab;
+        [Tooltip("Thời gian hiển thị của mỗi nhịp vòng tròn (giây).")]
+        [SerializeField, Min(0.02f)] private float ringBeatDuration = 0.07f;
+
         public int Team => team;
         public PlayerController Enemy { get; private set; }
         public PlayerStats Stats => stats;
         public PlayerAction Action => action;
+        public PlayerAnim Anim => anim;
         public bool Alive => playing && stats.Alive;
         public bool CanMove => Alive && stats.CanMove;
         public bool CanAttack => Alive && stats.CanAttack;
@@ -48,6 +56,8 @@ namespace AOG.Duel
         public float Face => Enemy == null ? (team == 0 ? 1f : -1f) : Mathf.Sign(Enemy.transform.position.x - transform.position.x);
         public Vector2 Aim => aimPoint == null ? transform.position : aimPoint.position;
         public bool IsAirborne => move.IsAirborne;
+        public Transform BodyEffectPoint { get; private set; }
+        public Transform BowEffectPoint { get; private set; }
 
         private void Awake()
         {
@@ -65,6 +75,9 @@ namespace AOG.Duel
             summonPoint = Find("summonpoint");
             Transform bow = Find("bow");
             bowVisual = bow == null ? null : bow.GetComponent<SpriteRenderer>();
+            BowEffectPoint = bow == null ? null : bow.Find("effect");
+            Transform visualT = anim != null ? anim.transform : Find("Visual");
+            BodyEffectPoint = visualT != null ? visualT.Find("Effect") : null;
         }
 
         private void Update()
@@ -117,6 +130,7 @@ namespace AOG.Duel
             action.ResetAction();
             autoShoot.ResetAttack();
             stats.ResetAll();
+            anim.ResetAnimation();
             poweredArrowCount = 0;
             arrowBuff = null;
             arrowBuffSkillSlot = -1;
@@ -168,6 +182,12 @@ namespace AOG.Duel
         {
             move.Lock(true);
             move.Dash(direction, speed);
+        }
+
+        public void StartSkillJump(float direction, float horizontalSpeed, float jumpForce)
+        {
+            move.Lock(true);
+            move.Jump(direction, horizontalSpeed, jumpForce);
         }
 
         public void ShootSkill(ShotData shot, int skillSlot)
@@ -357,10 +377,22 @@ namespace AOG.Duel
 
         public void Hit() => anim.Trigger("Hit");
 
+        public void Win()
+        {
+            playing = false;
+            move.Match(false);
+            HideHeldArrows();
+            action.Stop();
+            move.Lock(true);
+            move.Stop();
+            anim.Trigger("Win");
+        }
+
         public void Die()
         {
             playing = false;
             move.Match(false);
+            if (stats.Alive) stats.Kill();
             action.Die();
             game?.NotifyCharacterDied(this);
         }
@@ -375,7 +407,73 @@ namespace AOG.Duel
 
             arrow.Launch(this, start, target, path, arc, damage, sprite, speedMultiplier,
                 effect, effectPower, effectDuration, lifeSteal, worldEffect, resetCooldownSlot);
+            PlayBowShotEffect();
             return true;
+        }
+
+        private void PlayBowShotEffect()
+        {
+            if (bowShotEffectPrefab == null) return;
+            Transform point = BowEffectPoint != null ? BowEffectPoint : (arrowSpawnPoint != null ? arrowSpawnPoint : transform);
+            GameObject ring = Instantiate(bowShotEffectPrefab, point.position, point.rotation);
+            StartCoroutine(AnimateBowShotRing(ring, point, ringBeatDuration));
+        }
+
+        private IEnumerator AnimateBowShotRing(GameObject instance, Transform followPoint, float beatTime)
+        {
+            if (instance == null) yield break;
+
+            Transform innerTransform = instance.transform.Find("InnerRing");
+            Transform outerTransform = instance.transform.Find("OuterRing");
+            SpriteRenderer[] renderers = instance.GetComponentsInChildren<SpriteRenderer>(true);
+            int sortingOrder = (bowVisual != null ? bowVisual.sortingOrder : 10) + 2;
+            int sortingLayerID = bowVisual != null ? bowVisual.sortingLayerID : 0;
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                renderers[i].sortingLayerID = sortingLayerID;
+                renderers[i].sortingOrder = sortingOrder + i;
+            }
+
+            // Nhịp 1: Vòng bên trong xuất hiện trước, vòng to tắt
+            if (outerTransform != null) outerTransform.gameObject.SetActive(false);
+            if (innerTransform != null) innerTransform.gameObject.SetActive(true);
+
+            float elapsed = 0f;
+            while (elapsed < beatTime)
+            {
+                if (instance == null) yield break;
+                elapsed += Time.deltaTime;
+                if (followPoint != null)
+                {
+                    instance.transform.position = followPoint.position;
+                    instance.transform.rotation = followPoint.rotation;
+                }
+                yield return null;
+            }
+
+            // Tắt vòng bên trong
+            if (innerTransform != null) innerTransform.gameObject.SetActive(false);
+
+            // Nhịp 2: Vòng to xuất hiện rồi tắt luôn
+            if (outerTransform != null) outerTransform.gameObject.SetActive(true);
+
+            elapsed = 0f;
+            while (elapsed < beatTime)
+            {
+                if (instance == null) yield break;
+                elapsed += Time.deltaTime;
+                if (followPoint != null)
+                {
+                    instance.transform.position = followPoint.position;
+                    instance.transform.rotation = followPoint.rotation;
+                }
+                yield return null;
+            }
+
+            if (instance != null)
+            {
+                Destroy(instance);
+            }
         }
 
         private Transform Find(string name)

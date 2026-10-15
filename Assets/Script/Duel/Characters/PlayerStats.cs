@@ -155,6 +155,12 @@ namespace AOG.Duel
             Hp = Mathf.Min(maxHp, Hp + amount);
             HpChanged?.Invoke(Hp, maxHp);
         }
+        public void Kill()
+        {
+            if (Hp <= 0) return;
+            Hp = 0;
+            HpChanged?.Invoke(Hp, maxHp);
+        }
         public void Stun(float seconds) => stunTime = Mathf.Max(stunTime, seconds);
         public void Silence(float seconds) => silenceTime = Mathf.Max(silenceTime, seconds);
         public void ApplyStatus(PlayerController attacker, ArrowEffect effect, int power, float duration)

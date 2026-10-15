@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
+    [CreateAssetMenu(menuName = "Skill/Buff", fileName = "NewBuffSkill")]
     public sealed class BuffSkill : SkillData
     {
         [SerializeField] private BuffData buff = new BuffData();

@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0.197, y: -0.011, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
+  m_LocalScale: {x: 1.9, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5352950844171551019}
@@ -271,7 +271,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.20697738, y: 0.004570592}
+  m_Offset: {x: 0.36427358, y: 0.004570592}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.13547143, y: 0.49999994}
@@ -281,7 +281,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.5707412, y: 0.114294045}
+  m_Size: {x: 0.25614876, y: 0.114294045}
   m_EdgeRadius: 0
 --- !u!114 &1046340276981905311
 MonoBehaviour:
@@ -309,11 +309,18 @@ MonoBehaviour:
     m_Bits: 256
   groundLifetime: 2
   groundFadeTime: 0.5
+  bloodEffectPrefab: {fileID: 6399403723404837957, guid: 53b2cc39336e4386b904dcb332bd1f6c, type: 3}
+  groundSmokePrefab: {fileID: 6399403723404837957, guid: 1fdbe55f8bf24e24b1b7f0d1f770ac5e, type: 3}
   groundEffects:
   - effect: 1
     prefab: {fileID: 2500000010, guid: b755d6b455f3b074f8e9248202ca7d27, type: 3}
+  - effect: 2
+    prefab: {fileID: 2500000010, guid: 2c0f435f861b4f91bb78a6e8ce1614d6, type: 3}
   legacyGroundFirePrefab: {fileID: 0}
   trails:
+  - effect: 2
+    prefab: {fileID: 6399403723404837957, guid: 734f2dbf9e4236e4da5a901d6c453749, type: 3}
+    spawnPoint: {fileID: 7233260428808071874}
   - effect: 3
     prefab: {fileID: 6399403723404837957, guid: 05295442cf915b849a43dce86d360ebb, type: 3}
     spawnPoint: {fileID: 7233260428808071874}

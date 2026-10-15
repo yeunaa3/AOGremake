@@ -662,6 +662,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 796781461726018189}
+  - {fileID: 8547150237362998022}
   m_Father: {fileID: 6310298845818199511}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90.98738}
 --- !u!212 &176896371874652664
@@ -1307,6 +1308,8 @@ MonoBehaviour:
   team: 0
   heldArrowScaleMultiplier: {x: 1, y: 1}
   heldArrowSortingOrder: 5
+  bowShotEffectPrefab: {fileID: 2170247513286342540, guid: 5b0940aeadd44e3f91d1ad749c55f719, type: 3}
+  ringBeatDuration: 0.07
 --- !u!114 &1747435524008901407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1388,6 +1391,9 @@ MonoBehaviour:
   statusParticles:
   - effect: 1
     prefab: {fileID: 6399403723404837957, guid: abbe19a5c44c214a29cbd39c41869bb7, type: 3}
+    spawnPoint: {fileID: 2800000001}
+  - effect: 2
+    prefab: {fileID: 6399403723404837957, guid: 6206cc09046248388ead063c6bbc4f77, type: 3}
     spawnPoint: {fileID: 2800000001}
 --- !u!114 &719154445166342356
 MonoBehaviour:
@@ -1939,6 +1945,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ec7b906090af19499962e957a82963b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.AnimEvent
+--- !u!1 &7067700815655817897
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8547150237362998022}
+  m_Layer: 9
+  m_Name: effect
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8547150237362998022
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7067700815655817897}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.27, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8499089883281746447}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7141953278676522350
 GameObject:
   m_ObjectHideFlags: 0

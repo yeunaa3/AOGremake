@@ -133,10 +133,29 @@ namespace AOG.Duel
             if (State == GameState.Finished) return;
 
             Winner = winner;
+            SetState(GameState.Finished);
             playerOne.Play(false);
             playerTwo.Play(false);
             projectilePool?.ReturnAll();
-            SetState(GameState.Finished);
+
+            if (winner != null)
+            {
+                PlayerController loser = winner == playerOne ? playerTwo : playerOne;
+                winner.Win();
+                if (loser != null)
+                {
+                    if (loser.Stats.Alive)
+                        loser.Die();
+                    else
+                        loser.Anim.Trigger("Die");
+                }
+            }
+            else
+            {
+                if (playerOne != null && playerOne.Stats.Alive) playerOne.Die();
+                if (playerTwo != null && playerTwo.Stats.Alive) playerTwo.Die();
+            }
+
             MatchFinished?.Invoke(winner);
         }
 

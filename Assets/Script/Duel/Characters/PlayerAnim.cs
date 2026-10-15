@@ -163,6 +163,15 @@ namespace AOG.Duel
         public void Trigger(string name) { if (Has(animator, name, AnimatorControllerParameterType.Trigger)) animator.SetTrigger(name); }
         public void Bool(string name, bool value) { if (Has(animator, name, AnimatorControllerParameterType.Bool)) animator.SetBool(name, value); }
         public void Float(string name, float value) { if (Has(animator, name, AnimatorControllerParameterType.Float)) animator.SetFloat(name, value); }
+        public void Win() => Trigger("Win");
+        public void Die() => Trigger("Die");
+        public void ResetAnimation()
+        {
+            if (animator == null) return;
+            if (Has(animator, "Win", AnimatorControllerParameterType.Trigger)) animator.ResetTrigger("Win");
+            if (Has(animator, "Die", AnimatorControllerParameterType.Trigger)) animator.ResetTrigger("Die");
+            animator.Play("Character_idle", 0, 0f);
+        }
 
         // Chỉ gửi vào những Animator con có đúng Parameter tương ứng.
         public void EffectTrigger(string name)

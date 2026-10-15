@@ -58,6 +58,10 @@ namespace AOG.Duel
         [Tooltip("Khoảng cuối của Ground Lifetime dùng để giảm Alpha.")]
         [SerializeField, Min(0.01f)] private float groundFadeTime = .5f;
         [Header("Hiệu ứng tại điểm va chạm")]
+        [Tooltip("Prefab hiệu ứng tóe máu khi bắn trúng nhân vật.")]
+        [SerializeField] private ParticleSystem bloodEffectPrefab;
+        [Tooltip("Prefab hiệu ứng khói bụi khi mũi tên va chạm mặt đất.")]
+        [SerializeField] private ParticleSystem groundSmokePrefab;
         [Tooltip("Prefab vùng hiệu ứng được tạo tại điểm tên chạm người hoặc mặt đất.")]
         [InspectorName("Impact Effects")]
         [SerializeField] private GroundEffectSetting[] groundEffects;
@@ -432,6 +436,7 @@ namespace AOG.Duel
             OnHitPlayer(target, dealt);
             if (dealt > 0 && lifeSteal > 0f) owner.Stats.Heal(Mathf.RoundToInt(dealt * lifeSteal));
             if (dealt > 0 && resetCooldownSlot >= 0) owner.Action.ResetSkillCooldown(resetCooldownSlot);
+            SpawnBloodEffect(target);
             CreateImpactEffects(contact, target);
             Despawn();
         }
@@ -449,11 +454,29 @@ namespace AOG.Duel
             stuckInGround = true;
             groundTime = 0f;
             CreateImpactEffects(contact);
+            SpawnGroundSmoke(contact);
             FinishTrail();
             StopFlightEffect();
 
             // Tên nằm đất chỉ còn hình ảnh; không nhận va chạm hay gây damage/status.
             if (hitbox != null) hitbox.enabled = false;
+        }
+
+        private void SpawnGroundSmoke(Vector2 contact)
+        {
+            if (groundSmokePrefab == null) return;
+            ParticleSystem smoke = Instantiate(groundSmokePrefab, contact, Quaternion.identity);
+            smoke.Play(true);
+            Destroy(smoke.gameObject, 1.5f);
+        }
+
+        private void SpawnBloodEffect(PlayerController target)
+        {
+            if (bloodEffectPrefab == null || target == null) return;
+            Vector3 pos = target.BodyEffectPoint != null ? target.BodyEffectPoint.position : target.transform.position;
+            ParticleSystem blood = Instantiate(bloodEffectPrefab, pos, Quaternion.identity);
+            blood.Play(true);
+            Destroy(blood.gameObject, 1.5f);
         }
 
         private Vector2 GroundBelow(PlayerController target)
@@ -473,7 +496,7 @@ namespace AOG.Duel
 
         private void CreateImpactEffects(Vector2 contact, PlayerController hitTarget = null)
         {
-            if (effect == ArrowEffect.Burn && hitTarget != null)
+            if ((effect == ArrowEffect.Burn || effect == ArrowEffect.Poison) && hitTarget != null)
                 contact = GroundBelow(hitTarget);
             CreateWorldEffect(contact);
             AreaEffect prefab = FindGroundEffect();
