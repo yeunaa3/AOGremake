@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c97008a94119bd34aad36c9d4614096b, type: 3}
+  m_Name: LifestealBow
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
+  bowId: bow_lifesteal
+  displayName: Lifesteal Bow
+  icon: {fileID: 0}
+  bowSprite: {fileID: 2630720244013161647, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  arrowSprite: {fileID: -4805778372435739706, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  damage: 10
+  attackSpeedMultiplier: 1
+  passive: {fileID: 11400000, guid: f4d3a2fdbf7642cdb22338d046a95cd2, type: 2}

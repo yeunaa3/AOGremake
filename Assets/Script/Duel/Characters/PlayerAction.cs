@@ -11,31 +11,23 @@ namespace AOG.Duel
     [RequireComponent(typeof(PlayerAnim))]
     public sealed class PlayerAction : MonoBehaviour
     {
-        [Header("Dash")]
-        [SerializeField] private float dashTime = .2f;
-        [SerializeField] private float dashSpeed = 14f;
-        [SerializeField] private float dashCooldown = 2f;
-        [Header("Khiên")]
-        [SerializeField] private float shieldTime = .7f;
-        [SerializeField] private float shieldCooldown = 4f;
-        [Header("4 Skill")]
+        [Header("5 Skill")]
         [SerializeField] private SkillLoadout loadout;
-        [SerializeField] private SkillData[] skills = new SkillData[4];
+        [SerializeField] private SkillData[] skills = new SkillData[5];
 
         private PlayerController player;
         private PlayerMove move;
         private PlayerStats stats;
         private PlayerAnim anim;
         private float time;
-        private float dashLeft;
-        private float shieldLeft;
-        private readonly float[] skillLeft = new float[4];
+        private readonly float[] skillLeft = new float[5];
         private int skillSlot = -1;
         private float skillDirection = 1f;
         private bool normalArrowShown;
         private bool normalArrowFired;
         private bool skillEffectDone;
         private bool skillVisualShown;
+        private SkillData specialSkill;
 
         [Header("Đánh thường - thời gian của clip gốc")]
         [InspectorName("Show Arrow Time")]
@@ -52,11 +44,11 @@ namespace AOG.Duel
 
         public ActionState State { get; private set; } = ActionState.Ready;
         public bool Ready => State == ActionState.Ready;
-        public bool ShieldOn => State == ActionState.Shielding;
-        public float DashCooldownRemaining => dashLeft;
-        public float ShieldCooldownRemaining => shieldLeft;
-        public float DashCooldownDuration => dashCooldown;
-        public float ShieldCooldownDuration => shieldCooldown;
+        public bool ShieldOn => false;
+        public float DashCooldownRemaining => 0f;
+        public float ShieldCooldownRemaining => 0f;
+        public float DashCooldownDuration => 0f;
+        public float ShieldCooldownDuration => 0f;
 
         private void Awake()
         {
@@ -64,7 +56,7 @@ namespace AOG.Duel
             move = GetComponent<PlayerMove>();
             stats = GetComponent<PlayerStats>();
             anim = GetComponent<PlayerAnim>();
-            if (skills == null || skills.Length != 4) Array.Resize(ref skills, 4);
+            if (skills == null || skills.Length != 5) Array.Resize(ref skills, 5);
         }
 
         private void Update()
@@ -72,9 +64,7 @@ namespace AOG.Duel
             // Không trừ hồi chiêu trong thời gian đếm ngược hoặc sau khi trận đã kết thúc.
             if (!player.Alive) return;
 
-            dashLeft = Mathf.Max(0f, dashLeft - Time.deltaTime);
-            shieldLeft = Mathf.Max(0f, shieldLeft - Time.deltaTime);
-            for (int i = 0; i < 4; i++) skillLeft[i] = Mathf.Max(0f, skillLeft[i] - Time.deltaTime);
+            for (int i = 0; i < skillLeft.Length; i++) skillLeft[i] = Mathf.Max(0f, skillLeft[i] - Time.deltaTime);
 
             if (stats.Stunned && State != ActionState.Stunned && State != ActionState.Dead)
             {
@@ -115,24 +105,35 @@ namespace AOG.Duel
                 }
                 if (time >= cycleDuration)
                 {
+                    if (player.Gear != null && player.Gear.BowState.specialSkillReady)
+                    {
+                        if (player.Gear.EquippedBow != null && player.Gear.EquippedBow.Passive is IceShotPassive icePassive)
+                        {
+                            player.Gear.BowState.specialSkillReady = false;
+                            if (TriggerSpecialSkill(icePassive.IceSkill, icePassive.AnimationTrigger))
+                                return;
+                        }
+                    }
+
                     time -= cycleDuration;
                     normalArrowShown = false;
                     normalArrowFired = false;
                 }
                 return;
             }
-            else if (State == ActionState.Dashing)
-            {
-                if (time >= dashTime) { move.Stop(); State = ActionState.Ready; }
-            }
-            else if (State == ActionState.Shielding)
-            {
-                if (time >= shieldTime) State = ActionState.Ready;
-            }
             else if (State == ActionState.UsingSkill)
             {
                 SkillData skill = GetSkill(skillSlot);
-                if (skill == null) { EndSkillFromClip(); return; }
+                if (skill == null)
+                {
+                    if (!skillEffectDone && time >= 0.76f)
+                    {
+                        skillEffectDone = true;
+                        player.ShootArrow(ProjectilePath.Straight, 1f, 1.2f, ArrowEffect.Freeze, 0, 2f);
+                    }
+                    if (time >= 1f) EndSkillFromClip();
+                    return;
+                }
                 if (skill.CancelOnMove && move.WantsMove)
                 {
                     EndSkillFromClip();
@@ -153,6 +154,16 @@ namespace AOG.Duel
         public bool Attack()
         {
             if (!Ready || !player.CanAttack) return false;
+
+            if (player.Gear != null && player.Gear.BowState.specialSkillReady)
+            {
+                if (player.Gear.EquippedBow != null && player.Gear.EquippedBow.Passive is IceShotPassive icePassive)
+                {
+                    player.Gear.BowState.specialSkillReady = false;
+                    return TriggerSpecialSkill(icePassive.IceSkill, icePassive.AnimationTrigger);
+                }
+            }
+
             State = ActionState.AutoAttacking;
             time = 0f;
             normalArrowShown = false;
@@ -166,26 +177,8 @@ namespace AOG.Duel
             return true;
         }
 
-        public bool Dash(float direction)
-        {
-            if (!Ready || !player.CanSkill || dashLeft > 0f) return false;
-            State = ActionState.Dashing;
-            time = 0f;
-            dashLeft = dashTime + dashCooldown;
-            move.Dash(direction, dashSpeed);
-            anim.Trigger("Dash");
-            return true;
-        }
-
-        public bool Shield()
-        {
-            if (!Ready || !player.CanSkill || shieldLeft > 0f) return false;
-            State = ActionState.Shielding;
-            time = 0f;
-            shieldLeft = shieldTime + shieldCooldown;
-            anim.Trigger("Shield");
-            return true;
-        }
+        public bool Dash(float direction) => false;
+        public bool Shield() => false;
 
         public bool Skill(int slot, float direction)
         {
@@ -229,6 +222,50 @@ namespace AOG.Duel
             return true;
         }
 
+        public bool TriggerSpecialSkill(SkillData skill, string fallbackTrigger = "Low", float direction = 0f)
+        {
+            if (!player.Alive) return false;
+
+            if (State == ActionState.AutoAttacking) CancelAttack();
+            State = ActionState.UsingSkill;
+            time = 0f;
+            specialSkill = skill;
+            skillSlot = -1;
+            skillDirection = Mathf.Sign(direction == 0f ? player.Face : direction);
+            skillEffectDone = false;
+            skillVisualShown = false;
+
+            move.Lock(true);
+            move.Stop();
+            anim.Face(player.Face);
+
+            if (skill != null)
+            {
+                SkillCtx context = CurrentSkillContext();
+                skill.Begin(context);
+                if (skill.ShowVisualTime == 0f)
+                {
+                    skillVisualShown = true;
+                    skill.ShowVisual(context);
+                }
+
+                if (string.IsNullOrWhiteSpace(skill.AnimationTrigger))
+                {
+                    UseSkillFromClip();
+                    EndSkillFromClip();
+                }
+                else
+                {
+                    anim.Trigger(skill.AnimationTrigger);
+                }
+            }
+            else
+            {
+                anim.Trigger(fallbackTrigger);
+            }
+            return true;
+        }
+
         public void UseSkillFromClip()
         {
             if (State != ActionState.UsingSkill) return;
@@ -245,13 +282,14 @@ namespace AOG.Duel
             move.Stop();
             move.Lock(false);
             skillSlot = -1;
+            specialSkill = null;
             State = ActionState.Ready;
             anim.EndSkillAnimation();
         }
 
         public void StartPassives()
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < skills.Length; i++)
             {
                 SkillData skill = GetSkill(i);
                 if (skill != null && skill.Passive)
@@ -261,7 +299,7 @@ namespace AOG.Duel
 
         public void ResetSkillCooldown(int slot)
         {
-            if (slot >= 0 && slot < 4) skillLeft[slot] = 0f;
+            if (slot >= 0 && slot < skillLeft.Length) skillLeft[slot] = 0f;
         }
 
         public void CancelAttack()
@@ -273,20 +311,21 @@ namespace AOG.Duel
 
         public void Stun(float seconds) => stats.Stun(seconds);
         public void Silence(float seconds) => stats.Silence(seconds);
-        public void Die() { player.HideHeldArrows(); EndCurrentSkill(); skillSlot = -1; State = ActionState.Dead; move.Lock(true); move.Stop(); anim.Trigger("Die"); }
-        public void Stop() { if (State != ActionState.Dead) { player.HideHeldArrows(); EndCurrentSkill(); State = ActionState.Ready; skillSlot = -1; move.Lock(false); move.Stop(); } }
+        public void Die() { player.HideHeldArrows(); EndCurrentSkill(); skillSlot = -1; specialSkill = null; State = ActionState.Dead; move.Lock(true); move.Stop(); anim.Trigger("Die"); }
+        public void Stop() { if (State != ActionState.Dead) { player.HideHeldArrows(); EndCurrentSkill(); State = ActionState.Ready; skillSlot = -1; specialSkill = null; move.Lock(false); move.Stop(); } }
         public void ResetAction()
         {
             player.HideHeldArrows();
             State = ActionState.Ready;
-            time = dashLeft = shieldLeft = 0f;
+            time = 0f;
             skillSlot = -1;
+            specialSkill = null;
             skillDirection = 1f;
             normalArrowShown = false;
             normalArrowFired = false;
             skillEffectDone = false;
             skillVisualShown = false;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < skills.Length; i++)
             {
                 SkillData skill = GetSkill(i);
                 skillLeft[i] = skill != null && !skill.Passive ? skill.Cooldown : 0f;
@@ -295,15 +334,26 @@ namespace AOG.Duel
         }
         public SkillData GetSkill(int slot)
         {
-            if (slot < 0 || slot > 3) return null;
+            if (specialSkill != null) return specialSkill;
+            if (slot < 0 || slot >= skills.Length) return null;
             return loadout != null ? loadout.GetSkill(slot) : skills[slot];
         }
-        public float GetSkillCooldownRemaining(int slot) => slot >= 0 && slot < 4 ? skillLeft[slot] : 0f;
+        public SkillData GetEquippedSkill(int slot)
+        {
+            if (slot < 0 || slot >= skills.Length) return null;
+            return loadout != null ? loadout.GetSkill(slot) : skills[slot];
+        }
+        public float GetSkillCooldownRemaining(int slot) => slot >= 0 && slot < skillLeft.Length ? skillLeft[slot] : 0f;
 
         private SkillCtx CurrentSkillContext() => new SkillCtx(player, player.Enemy, skillSlot, skillDirection);
 
         private void EndCurrentSkill()
         {
+            if (specialSkill != null)
+            {
+                specialSkill.End(CurrentSkillContext());
+                return;
+            }
             if (skillSlot < 0) return;
             GetSkill(skillSlot)?.End(CurrentSkillContext());
         }

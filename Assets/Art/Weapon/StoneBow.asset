@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c97008a94119bd34aad36c9d4614096b, type: 3}
   m_Name: StoneBow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
-  bowId: bow_basic
-  displayName: Basic Bow
+  bowId: bow_stone
+  displayName: Stone Bow
   icon: {fileID: 0}
   bowSprite: {fileID: -1296967589664866828, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   arrowSprite: {fileID: -7663145071650704565, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
-  damage: 10
-  attackSpeedMultiplier: 1
+  damage: 12
+  attackSpeedMultiplier: 0.8
+  passive: {fileID: 11400000, guid: 0c46ef7cea664221a58fddfbf553e1ce, type: 2}

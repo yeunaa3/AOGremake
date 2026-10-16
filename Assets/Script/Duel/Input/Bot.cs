@@ -37,13 +37,12 @@ namespace AOG.Duel
                 return;
             }
 
-            int action = Random.Range(0, 6);
-            pendingCommand.DashPressed = action == 0;
-            pendingCommand.ShieldPressed = action == 1;
-            pendingCommand.Skill1Pressed = action == 2;
-            pendingCommand.Skill2Pressed = action == 3;
-            pendingCommand.Skill3Pressed = action == 4;
-            pendingCommand.Skill4Pressed = action == 5;
+            int action = Random.Range(0, 5);
+            pendingCommand.Skill1Pressed = action == 0;
+            pendingCommand.Skill2Pressed = action == 1;
+            pendingCommand.Skill3Pressed = action == 2;
+            pendingCommand.Skill4Pressed = action == 3;
+            pendingCommand.Skill5Pressed = action == 4;
         }
     }
 }

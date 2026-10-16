@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c97008a94119bd34aad36c9d4614096b, type: 3}
+  m_Name: IceBow
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
+  bowId: bow_ice
+  displayName: Ice Bow
+  icon: {fileID: 0}
+  bowSprite: {fileID: -9145116389740409384, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  arrowSprite: {fileID: 507831392600367878, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  damage: 10
+  attackSpeedMultiplier: 1
+  passive: {fileID: 11400000, guid: a041cf0aa8104897b13dc76c36099f02, type: 2}

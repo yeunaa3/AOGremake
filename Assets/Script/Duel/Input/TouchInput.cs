@@ -6,14 +6,12 @@ namespace AOG.Duel
     {
         private bool leftHeld;
         private bool rightHeld;
-        private bool dashPressed;
-        private bool shieldPressed;
-        private readonly bool[] skillPressed = new bool[4];
+        private readonly bool[] skillPressed = new bool[5];
 
         public void SetLeftHeld(bool held) => leftHeld = held;
         public void SetRightHeld(bool held) => rightHeld = held;
-        public void PressDash() => dashPressed = true;
-        public void PressShield() => shieldPressed = true;
+        public void PressDash() { }
+        public void PressShield() { }
 
         public void PressSkill(int slot)
         {
@@ -28,16 +26,15 @@ namespace AOG.Duel
             var command = new InputCmd
             {
                 Move = (rightHeld ? 1f : 0f) - (leftHeld ? 1f : 0f),
-                DashPressed = dashPressed,
-                ShieldPressed = shieldPressed,
+                DashPressed = false,
+                ShieldPressed = false,
                 Skill1Pressed = skillPressed[0],
                 Skill2Pressed = skillPressed[1],
                 Skill3Pressed = skillPressed[2],
-                Skill4Pressed = skillPressed[3]
+                Skill4Pressed = skillPressed[3],
+                Skill5Pressed = skillPressed[4]
             };
 
-            dashPressed = false;
-            shieldPressed = false;
             for (int i = 0; i < skillPressed.Length; i++)
             {
                 skillPressed[i] = false;

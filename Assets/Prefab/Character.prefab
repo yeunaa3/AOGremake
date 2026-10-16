@@ -1282,7 +1282,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 3.6
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 512f45812b194f4a9b49b38029517fa2, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1341,6 +1341,7 @@ MonoBehaviour:
   shieldCooldown: 4
   loadout: {fileID: 11400000, guid: 5f8063d25c5750a4a8725e46ffb8c3d4, type: 2}
   skills:
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -1415,6 +1416,7 @@ MonoBehaviour:
   skill2: 42
   skill3: 43
   skill4: 44
+  skill5: 45
 --- !u!114 &2826237251451615008
 MonoBehaviour:
   m_ObjectHideFlags: 0

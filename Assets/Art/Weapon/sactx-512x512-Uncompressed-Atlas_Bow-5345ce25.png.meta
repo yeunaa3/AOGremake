@@ -321,12 +321,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_0
       rect:
         serializedVersion: 2
-        x: 3
-        y: 489
-        width: 63
-        height: 12
+        x: 4
+        y: 490
+        width: 61
+        height: 10
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -343,12 +343,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_1
       rect:
         serializedVersion: 2
-        x: 83
-        y: 489
-        width: 57
-        height: 12
+        x: 84
+        y: 490
+        width: 55
+        height: 10
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -365,13 +365,13 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_2
       rect:
         serializedVersion: 2
-        x: 161
-        y: 479
-        width: 58
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+        x: 235
+        y: 484
+        width: 60
+        height: 16
+      alignment: 9
+      pivot: {x: 0.18340683, y: 0.48650742}
+      border: {x: 0, y: 0, z: 4, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -387,12 +387,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_3
       rect:
         serializedVersion: 2
-        x: 234
-        y: 483
-        width: 60
-        height: 25
+        x: 8
+        y: 474
+        width: 55
+        height: 10
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -409,12 +409,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_4
       rect:
         serializedVersion: 2
-        x: 7
-        y: 473
-        width: 57
-        height: 12
+        x: 81
+        y: 471
+        width: 60
+        height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -431,12 +431,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_5
       rect:
         serializedVersion: 2
-        x: 80
-        y: 470
-        width: 62
-        height: 18
+        x: 162
+        y: 480
+        width: 56
+        height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -453,12 +453,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_6
       rect:
         serializedVersion: 2
-        x: 232
-        y: 470
-        width: 63
-        height: 12
+        x: 233
+        y: 471
+        width: 61
+        height: 10
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -475,12 +475,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_7
       rect:
         serializedVersion: 2
-        x: 317
-        y: 451
-        width: 60
-        height: 25
+        x: 8
+        y: 459
+        width: 58
+        height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -497,12 +497,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_8
       rect:
         serializedVersion: 2
-        x: 7
-        y: 458
-        width: 60
-        height: 10
+        x: 71
+        y: 434
+        width: 74
+        height: 18
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -519,12 +519,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_9
       rect:
         serializedVersion: 2
-        x: 60
-        y: 423
-        width: 96
-        height: 49
+        x: 162
+        y: 465
+        width: 53
+        height: 6
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -541,13 +541,13 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_10
       rect:
         serializedVersion: 2
-        x: 161
-        y: 464
-        width: 55
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+        x: 238
+        y: 452
+        width: 62
+        height: 16
+      alignment: 9
+      pivot: {x: 0.16479813, y: 0.5000019}
+      border: {x: 0, y: 0, z: 3, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -563,13 +563,13 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_11
       rect:
         serializedVersion: 2
-        x: 237
-        y: 451
-        width: 64
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+        x: 318
+        y: 454
+        width: 58
+        height: 12
+      alignment: 9
+      pivot: {x: 0.17993322, y: 0.4820099}
+      border: {x: 0, y: 0, z: 2, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -585,12 +585,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_12
       rect:
         serializedVersion: 2
-        x: 1
-        y: 348
-        width: 32
-        height: 100
+        x: 2
+        y: 349
+        width: 30
+        height: 98
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -607,12 +607,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_13
       rect:
         serializedVersion: 2
-        x: 186
-        y: 418
-        width: 44
-        height: 39
+        x: 187
+        y: 419
+        width: 42
+        height: 37
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -629,12 +629,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_14
       rect:
         serializedVersion: 2
-        x: 242
-        y: 439
-        width: 57
-        height: 10
+        x: 243
+        y: 440
+        width: 55
+        height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -651,13 +651,13 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_15
       rect:
         serializedVersion: 2
-        x: 320
-        y: 438
-        width: 57
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+        x: 321
+        y: 439
+        width: 55
+        height: 10
+      alignment: 9
+      pivot: {x: 0.18328246, y: 0.4604126}
+      border: {x: 0, y: 0, z: 2, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -673,12 +673,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_16
       rect:
         serializedVersion: 2
-        x: 39
-        y: 349
-        width: 26
-        height: 86
+        x: 40
+        y: 350
+        width: 24
+        height: 84
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -695,12 +695,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_17
       rect:
         serializedVersion: 2
-        x: 122
-        y: 342
-        width: 26
-        height: 86
+        x: 123
+        y: 343
+        width: 24
+        height: 84
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -717,12 +717,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_18
       rect:
         serializedVersion: 2
-        x: 154
-        y: 342
-        width: 27
-        height: 82
+        x: 301
+        y: 424
+        width: 60
+        height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -739,12 +739,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_19
       rect:
         serializedVersion: 2
-        x: 300
-        y: 423
-        width: 62
-        height: 10
+        x: 155
+        y: 343
+        width: 25
+        height: 80
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -761,12 +761,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_20
       rect:
         serializedVersion: 2
-        x: 187
-        y: 336
-        width: 27
-        height: 76
+        x: 188
+        y: 337
+        width: 25
+        height: 74
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -783,12 +783,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_21
       rect:
         serializedVersion: 2
-        x: 263
-        y: 319
-        width: 27
-        height: 100
+        x: 264
+        y: 320
+        width: 25
+        height: 98
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -805,12 +805,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_22
       rect:
         serializedVersion: 2
-        x: 301
-        y: 406
-        width: 58
-        height: 12
+        x: 302
+        y: 407
+        width: 56
+        height: 10
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -827,12 +827,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_23
       rect:
         serializedVersion: 2
-        x: 378
-        y: 404
-        width: 60
-        height: 11
+        x: 379
+        y: 405
+        width: 58
+        height: 9
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -849,12 +849,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_24
       rect:
         serializedVersion: 2
-        x: 302
-        y: 392
-        width: 57
-        height: 8
+        x: 303
+        y: 393
+        width: 55
+        height: 6
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -871,13 +871,13 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_25
       rect:
         serializedVersion: 2
-        x: 375
-        y: 385
-        width: 61
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+        x: 376
+        y: 386
+        width: 59
+        height: 16
+      alignment: 9
+      pivot: {x: 0.17479847, y: 0.52262497}
+      border: {x: 0, y: 0, z: 2, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -893,12 +893,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_26
       rect:
         serializedVersion: 2
-        x: 296
-        y: 358
-        width: 33
-        height: 27
+        x: 297
+        y: 330
+        width: 32
+        height: 54
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -915,12 +915,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_27
       rect:
         serializedVersion: 2
-        x: 340
-        y: 373
-        width: 61
-        height: 10
+        x: 341
+        y: 374
+        width: 59
+        height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -934,59 +934,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_28
-      rect:
-        serializedVersion: 2
-        x: 296
-        y: 329
-        width: 33
-        height: 27
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b7fc1de0bcdc44160800000000000000
-      internalID: 7008953192106020731
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_29
-      rect:
-        serializedVersion: 2
-        x: 300
-        y: 346
-        width: 11
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bf99aa244c77b3ca0800000000000000
-      internalID: -6036099190744245765
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_30
       rect:
         serializedVersion: 2
-        x: 344
-        y: 353
-        width: 56
-        height: 18
+        x: 345
+        y: 354
+        width: 54
+        height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1003,13 +959,13 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_31
       rect:
         serializedVersion: 2
-        x: 416
-        y: 350
-        width: 60
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+        x: 417
+        y: 351
+        width: 58
+        height: 9
+      alignment: 9
+      pivot: {x: 0.18624142, y: 0.5}
+      border: {x: 0, y: 0, z: 2, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -1025,12 +981,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_32
       rect:
         serializedVersion: 2
-        x: 1
-        y: 244
-        width: 36
-        height: 100
+        x: 2
+        y: 245
+        width: 34
+        height: 98
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1047,12 +1003,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_33
       rect:
         serializedVersion: 2
-        x: 43
-        y: 245
-        width: 36
-        height: 102
+        x: 44
+        y: 246
+        width: 34
+        height: 100
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1069,12 +1025,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_34
       rect:
         serializedVersion: 2
-        x: 228
-        y: 235
+        x: 229
+        y: 236
         width: 29
-        height: 113
+        height: 102
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1091,13 +1047,13 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_35
       rect:
         serializedVersion: 2
-        x: 339
-        y: 341
-        width: 62
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+        x: 340
+        y: 342
+        width: 60
+        height: 9
+      alignment: 9
+      pivot: {x: 0.15362448, y: 0.4340244}
+      border: {x: 0, y: 0, z: 3, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -1113,12 +1069,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_36
       rect:
         serializedVersion: 2
-        x: 416
-        y: 335
-        width: 61
-        height: 10
+        x: 417
+        y: 336
+        width: 59
+        height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1135,12 +1091,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_37
       rect:
         serializedVersion: 2
-        x: 85
-        y: 245
-        width: 32
-        height: 92
+        x: 86
+        y: 246
+        width: 30
+        height: 90
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1157,12 +1113,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_38
       rect:
         serializedVersion: 2
-        x: 122
-        y: 246
-        width: 31
-        height: 90
+        x: 123
+        y: 247
+        width: 29
+        height: 88
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1179,12 +1135,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_39
       rect:
         serializedVersion: 2
-        x: 188
-        y: 239
-        width: 34
-        height: 91
+        x: 189
+        y: 240
+        width: 32
+        height: 89
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1201,12 +1157,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_40
       rect:
         serializedVersion: 2
-        x: 301
-        y: 237
-        width: 32
-        height: 86
+        x: 302
+        y: 238
+        width: 30
+        height: 84
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1223,12 +1179,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_41
       rect:
         serializedVersion: 2
-        x: 339
-        y: 236
-        width: 27
-        height: 100
+        x: 340
+        y: 237
+        width: 25
+        height: 98
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1245,12 +1201,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_42
       rect:
         serializedVersion: 2
-        x: 372
-        y: 239
-        width: 29
-        height: 82
+        x: 373
+        y: 240
+        width: 27
+        height: 80
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1267,12 +1223,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_43
       rect:
         serializedVersion: 2
-        x: 410
-        y: 315
-        width: 65
-        height: 18
+        x: 411
+        y: 316
+        width: 63
+        height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1289,12 +1245,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_44
       rect:
         serializedVersion: 2
-        x: 263
-        y: 228
-        width: 32
-        height: 86
+        x: 264
+        y: 229
+        width: 30
+        height: 84
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1311,13 +1267,13 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_45
       rect:
         serializedVersion: 2
-        x: 415
-        y: 303
-        width: 57
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+        x: 416
+        y: 304
+        width: 55
+        height: 9
+      alignment: 9
+      pivot: {x: 0.18981823, y: 0.48740304}
+      border: {x: 0, y: 0, z: 2, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -1333,12 +1289,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_46
       rect:
         serializedVersion: 2
-        x: 411
-        y: 287
-        width: 62
-        height: 10
+        x: 412
+        y: 288
+        width: 60
+        height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1355,12 +1311,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_47
       rect:
         serializedVersion: 2
-        x: 411
-        y: 271
-        width: 61
-        height: 10
+        x: 412
+        y: 272
+        width: 59
+        height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1377,12 +1333,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_48
       rect:
         serializedVersion: 2
-        x: 409
-        y: 251
-        width: 62
-        height: 18
+        x: 410
+        y: 252
+        width: 60
+        height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1399,12 +1355,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_49
       rect:
         serializedVersion: 2
-        x: 1
-        y: 143
-        width: 46
-        height: 96
+        x: 147
+        y: 144
+        width: 34
+        height: 105
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1421,12 +1377,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_50
       rect:
         serializedVersion: 2
-        x: 49
-        y: 143
-        width: 48
-        height: 95
+        x: 414
+        y: 239
+        width: 55
+        height: 10
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1443,12 +1399,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_51
       rect:
         serializedVersion: 2
-        x: 103
-        y: 143
-        width: 41
-        height: 96
+        x: 2
+        y: 144
+        width: 44
+        height: 94
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1465,12 +1421,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_52
       rect:
         serializedVersion: 2
-        x: 146
-        y: 143
-        width: 36
-        height: 107
+        x: 50
+        y: 144
+        width: 46
+        height: 93
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1487,12 +1443,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_53
       rect:
         serializedVersion: 2
-        x: 413
-        y: 238
-        width: 57
-        height: 12
+        x: 104
+        y: 144
+        width: 39
+        height: 94
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1509,12 +1465,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_54
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 92
-        height: 138
+        x: 194
+        y: 136
+        width: 60
+        height: 97
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1531,12 +1487,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_55
       rect:
         serializedVersion: 2
-        x: 96
-        y: 1
-        width: 92
-        height: 137
+        x: 262
+        y: 136
+        width: 60
+        height: 85
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1553,12 +1509,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_56
       rect:
         serializedVersion: 2
-        x: 193
-        y: 135
-        width: 62
-        height: 99
+        x: 330
+        y: 136
+        width: 52
+        height: 94
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1575,12 +1531,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_57
       rect:
         serializedVersion: 2
-        x: 261
-        y: 135
-        width: 62
-        height: 87
+        x: 390
+        y: 132
+        width: 44
+        height: 104
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1597,12 +1553,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_58
       rect:
         serializedVersion: 2
-        x: 329
+        x: 442
         y: 135
-        width: 54
-        height: 96
+        width: 37
+        height: 95
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1619,12 +1575,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_59
       rect:
         serializedVersion: 2
-        x: 389
-        y: 131
-        width: 46
-        height: 106
+        x: 1
+        y: 1
+        width: 90
+        height: 136
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1641,12 +1597,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_60
       rect:
         serializedVersion: 2
-        x: 441
-        y: 134
-        width: 39
-        height: 97
+        x: 97
+        y: 2
+        width: 90
+        height: 135
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1663,12 +1619,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_61
       rect:
         serializedVersion: 2
-        x: 193
-        y: 1
-        width: 84
-        height: 128
+        x: 194
+        y: 2
+        width: 82
+        height: 126
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1685,12 +1641,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_62
       rect:
         serializedVersion: 2
-        x: 283
-        y: 1
-        width: 84
-        height: 128
+        x: 284
+        y: 2
+        width: 82
+        height: 126
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1707,12 +1663,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_63
       rect:
         serializedVersion: 2
-        x: 373
-        y: 1
-        width: 84
-        height: 128
+        x: 374
+        y: 2
+        width: 82
+        height: 126
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1729,12 +1685,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_64
       rect:
         serializedVersion: 2
-        x: 463
-        y: 0
-        width: 45
-        height: 100
+        x: 464
+        y: 1
+        width: 43
+        height: 98
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1747,11 +1703,33 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_65
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 455
+        width: 76
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 398d999e914cf9945baaf93de2499a84
+      internalID: -760035607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 3ccaf9ef3006c8c4cb9554853ecca919
     internalID: 0
     vertices: []
     indices: 
@@ -1759,7 +1737,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":1,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_0: 6569630779224905185
       sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_1: 2112582966018898501
@@ -1823,6 +1803,7 @@ TextureImporter:
       sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_62: -4444224961565705909
       sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_63: 3882624521978032223
       sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_64: -9145116389740409384
+      sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_65: -760035607
       sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_7: -4926768651289010064
       sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_8: -8718748718634993904
       sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_9: 2007438849850422819

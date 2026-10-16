@@ -16,6 +16,7 @@ namespace AOG.Duel
         [SerializeField] private int team;
         private InputSource[] inputs;
         private PlayerStats stats;
+        private Gear gear;
         private PlayerMove move;
         private PlayerAction action;
         private AutoShoot autoShoot;
@@ -47,8 +48,10 @@ namespace AOG.Duel
         public int Team => team;
         public PlayerController Enemy { get; private set; }
         public PlayerStats Stats => stats;
+        public Gear Gear => gear;
         public PlayerAction Action => action;
         public PlayerAnim Anim => anim;
+        public ArrowPool Pool => pool;
         public bool Alive => playing && stats.Alive;
         public bool CanMove => Alive && stats.CanMove;
         public bool CanAttack => Alive && stats.CanAttack;
@@ -58,11 +61,13 @@ namespace AOG.Duel
         public bool IsAirborne => move.IsAirborne;
         public Transform BodyEffectPoint { get; private set; }
         public Transform BowEffectPoint { get; private set; }
+        public Transform ArrowSpawnPoint => arrowSpawnPoint;
 
         private void Awake()
         {
             inputs = GetComponents<InputSource>();
             stats = GetComponent<PlayerStats>();
+            gear = GetComponent<Gear>();
             move = GetComponent<PlayerMove>();
             action = GetComponent<PlayerAction>();
             autoShoot = GetComponent<AutoShoot>();
@@ -96,12 +101,11 @@ namespace AOG.Duel
                 if (source == null || !source.isActiveAndEnabled) continue;
                 InputCmd next = source.ReadCommand();
                 if (Mathf.Abs(next.Move) > Mathf.Abs(cmd.Move)) cmd.Move = next.Move;
-                cmd.DashPressed |= next.DashPressed;
-                cmd.ShieldPressed |= next.ShieldPressed;
                 cmd.Skill1Pressed |= next.Skill1Pressed;
                 cmd.Skill2Pressed |= next.Skill2Pressed;
                 cmd.Skill3Pressed |= next.Skill3Pressed;
                 cmd.Skill4Pressed |= next.Skill4Pressed;
+                cmd.Skill5Pressed |= next.Skill5Pressed;
             }
             bool usingSkill = action.State == ActionState.UsingSkill;
             float direction = CanMove && !usingSkill ? cmd.Move : 0f;
@@ -113,8 +117,6 @@ namespace AOG.Duel
                 stats.Silenced, action.ShieldOn, stats.ClipSpeed);
 
             if (!CanSkill) return;
-            if (cmd.DashPressed) { action.Dash(direction == 0f ? Face : direction); return; }
-            if (cmd.ShieldPressed) { action.Shield(); return; }
             if (cmd.TryGetSkillSlot(out int slot)) action.Skill(slot, direction == 0f ? Face : direction);
         }
 
@@ -134,6 +136,7 @@ namespace AOG.Duel
             poweredArrowCount = 0;
             arrowBuff = null;
             arrowBuffSkillSlot = -1;
+            gear?.ResetState();
         }
 
         public void Play(bool on)
@@ -316,6 +319,7 @@ namespace AOG.Duel
                         data.effectPower, data.effectDuration,
                         shotResetCooldownSlot: -1,
                         shotGroundLifetime: data.groundDuration);
+                    gear?.TriggerOnShoot(projectile, true);
                 }
                 return;
             }
@@ -400,7 +404,7 @@ namespace AOG.Duel
         private bool Fire(Vector2 start, Vector2 target, ProjectilePath path, float arc,
             int damage, Sprite sprite, float speedMultiplier, ArrowEffect effect,
             int effectPower, float effectDuration, float lifeSteal,
-            GameObject worldEffect, int resetCooldownSlot)
+            GameObject worldEffect, int resetCooldownSlot, bool isSecondaryShot = false)
         {
             Arrow arrow = pool == null ? null : pool.Spawn();
             if (arrow == null || sprite == null) return false;
@@ -408,7 +412,21 @@ namespace AOG.Duel
             arrow.Launch(this, start, target, path, arc, damage, sprite, speedMultiplier,
                 effect, effectPower, effectDuration, lifeSteal, worldEffect, resetCooldownSlot);
             PlayBowShotEffect();
+            gear?.TriggerOnShoot(arrow, isSecondaryShot);
             return true;
+        }
+
+        public void FireFollowupShot(float delay)
+        {
+            StartCoroutine(RoutineFollowupShot(delay));
+        }
+
+        private IEnumerator RoutineFollowupShot(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (!Alive || Enemy == null || arrowSpawnPoint == null || stats.ArrowSprite == null) yield break;
+            Fire(arrowSpawnPoint.position, Enemy.Aim, ProjectilePath.NormalArc, 0f,
+                stats.Damage, stats.ArrowSprite, 1f, ArrowEffect.None, 0, 0f, 0f, null, -1, true);
         }
 
         private void PlayBowShotEffect()

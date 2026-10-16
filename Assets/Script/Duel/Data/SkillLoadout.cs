@@ -6,7 +6,7 @@ namespace AOG.Duel
     [CreateAssetMenu(menuName = "AOG/Duel/Skill Loadout", fileName = "PlayerSkillLoadout")]
     public sealed class SkillLoadout : ScriptableObject
     {
-        [SerializeField] private SkillData[] skills = new SkillData[4];
+        [SerializeField] private SkillData[] skills = new SkillData[5];
 
         public SkillData GetSkill(int slot)
         {
@@ -20,7 +20,7 @@ namespace AOG.Duel
 
         private void OnValidate()
         {
-            if (skills == null || skills.Length != 4) Array.Resize(ref skills, 4);
+            if (skills == null || skills.Length != 5) Array.Resize(ref skills, 5);
         }
     }
 }

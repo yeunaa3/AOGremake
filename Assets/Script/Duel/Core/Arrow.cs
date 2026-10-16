@@ -101,9 +101,30 @@ namespace AOG.Duel
         private readonly RaycastHit2D[] groundProbe = new RaycastHit2D[1];
         private ParticleSystem activeTrail;
         private Action<Arrow> returnToPool;
+        private Vector3 initialScale = Vector3.one;
+
+        public Action<Arrow, float> OnFlightUpdate;
+        public PlayerController Owner => owner;
+        public int Damage { get => damage; set => damage = Mathf.Max(0, value); }
+        public float ShotSpeedMultiplier { get => shotSpeedMultiplier; set => shotSpeedMultiplier = Mathf.Max(0.01f, value); }
+        public float LifeSteal { get => lifeSteal; set => lifeSteal = Mathf.Clamp01(value); }
+        public float ActiveGroundLifetime { get => activeGroundLifetime; set => activeGroundLifetime = value; }
+        public ArrowEffect Effect => effect;
+        public bool IsFlying => flying;
+        public bool IsStuckInGround => stuckInGround;
+        public Vector2 StartPoint => startPoint;
+        public Vector2 EndPoint => endPoint;
+        public ProjectilePath Path => path;
+        public Sprite ArrowSprite => visual != null ? visual.sprite : null;
+        public ArrowEffect ArrowEffectType => effect;
+        public int EffectPower => effectPower;
+        public float EffectDuration => effectDuration;
+        public GameObject WorldEffectPrefab => worldEffectPrefab;
+        public int ResetCooldownSlot => resetCooldownSlot;
 
         private void Awake()
         {
+            initialScale = transform.localScale;
             body = GetComponent<Rigidbody2D>();
             hitbox = GetComponent<Collider2D>();
             visual = GetComponentInChildren<SpriteRenderer>(true);
@@ -136,6 +157,8 @@ namespace AOG.Duel
                 if (groundTime >= activeGroundLifetime) Despawn();
                 return;
             }
+
+            OnFlightUpdate?.Invoke(this, Time.fixedDeltaTime);
 
             lifetime += Time.fixedDeltaTime;
             if (lifetime >= maximumLifetime)
@@ -305,6 +328,8 @@ namespace AOG.Duel
             shotSpeedMultiplier = 1f;
             worldEffectPrefab = null;
             worldEffectCreated = false;
+            transform.localScale = initialScale;
+            OnFlightUpdate = null;
             FinishTrail();
             StopFlightEffect();
             returnToPool = null;
@@ -438,6 +463,10 @@ namespace AOG.Duel
             if (dealt > 0 && resetCooldownSlot >= 0) owner.Action.ResetSkillCooldown(resetCooldownSlot);
             SpawnBloodEffect(target);
             CreateImpactEffects(contact, target);
+            if (owner != null && owner.Gear != null)
+            {
+                owner.Gear.TriggerOnArrowHit(this, target, dealt);
+            }
             Despawn();
         }
 
@@ -543,6 +572,50 @@ namespace AOG.Duel
             GameObject created = Instantiate(worldEffectPrefab, position, Quaternion.identity);
             AreaEffect area = created.GetComponent<AreaEffect>();
             if (area != null) area.Setup(owner);
+        }
+
+        public void ConvertToFreezeShot(float duration, float speedMultiplier = 1f)
+        {
+            effect = ArrowEffect.Freeze;
+            effectDuration = Mathf.Max(0.1f, duration);
+            path = ProjectilePath.Straight;
+            shotSpeedMultiplier *= Mathf.Max(0.1f, speedMultiplier);
+            if (owner != null && owner.Enemy != null)
+            {
+                straightDirection = (owner.Enemy.Aim - (Vector2)transform.position).normalized;
+                if (rotateAlongPath && straightDirection.sqrMagnitude > .000001f)
+                {
+                    float angle = Mathf.Atan2(straightDirection.y, straightDirection.x) * Mathf.Rad2Deg;
+                    body.SetRotation(angle);
+                    transform.rotation = Quaternion.Euler(0f, 0f, angle);
+                }
+            }
+            StartTrail(ArrowEffect.Freeze);
+        }
+
+        public void RedirectStraight(Vector2 target, float speedMultiplier = 1f)
+        {
+            if (!gameObject.activeInHierarchy) return;
+            flying = true;
+            stuckInGround = false;
+            groundTime = 0f;
+            lifetime = 0f;
+            if (visual != null)
+            {
+                Color color = normalColor;
+                color.a = 1f;
+                visual.color = color;
+            }
+            if (hitbox != null) hitbox.enabled = true;
+            path = ProjectilePath.Straight;
+            straightDirection = (target - (Vector2)transform.position).normalized;
+            shotSpeedMultiplier *= Mathf.Max(0.1f, speedMultiplier);
+            if (rotateAlongPath && straightDirection.sqrMagnitude > .000001f)
+            {
+                float angle = Mathf.Atan2(straightDirection.y, straightDirection.x) * Mathf.Rad2Deg;
+                body.SetRotation(angle);
+                transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            }
         }
 
         private void Despawn()

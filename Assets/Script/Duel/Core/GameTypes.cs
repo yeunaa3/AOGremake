@@ -50,6 +50,7 @@ namespace AOG.Duel
         public bool Skill2Pressed;
         public bool Skill3Pressed;
         public bool Skill4Pressed;
+        public bool Skill5Pressed;
 
         public bool TryGetSkillSlot(out int slot)
         {
@@ -57,6 +58,7 @@ namespace AOG.Duel
             if (Skill2Pressed) { slot = 1; return true; }
             if (Skill3Pressed) { slot = 2; return true; }
             if (Skill4Pressed) { slot = 3; return true; }
+            if (Skill5Pressed) { slot = 4; return true; }
 
             slot = -1;
             return false;

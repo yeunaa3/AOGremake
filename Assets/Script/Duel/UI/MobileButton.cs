@@ -13,7 +13,8 @@ namespace AOG.Duel
         Skill1,
         Skill2,
         Skill3,
-        Skill4
+        Skill4,
+        Skill5
     }
 
     public sealed class MobileButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
@@ -36,27 +37,28 @@ namespace AOG.Duel
             button = GetComponent<Button>();
             normalScale = transform.localScale;
             if (keyboardInput == null && input != null) keyboardInput = input.GetComponent<KeyInput>();
+            if (keyboardInput == null) keyboardInput = FindAnyObjectByType<KeyInput>();
+            if (input == null) input = FindAnyObjectByType<TouchInput>();
         }
 
         private bool CanPress => button == null || button.IsInteractable();
 
         private void LateUpdate()
         {
-            bool held = keyboardInput != null && keyboardInput.IsHeld(action);
-            if (held && !keyWasHeld && CanPress) keyboardPressed = true;
-            if (!held) keyboardPressed = false;
-            keyWasHeld = held;
-            Vector3 target = normalScale * (pointerHeld || keyboardPressed ? pressedScale : 1f);
+            bool keyboardHeld = keyboardInput != null && keyboardInput.IsHeld(action);
+            bool isPressed = pointerHeld || keyboardHeld;
+            Vector3 target = normalScale * (isPressed ? pressedScale : 1f);
             transform.localScale = Vector3.Lerp(transform.localScale, target,
                 1f - Mathf.Exp(-pressSpeed * Time.unscaledDeltaTime));
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (eventData.button != PointerEventData.InputButton.Left || !CanPress || pointerHeld) return;
+            if (eventData.button != PointerEventData.InputButton.Left || pointerHeld) return;
             pointerHeld = true;
             heldPointerId = eventData.pointerId;
-            if (input == null) return;
+
+            if (!CanPress || input == null) return;
 
             switch (action)
             {
@@ -68,6 +70,7 @@ namespace AOG.Duel
                 case MobileAction.Skill2: input.PressSkill(1); break;
                 case MobileAction.Skill3: input.PressSkill(2); break;
                 case MobileAction.Skill4: input.PressSkill(3); break;
+                case MobileAction.Skill5: input.PressSkill(4); break;
             }
         }
 
@@ -87,7 +90,7 @@ namespace AOG.Duel
 
         private void OnDisable()
         {
-            pointerHeld = keyboardPressed = keyWasHeld = false;
+            pointerHeld = false;
             ReleaseMovement();
             transform.localScale = normalScale;
         }
@@ -95,7 +98,7 @@ namespace AOG.Duel
         private void OnApplicationFocus(bool focused)
         {
             if (focused) return;
-            pointerHeld = keyboardPressed = keyWasHeld = false;
+            pointerHeld = false;
             ReleaseMovement();
             transform.localScale = normalScale;
         }
