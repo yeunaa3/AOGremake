@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace AOG.Duel
 {
@@ -59,6 +61,19 @@ namespace AOG.Duel
             if (winner == null) resultText.text = "HÒA";
             else if (winner == localPlayer) resultText.text = "CHIẾN THẮNG";
             else resultText.text = "THẤT BẠI";
+        }
+
+        private void Update()
+        {
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                ReturnToMenu();
+            }
+        }
+
+        public void ReturnToMenu()
+        {
+            SceneManager.LoadScene("Menu");
         }
     }
 }

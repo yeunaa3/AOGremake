@@ -28,6 +28,8 @@ namespace AOG.Duel
         private Coroutine countdownRoutine;
 
         public GameState State { get; private set; } = GameState.Waiting;
+        public PlayerController PlayerOne => playerOne;
+        public PlayerController PlayerTwo => playerTwo;
         public float CountdownRemaining { get; private set; }
         public float MatchTimeRemaining { get; private set; }
         public PlayerController Winner { get; private set; }
@@ -164,6 +166,12 @@ namespace AOG.Duel
             playerHealthBar?.Bind(playerOne != null ? playerOne.GetComponent<PlayerStats>() : null);
             enemyHealthBar?.Bind(playerTwo != null ? playerTwo.GetComponent<PlayerStats>() : null);
             if (playerOne == null || playerTwo == null) return;
+
+            if (PlayerLoadoutManager.Instance != null)
+            {
+                PlayerLoadoutManager.Instance.ApplyToPlayer(playerOne);
+            }
+
             playerOne.Setup(this, playerTwo, 0, projectilePool);
             playerTwo.Setup(this, playerOne, 1, projectilePool);
         }

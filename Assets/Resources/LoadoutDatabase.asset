@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d2cd74f3024b5f9a66354aac7a73cf, type: 3}
+  m_Name: LoadoutDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.LoadoutDatabase
+  bows:
+  - {fileID: 11400000, guid: b502507f0fdb4cf092a08d8a9f1f3003, type: 2}
+  - {fileID: 11400000, guid: b26cb081d75732742a2a524b811df5da, type: 2}
+  - {fileID: 11400000, guid: ec53c1bf3d394d27aee7466a7aff2e9b, type: 2}
+  - {fileID: 11400000, guid: e6e814d8beef4b8e9c13946b4eb53a52, type: 2}
+  - {fileID: 11400000, guid: 07b5b61eae9b43a78567203dbbfd4b66, type: 2}
+  - {fileID: 11400000, guid: e19f29bfa0b296e42a9e7c8668f28b6b, type: 2}
+  - {fileID: 11400000, guid: ffd86a174dc848d2981bf8eb4e7ab9bd, type: 2}
+  skills:
+  - {fileID: 11400000, guid: b7d6c8f9e0a14253c4d5e6f708192a3b, type: 2}
+  - {fileID: 11400000, guid: 8f8ba6490d03f4746adef9a7c18f2e21, type: 2}
+  - {fileID: 11400000, guid: a02ef8173eb718b42b1bf59024826c63, type: 2}
+  - {fileID: 11400000, guid: 2c42c8bf3b1d4a5ca7c30bea99f1f6b9, type: 2}
+  - {fileID: 11400000, guid: b8bb2dff14b547a38582b4210759ff31, type: 2}
+  - {fileID: 11400000, guid: e2c996d7461a4015ba3a2bfcf688e98b, type: 2}
+  - {fileID: 11400000, guid: a5958571e6a0cbf4e92de846b24c7600, type: 2}
+  defaultBow: {fileID: 11400000, guid: b502507f0fdb4cf092a08d8a9f1f3003, type: 2}
+  defaultSkills:
+  - {fileID: 11400000, guid: b7d6c8f9e0a14253c4d5e6f708192a3b, type: 2}
+  - {fileID: 11400000, guid: 8f8ba6490d03f4746adef9a7c18f2e21, type: 2}
+  - {fileID: 11400000, guid: a02ef8173eb718b42b1bf59024826c63, type: 2}
+  - {fileID: 11400000, guid: 2c42c8bf3b1d4a5ca7c30bea99f1f6b9, type: 2}
+  - {fileID: 11400000, guid: b8bb2dff14b547a38582b4210759ff31, type: 2}
+  frames: {fileID: 11400000, guid: 038ef9122a7597d40aded94803868c24, type: 2}
+  roundedBoxSprite: {fileID: 21300000, guid: 8b1c27e213cd47319c2e076c9618cedf, type: 3}
+  circleSprite: {fileID: 21300000, guid: e375d26d48294d0bb7f02e6e374d9500, type: 3}
+  buttonSprite: {fileID: 21300000, guid: 16dfce0b8b7e6b94c92b38fbc13fe03b, type: 3}
+  fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

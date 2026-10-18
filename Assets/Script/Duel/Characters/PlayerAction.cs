@@ -343,6 +343,31 @@ namespace AOG.Duel
             if (slot < 0 || slot >= skills.Length) return null;
             return loadout != null ? loadout.GetSkill(slot) : skills[slot];
         }
+
+        public void SetSkill(int slot, SkillData skill)
+        {
+            if (skills == null || skills.Length != 5) Array.Resize(ref skills, 5);
+            if (slot < 0 || slot >= skills.Length) return;
+            loadout = null;
+            skills[slot] = skill;
+            if (slot < skillLeft.Length) skillLeft[slot] = 0f;
+        }
+
+        public void SetSkills(SkillData[] newSkills)
+        {
+            loadout = null;
+            if (skills == null || skills.Length != 5) Array.Resize(ref skills, 5);
+            for (int i = 0; i < 5; i++)
+            {
+                skills[i] = (newSkills != null && i < newSkills.Length) ? newSkills[i] : null;
+                if (i < skillLeft.Length) skillLeft[i] = 0f;
+            }
+        }
+
+        public void SetLoadout(SkillLoadout newLoadout)
+        {
+            loadout = newLoadout;
+        }
         public float GetSkillCooldownRemaining(int slot) => slot >= 0 && slot < skillLeft.Length ? skillLeft[slot] : 0f;
 
         private SkillCtx CurrentSkillContext() => new SkillCtx(player, player.Enemy, skillSlot, skillDirection);

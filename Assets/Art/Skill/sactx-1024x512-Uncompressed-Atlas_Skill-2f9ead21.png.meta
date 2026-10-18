@@ -137,6 +137,21 @@ TextureImporter:
   - first:
       213: 6867338628389476636
     second: sactx-1024x512-Uncompressed-Atlas_Skill-2f9ead21_44
+  - first:
+      213: -594454407
+    second: sactx-1024x512-Uncompressed-Atlas_Skill-2f9ead21_45
+  - first:
+      213: -1295341847
+    second: sactx-1024x512-Uncompressed-Atlas_Skill-2f9ead21_46
+  - first:
+      213: -960658668
+    second: sactx-1024x512-Uncompressed-Atlas_Skill-2f9ead21_47
+  - first:
+      213: 559559370
+    second: sactx-1024x512-Uncompressed-Atlas_Skill-2f9ead21_48
+  - first:
+      213: -765370794
+    second: sactx-1024x512-Uncompressed-Atlas_Skill-2f9ead21_49
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
