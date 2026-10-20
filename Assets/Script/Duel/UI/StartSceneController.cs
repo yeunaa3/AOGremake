@@ -457,7 +457,11 @@ namespace AOG.Duel
         {
             if (currentPhase == Phase.Video1)
             {
-                if (allowSkipVideo1 && CheckAnyInput())
+                if (playerA != null && playerA.isPlaying && playerA.length > 0 && playerA.time >= playerA.length - 0.05)
+                {
+                    SwitchToPhase2();
+                }
+                else if (allowSkipVideo1 && CheckAnyInput())
                 {
                     SwitchToPhase2();
                 }
@@ -553,21 +557,8 @@ namespace AOG.Duel
             if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
                 return true;
 
-            if (Gamepad.current != null)
-            {
-                foreach (var control in Gamepad.current.allControls)
-                {
-                    if (control is UnityEngine.InputSystem.Controls.ButtonControl btn && btn.wasPressedThisFrame)
-                        return true;
-                }
-            }
-
-            try
-            {
-                if (UnityEngine.Input.anyKeyDown)
-                    return true;
-            }
-            catch { }
+            if (Gamepad.current != null && (Gamepad.current.buttonSouth.wasPressedThisFrame || Gamepad.current.startButton.wasPressedThisFrame))
+                return true;
 
             return false;
         }

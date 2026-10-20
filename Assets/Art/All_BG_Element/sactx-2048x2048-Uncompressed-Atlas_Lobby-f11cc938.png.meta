@@ -3115,28 +3115,6 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sactx-2048x2048-Uncompressed-Atlas_Lobby-f11cc938_101
-      rect:
-        serializedVersion: 2
-        x: 1699
-        y: 1590
-        width: 91
-        height: 107
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ef5d6b20d3d7c5ff0800000000000000
-      internalID: -46024195188533762
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: sactx-2048x2048-Uncompressed-Atlas_Lobby-f11cc938_102
       rect:
         serializedVersion: 2
@@ -5368,7 +5346,7 @@ TextureImporter:
         height: 46
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 10, y: 10, z: 10, w: 10}
       customData: 
       outline: []
       physicsShape: []
@@ -8445,10 +8423,10 @@ TextureImporter:
         x: 1837
         y: 426
         width: 126
-        height: 38
+        height: 39
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 39, y: 0, z: 39, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -8579,7 +8557,7 @@ TextureImporter:
         width: 94
         height: 60
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 36, y: 0, z: 36, w: 0}
       customData: 
       outline: []
@@ -8588,6 +8566,50 @@ TextureImporter:
       bones: []
       spriteID: f23e47a847dfa4e44b4d48b6311e0129
       internalID: 7547608484001631783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sactx-2048x2048-Uncompressed-Atlas_Lobby-f11cc938_4
+      rect:
+        serializedVersion: 2
+        x: 1530
+        y: 1375
+        width: 156
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 10, y: 0, z: 10, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04ed1d752a58dcc418621d91bf3a2177
+      internalID: -5264408114643579906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sactx-2048x2048-Uncompressed-Atlas_Lobby-f11cc938_5
+      rect:
+        serializedVersion: 2
+        x: 1703
+        y: 1626
+        width: 33
+        height: 30
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f5d42886e91d8a4fb50234753ba7950
+      internalID: -2216718352517382607
       vertices: []
       indices: 
       edges: []

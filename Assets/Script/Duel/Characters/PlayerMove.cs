@@ -17,11 +17,12 @@ namespace AOG.Duel
         public bool Moving => dashing || (canMove && Mathf.Abs(input) > 0.05f);
         public bool WantsMove => Mathf.Abs(input) > 0.05f;
         public bool Dashing => dashing;
-        public bool IsAirborne => Mathf.Abs(body.linearVelocity.y) > 0.1f;
+        public bool IsAirborne => body != null && body.bodyType != RigidbodyType2D.Static && Mathf.Abs(body.linearVelocity.y) > 0.1f;
 
         private void Awake() { body = GetComponent<Rigidbody2D>(); stats = GetComponent<PlayerStats>(); }
         private void FixedUpdate()
         {
+            if (body == null || body.bodyType == RigidbodyType2D.Static) return;
             float x = matchOn ? (dashing ? dashDir * dashSpeed : canMove ? input * stats.MoveSpeed : 0f) : 0f;
             body.linearVelocity = new Vector2(x, body.linearVelocity.y);
         }
@@ -35,9 +36,12 @@ namespace AOG.Duel
             dashDir = Mathf.Sign(direction == 0 ? 1 : direction);
             dashSpeed = Mathf.Max(0f, horizontalSpeed);
             dashing = dashSpeed > .01f;
-            body.linearVelocity = new Vector2(
-                dashing ? dashDir * dashSpeed : body.linearVelocity.x,
-                Mathf.Max(0f, jumpForce));
+            if (body != null && body.bodyType != RigidbodyType2D.Static)
+            {
+                body.linearVelocity = new Vector2(
+                    dashing ? dashDir * dashSpeed : body.linearVelocity.x,
+                    Mathf.Max(0f, jumpForce));
+            }
         }
         public void Stop() { input = 0f; dashing = false; }
     }
