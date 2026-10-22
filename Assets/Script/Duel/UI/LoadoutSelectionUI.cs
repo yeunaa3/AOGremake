@@ -44,7 +44,8 @@ namespace AOG.Duel
             {
                 GameObject esGo = new GameObject("EventSystem");
                 esGo.AddComponent<EventSystem>();
-                esGo.AddComponent<InputSystemUIInputModule>();
+                var inputModule = esGo.AddComponent<InputSystemUIInputModule>();
+                inputModule.AssignDefaultActions();
             }
         }
 

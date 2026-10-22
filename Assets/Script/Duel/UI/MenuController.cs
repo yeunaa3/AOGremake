@@ -24,6 +24,7 @@ namespace AOG.Duel
         [Header("Tên Màn Đấu")]
         [SerializeField] private string pveSceneName = "Map1";
         [SerializeField] private string pvpSceneName = "Map2";
+        [SerializeField] private string loadoutSceneName = "Loadout";
 
         private void Awake()
         {
@@ -90,107 +91,30 @@ namespace AOG.Duel
 
         private void HandlePointerInput()
         {
-            Vector2 screenPos = Vector2.zero;
-            bool pointerDown = false;
-
-            if (Mouse.current != null && (Mouse.current.leftButton.wasPressedThisFrame || Mouse.current.leftButton.wasReleasedThisFrame))
-            {
-                pointerDown = true;
-                screenPos = Mouse.current.position.ReadValue();
-            }
-            else if (Touchscreen.current != null && (Touchscreen.current.primaryTouch.press.wasPressedThisFrame || Touchscreen.current.primaryTouch.press.wasReleasedThisFrame))
-            {
-                pointerDown = true;
-                screenPos = Touchscreen.current.primaryTouch.position.ReadValue();
-            }
-            else if (Pointer.current != null && (Pointer.current.press.wasPressedThisFrame || Pointer.current.press.wasReleasedThisFrame))
-            {
-                pointerDown = true;
-                screenPos = Pointer.current.position.ReadValue();
-            }
-
-            if (!pointerDown) return;
+            if (!TryGetPointerDown(out Vector2 screenPos)) return;
 
             if ((settingsUI != null && settingsUI.IsOpen) || (selectionUI != null && selectionUI.IsOpen)) return;
 
             Camera cam = Camera.main;
             if (cam == null) return;
 
-            float zDist = Mathf.Abs(cam.transform.position.z);
-            Vector3 worldPos3D = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, zDist));
-            Vector2 worldPoint = new Vector2(worldPos3D.x, worldPos3D.y);
-
-            // Kiểm tra click từng nút (kết hợp cả Collider lẫn Bounds hình học để đảm bảo 100% ăn click)
-            if (CheckButtonHit(settingButton, worldPoint, new Vector2(1.2f, 1.2f)))
+            // Cùng cơ chế với MenuOptionBar: chỉ quét physics một lần đúng lúc click.
+            Vector2 worldPoint = cam.ScreenToWorldPoint(screenPos);
+            foreach (Collider2D hit in Physics2D.OverlapPointAll(worldPoint))
             {
-                PlayButtonFeedback(settingButton);
-                OpenSettings();
-                return;
-            }
-            if (CheckButtonHit(bowButton, worldPoint, new Vector2(3.0f, 1.0f)))
-            {
-                PlayButtonFeedback(bowButton);
-                OpenBowSelection();
-                return;
-            }
-            if (CheckButtonHit(skillButton, worldPoint, new Vector2(3.0f, 1.0f)))
-            {
-                PlayButtonFeedback(skillButton);
-                OpenSkillSelection(0);
-                return;
-            }
-            if (CheckButtonHit(pveButton, worldPoint, new Vector2(3.0f, 1.0f)))
-            {
-                PlayButtonFeedback(pveButton);
-                LoadPVEScene();
-                return;
-            }
-            if (CheckButtonHit(pvpButton, worldPoint, new Vector2(3.0f, 1.0f)))
-            {
-                PlayButtonFeedback(pvpButton);
-                LoadPVPScene();
-                return;
-            }
-            if (CheckButtonHit(rankButton, worldPoint, new Vector2(3.0f, 1.0f)))
-            {
-                PlayButtonFeedback(rankButton);
-                return;
+                if (BelongsToButton(hit, settingButton)) { PlayButtonFeedback(settingButton); OpenSettings(); return; }
+                if (BelongsToButton(hit, bowButton)) { PlayButtonFeedback(bowButton); OpenBowSelection(); return; }
+                if (BelongsToButton(hit, skillButton)) { PlayButtonFeedback(skillButton); OpenSkillSelection(0); return; }
+                if (BelongsToButton(hit, pveButton)) { PlayButtonFeedback(pveButton); LoadPVEScene(); return; }
+                if (BelongsToButton(hit, pvpButton)) { PlayButtonFeedback(pvpButton); LoadPVPScene(); return; }
+                if (BelongsToButton(hit, rankButton)) { PlayButtonFeedback(rankButton); return; }
             }
         }
 
-        private static bool CheckButtonHit(GameObject btn, Vector2 point, Vector2 fallbackSize)
+        private static bool BelongsToButton(Collider2D hit, GameObject button)
         {
-            if (btn == null || !btn.activeInHierarchy) return false;
-
-            // 1. Kiểm tra Collider2D
-            var col = btn.GetComponent<Collider2D>();
-            if (col != null && col.OverlapPoint(point)) return true;
-
-            // 2. Kiểm tra SpriteRenderer Bounds trực tiếp
-            var sr = btn.GetComponent<SpriteRenderer>();
-            if (sr != null && sr.bounds.Contains(point)) return true;
-
-            // 3. Kiểm tra vùng Rect thực tế
-            Vector2 pos = btn.transform.position;
-            Vector2 size = (sr != null && sr.sprite != null) ? (Vector2)sr.bounds.size : fallbackSize;
-            size = new Vector2(Mathf.Max(size.x, fallbackSize.x), Mathf.Max(size.y, fallbackSize.y));
-            Rect rect = new Rect(pos.x - size.x * 0.5f, pos.y - size.y * 0.5f, size.x, size.y);
-            if (rect.Contains(point)) return true;
-
-            // 4. Kiểm tra các object con
-            for (int i = 0; i < btn.transform.childCount; i++)
-            {
-                Transform child = btn.transform.GetChild(i);
-                if (!child.gameObject.activeInHierarchy) continue;
-
-                var childCol = child.GetComponent<Collider2D>();
-                if (childCol != null && childCol.OverlapPoint(point)) return true;
-
-                var childSr = child.GetComponent<SpriteRenderer>();
-                if (childSr != null && childSr.bounds.Contains(point)) return true;
-            }
-
-            return false;
+            return hit != null && button != null &&
+                   (hit.transform == button.transform || hit.transform.IsChildOf(button.transform));
         }
 
         public void OpenSettings()
@@ -208,8 +132,8 @@ namespace AOG.Duel
             settingsUI.Open();
         }
 
-        public void OpenBowSelection() => selectionUI?.OpenBowSelection();
-        public void OpenSkillSelection(int targetSlot = 0) => selectionUI?.OpenSkillSelection(targetSlot);
+        public void OpenBowSelection() => LoadoutSceneController.Open(loadoutSceneName, LoadoutSceneController.LoadoutTab.Bow);
+        public void OpenSkillSelection(int targetSlot = 0) => LoadoutSceneController.Open(loadoutSceneName, LoadoutSceneController.LoadoutTab.Skill);
         public void LoadPVEScene() => SceneManager.LoadScene(pveSceneName);
         public void LoadPVPScene() => SceneManager.LoadScene(pvpSceneName);
 
@@ -250,23 +174,33 @@ namespace AOG.Duel
 
         private void EnsureColliders()
         {
-            AddBoxColliderIfMissing(bowButton, new Vector2(1.5f, 0.5f));
-            AddBoxColliderIfMissing(skillButton, new Vector2(1.5f, 0.5f));
-            AddBoxColliderIfMissing(pveButton, new Vector2(1.5f, 0.5f));
-            AddBoxColliderIfMissing(pvpButton, new Vector2(1.5f, 0.5f));
-            AddBoxColliderIfMissing(rankButton, new Vector2(1.5f, 0.5f));
-            AddBoxColliderIfMissing(settingButton, new Vector2(1.2f, 1.2f));
+            EnsureButtonColliders(bowButton, new Vector2(1.5f, 0.5f));
+            EnsureButtonColliders(skillButton, new Vector2(1.5f, 0.5f));
+            EnsureButtonColliders(pveButton, new Vector2(1.5f, 0.5f));
+            EnsureButtonColliders(pvpButton, new Vector2(1.5f, 0.5f));
+            EnsureButtonColliders(rankButton, new Vector2(1.5f, 0.5f));
+            EnsureButtonColliders(settingButton, new Vector2(1.2f, 1.2f));
+        }
 
-            if (settingButton != null && settingButton.transform.childCount > 0)
-            {
-                AddBoxColliderIfMissing(settingButton.transform.GetChild(0).gameObject, new Vector2(1.2f, 1.2f));
-            }
+        private static void EnsureButtonColliders(GameObject button, Vector2 fallbackSize)
+        {
+            if (button == null) return;
+            AddBoxColliderIfMissing(button, fallbackSize);
+            foreach (SpriteRenderer sprite in button.GetComponentsInChildren<SpriteRenderer>(true))
+                AddBoxColliderIfMissing(sprite.gameObject, fallbackSize);
         }
 
         private static void AddBoxColliderIfMissing(GameObject obj, Vector2 fallbackSize)
         {
             if (obj == null) return;
-            var box = obj.GetComponent<BoxCollider2D>() ?? obj.AddComponent<BoxCollider2D>();
+            // Không dùng ?? với Unity Component: component bị xoá có thể là "fake null"
+            // và khiến Awake văng MissingComponentException.
+            var box = obj.GetComponent<BoxCollider2D>();
+            if (box == null)
+            {
+                box = obj.AddComponent<BoxCollider2D>();
+            }
+            if (box == null) return;
             var sr = obj.GetComponent<SpriteRenderer>();
             if (sr != null && sr.sprite != null)
             {
@@ -279,6 +213,22 @@ namespace AOG.Duel
             {
                 box.size = fallbackSize;
             }
+        }
+
+        private static bool TryGetPointerDown(out Vector2 screenPos)
+        {
+            screenPos = Vector2.zero;
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                screenPos = Mouse.current.position.ReadValue();
+                return true;
+            }
+            if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
+            {
+                screenPos = Touchscreen.current.primaryTouch.position.ReadValue();
+                return true;
+            }
+            return false;
         }
     }
 }
