@@ -2,26 +2,38 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    // Hiệu ứng các hàng họa tiết nền trôi từ từ xuống dưới vô tận
+    // Quay toàn bộ 9 bức ảnh họa tiết nền thành một khối đồng nhất quanh tâm trục (0, 0)
+    [ExecuteAlways]
+    [DisallowMultipleComponent]
     public class BackgroundScroller : MonoBehaviour
     {
-        [SerializeField] private float scrollSpeed = 0.4f;
-        [SerializeField] private float rowSpacing = 3.0f;
-        [SerializeField] private float wrapBottomY = -5.5f;
+        [Header("Tốc Độ Quay")]
+        [Tooltip("Tốc độ quay của khối 9 ảnh họa tiết nền (độ mỗi giây). Dương = ngược chiều kim đồng hồ, Âm = cùng chiều kim đồng hồ.")]
+        [SerializeField] private float rotationSpeed = 8.0f;
+
+        [Header("Tùy Chọn Chạy Trong Editor")]
+        [Tooltip("Bật nếu muốn xem hiệu ứng xoay ngay trong Scene view mà không cần ấn Play game")]
+        [SerializeField] private bool previewRotateInEditor = false;
+
+        public float RotationSpeed
+        {
+            get => rotationSpeed;
+            set => rotationSpeed = value;
+        }
+
+        public bool PreviewRotateInEditor
+        {
+            get => previewRotateInEditor;
+            set => previewRotateInEditor = value;
+        }
 
         private void Update()
         {
-            if (scrollSpeed <= 0f) return;
-            float dy = scrollSpeed * Time.deltaTime;
+            if (!Application.isPlaying && !previewRotateInEditor) return;
+            if (Mathf.Approximately(rotationSpeed, 0f)) return;
 
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                Transform t = transform.GetChild(i);
-                Vector3 pos = t.localPosition;
-                pos.y -= dy;
-                if (pos.y < wrapBottomY) pos.y += rowSpacing * 3f;
-                t.localPosition = pos;
-            }
+            float deltaAngle = rotationSpeed * Time.deltaTime;
+            transform.Rotate(0f, 0f, deltaAngle, Space.Self);
         }
     }
 }

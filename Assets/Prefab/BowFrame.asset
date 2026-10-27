@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ca0d18e31d54e9fac19b3271ccfc1b2, type: 3}
+  m_Name: BowFrame
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowFrames
+  common: {fileID: -4628458176757347897, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  rare: {fileID: -4444224961565705909, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  heroic: {fileID: 3882624521978032223, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  legendary: {fileID: -3437214338773697506, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}

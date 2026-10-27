@@ -15,8 +15,10 @@ MonoBehaviour:
   bowId: bow_stone
   displayName: Stone Bow
   icon: {fileID: 0}
-  bowSprite: {fileID: -1296967589664866828, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  bowSprite: {fileID: -6999302658915870739, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  rarity: 1
   arrowSprite: {fileID: -7663145071650704565, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   damage: 12
   attackSpeedMultiplier: 0.8
+  arrowSpeed: 9
   passive: {fileID: 11400000, guid: 0c46ef7cea664221a58fddfbf553e1ce, type: 2}

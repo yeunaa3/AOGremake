@@ -15,8 +15,10 @@ MonoBehaviour:
   bowId: bow_trap
   displayName: Trap Bow
   icon: {fileID: 0}
-  bowSprite: {fileID: 0}
-  arrowSprite: {fileID: 0}
+  bowSprite: {fileID: 3348148514784138721, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  rarity: 2
+  arrowSprite: {fileID: -3220988957822842125, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   damage: 10
   attackSpeedMultiplier: 1
+  arrowSpeed: 9
   passive: {fileID: 11400000, guid: 64c9f3569d614b99a0327bede794f692, type: 2}

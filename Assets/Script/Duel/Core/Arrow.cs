@@ -441,7 +441,7 @@ namespace AOG.Duel
             if (obstacle != null)
             {
                 if (obstacle.Team == owner.Team) return;
-                obstacle.TakeDamage(damage);
+                obstacle.TakeDamage(damage, owner);
                 CreateWorldEffect(transform.position);
                 Despawn();
                 return;

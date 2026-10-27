@@ -169,6 +169,17 @@ namespace AOG.Duel
             img.sprite = bow.BowSprite != null ? bow.BowSprite : bow.Icon;
             img.preserveAspect = true;
 
+            // Bow Frame theo độ hiếm
+            GameObject frameObj = CreateUIObject("Frame", card.transform);
+            RectTransform frameRect = frameObj.GetComponent<RectTransform>();
+            frameRect.anchorMin = frameRect.anchorMax = frameRect.pivot = new Vector2(0.5f, 1f);
+            frameRect.anchoredPosition = new Vector2(0, -110);
+            frameRect.sizeDelta = new Vector2(130, 160);
+            Image frameImg = frameObj.AddComponent<Image>();
+            frameImg.sprite = database != null && database.BowFrames != null ? database.BowFrames.Get(bow.Rarity) : null;
+            frameImg.enabled = frameImg.sprite != null;
+            frameImg.preserveAspect = true;
+
             // Bow Name
             CreateText("Name", card.transform, bow.DisplayName,
                 new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),

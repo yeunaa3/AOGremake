@@ -61,11 +61,22 @@ namespace AOG.Duel
                 return;
             }
             PlayerController target = other.GetComponentInParent<PlayerController>();
-            if (target == null || owner == null || target.Team == owner.Team) return;
-            if (nextHit.TryGetValue(target, out float time) && Time.time < time) return;
-            nextHit[target] = Time.time + tickInterval;
-            target.Stats.TakeDamage(new DamageInfo(owner, damage, false, transform.position,
-                effect, effectPower, effectDuration));
+            if (target != null && owner != null && target.Team != owner.Team)
+            {
+                if (!nextHit.TryGetValue(target, out float time) || Time.time >= time)
+                {
+                    nextHit[target] = Time.time + tickInterval;
+                    target.Stats.TakeDamage(new DamageInfo(owner, damage, false, transform.position,
+                        effect, effectPower, effectDuration));
+                }
+                return;
+            }
+
+            SkillObject obstacle = other.GetComponentInParent<SkillObject>();
+            if (obstacle != null && owner != null && obstacle.Team != owner.Team)
+            {
+                obstacle.TakeDamage(damage, owner);
+            }
         }
     }
 }

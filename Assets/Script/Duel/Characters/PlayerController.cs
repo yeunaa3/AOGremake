@@ -57,7 +57,10 @@ namespace AOG.Duel
         public bool CanAttack => Alive && stats.CanAttack;
         public bool CanSkill => Alive && stats.CanUseSkill;
         public float Face => Enemy == null ? (team == 0 ? 1f : -1f) : Mathf.Sign(Enemy.transform.position.x - transform.position.x);
-        public Vector2 Aim => aimPoint == null ? transform.position : aimPoint.position;
+        public SkillObject ActiveTauntEntity { get; set; }
+        public Vector2 Aim => (ActiveTauntEntity != null && ActiveTauntEntity.gameObject.activeInHierarchy && !ActiveTauntEntity.IsDead)
+            ? (Vector2)ActiveTauntEntity.transform.position
+            : (aimPoint == null ? transform.position : aimPoint.position);
         public bool IsAirborne => move.IsAirborne;
         public Transform BodyEffectPoint { get; private set; }
         public Transform BowEffectPoint { get; private set; }
@@ -152,9 +155,11 @@ namespace AOG.Duel
             if (stats.ArrowSprite == null || Enemy == null || arrowSpawnPoint == null) return;
             bool powered = poweredArrowCount > 0;
             float damageMultiplier = powered ? arrowBuff.damageMultiplier : 1f;
+            float baseSpeedMult = (stats.ArrowSpeed > 0.01f ? stats.ArrowSpeed / 9f : 1f);
+            float finalSpeedMultiplier = (powered ? arrowBuff.speedMultiplier : 1f) * baseSpeedMult;
             bool fired = Fire(arrowSpawnPoint.position, Enemy.Aim, ProjectilePath.NormalArc, 0f,
                 Mathf.RoundToInt(stats.Damage * damageMultiplier), stats.ArrowSprite,
-                powered ? arrowBuff.speedMultiplier : 1f,
+                finalSpeedMultiplier,
                 powered ? arrowBuff.effect : ArrowEffect.None,
                 powered ? arrowBuff.effectPower : 0,
                 powered ? arrowBuff.effectDuration : 0f,
@@ -203,6 +208,12 @@ namespace AOG.Duel
 
             if (shot.path == ProjectilePath.Beam)
             {
+                if (Enemy.ActiveTauntEntity != null && Enemy.ActiveTauntEntity.gameObject.activeInHierarchy && !Enemy.ActiveTauntEntity.IsDead)
+                {
+                    Enemy.ActiveTauntEntity.TakeDamage(damage, this);
+                    if (shot.resetCooldownOnHit) action.ResetSkillCooldown(skillSlot);
+                    return;
+                }
                 int dealt = Enemy.Stats.TakeDamage(new DamageInfo(this, damage, false, Enemy.Aim,
                     shot.effect, shot.effectPower, shot.effectDuration));
                 if (dealt > 0 && shot.lifeSteal > 0f) stats.Heal(Mathf.RoundToInt(dealt * shot.lifeSteal));

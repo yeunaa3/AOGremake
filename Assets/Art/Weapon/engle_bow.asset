@@ -15,8 +15,10 @@ MonoBehaviour:
   bowId: bow_basic
   displayName: Basic Bow
   icon: {fileID: -3219188548066180312, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  rarity: 0
   bowSprite: {fileID: -3219188548066180312, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   arrowSprite: {fileID: -4633047966210821302, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   damage: 10
+  arrowSpeed: 9
   attackSpeedMultiplier: 1
   passive: {fileID: 0}

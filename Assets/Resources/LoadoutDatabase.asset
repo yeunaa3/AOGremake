@@ -28,6 +28,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b8bb2dff14b547a38582b4210759ff31, type: 2}
   - {fileID: 11400000, guid: e2c996d7461a4015ba3a2bfcf688e98b, type: 2}
   - {fileID: 11400000, guid: a5958571e6a0cbf4e92de846b24c7600, type: 2}
+  - {fileID: 11400000, guid: c1010001000200030004000500060001, type: 2}
+  - {fileID: 11400000, guid: c1010001000200030004000500060002, type: 2}
+  - {fileID: 11400000, guid: c1010001000200030004000500060003, type: 2}
+  - {fileID: 11400000, guid: c1010001000200030004000500060004, type: 2}
   defaultBow: {fileID: 11400000, guid: b502507f0fdb4cf092a08d8a9f1f3003, type: 2}
   defaultSkills:
   - {fileID: 11400000, guid: b7d6c8f9e0a14253c4d5e6f708192a3b, type: 2}
@@ -36,6 +40,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2c42c8bf3b1d4a5ca7c30bea99f1f6b9, type: 2}
   - {fileID: 11400000, guid: b8bb2dff14b547a38582b4210759ff31, type: 2}
   frames: {fileID: 11400000, guid: 038ef9122a7597d40aded94803868c24, type: 2}
+  bowFrames: {fileID: 11400000, guid: 36c06a44d6c446ed8f6c095c45435dae, type: 2}
   roundedBoxSprite: {fileID: 21300000, guid: 8b1c27e213cd47319c2e076c9618cedf, type: 3}
   circleSprite: {fileID: 21300000, guid: e375d26d48294d0bb7f02e6e374d9500, type: 3}
   buttonSprite: {fileID: 21300000, guid: 16dfce0b8b7e6b94c92b38fbc13fe03b, type: 3}

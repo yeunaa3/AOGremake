@@ -16,6 +16,7 @@ namespace AOG.Duel
         public BowRuntimeState BowState => bowState;
         public int BowDamage => equippedBow != null ? equippedBow.Damage : 0;
         public float BowAttackSpeedMultiplier => equippedBow != null ? equippedBow.AttackSpeedMultiplier : 1f;
+        public float BowArrowSpeed => equippedBow != null ? equippedBow.ArrowSpeed : 9f;
         public Sprite ArrowSprite => equippedBow != null ? equippedBow.ArrowSprite : null;
         public event Action<BowData> BowChanged;
 
@@ -78,6 +79,11 @@ namespace AOG.Duel
 
         private void ApplyBowVisual()
         {
+            if (bowRenderer == null)
+            {
+                Transform bow = FindChild("bow");
+                bowRenderer = bow != null ? bow.GetComponent<SpriteRenderer>() : null;
+            }
             if (bowRenderer != null && equippedBow != null && equippedBow.BowSprite != null)
                 bowRenderer.sprite = equippedBow.BowSprite;
         }

@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e7d6450081bc374590da90ff332f781, type: 3}
+  m_Name: Skill_Turret
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
+  skillId: skill_turret
+  displayName: "Th\xE1p B\u1EAFn T\xEAn"
+  description: "Tri\u1EC7u h\u1ED3i tr\u1EE5 b\u1EAFn t\xEAn li\xEAn t\u1EE5c v\xE0o
+    k\u1EBB \u0111\u1ECBch cho \u0111\u1EBFn khi bi\u1EBFn m\u1EA5t."
+  icon: {fileID: -2154011944882495345, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rarity: 0
+  cooldown: 8
+  animationTrigger: High
+  lockMovement: 1
+  cancelOnMove: 0
+  showTime: 0.2
+  effectTime: 0.76
+  duration: 1
+  spawn:
+    prefab: {fileID: 1300000000, guid: e1010001000200030004000500060003, type: 3}
+    spawnPoint: 1
+    count: 1
+    offset: {x: 0, y: 0}
+    targetRadius: 0
+    randomizeRain: 0
+    horizontalRandomness: 0.8
+    spawnHeightVariation: 1.5
+    objectSpacing: 0
+    path: 2
+    arc: 0
+    damageMultiplier: 1
+    speedMultiplier: 1
+    groundDuration: 2
+    hasEffect: 0
+    effect: 0
+    effectPower: 0
+    effectDuration: 0
+  showInHand: 0
+  heldFanAngle: 0

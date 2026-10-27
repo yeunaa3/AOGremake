@@ -1,49 +1,126 @@
+using System.Collections;
 using UnityEngine;
 
 namespace AOG.Duel
 {
-    public sealed class SkillObject : MonoBehaviour
+    public class SkillObject : MonoBehaviour
     {
-        [SerializeField, Min(1)] private int maxHp = 30;
-        [SerializeField, Min(0f)] private float lifetime = 5f;
-        [SerializeField, Min(0f)] private float hpLossPerSecond;
-        [SerializeField] private float moveSpeed;
-        [SerializeField, Min(0f)] private float patrolDistance = 3f;
+        [Header("Health & Decay")]
+        [SerializeField, Min(1)] protected int maxHp = 100;
+        [Tooltip("Phần trăm máu tối đa mất đi mỗi giây (ví dụ: 10 nghĩa là mất 10% max HP/giây -> tự mất sau 10s nếu không nhận thêm sát thương)")]
+        [SerializeField, Range(0f, 100f)] protected float decayPercentPerSecond = 10f;
+        [Tooltip("Giới hạn thời gian sống tối đa (giây). 0 = chỉ phụ thuộc vào decay máu.")]
+        [SerializeField, Min(0f)] protected float maxLifetime = 0f;
 
-        private PlayerController owner;
-        private float hp;
-        private float startX;
-        private float direction = 1f;
+        [Header("Effects & Feedback")]
+        [SerializeField] protected ParticleSystem deathEffectPrefab;
+        [SerializeField] protected SpriteRenderer mainVisual;
+        [SerializeField] protected Color hitFlashColor = new Color(1f, 0.4f, 0.4f, 1f);
 
+        protected PlayerController owner;
+        protected float currentHp;
+        protected float lifetimeTimer;
+        protected bool isDead;
+        private Color defaultColor = Color.white;
+        private Coroutine flashRoutine;
+
+        public PlayerController Owner => owner;
         public int Team => owner == null ? -1 : owner.Team;
+        public int MaxHp => maxHp;
+        public float CurrentHp => currentHp;
+        public bool IsDead => isDead;
 
-        public void Setup(PlayerController source)
+        protected virtual void Awake()
+        {
+            if (mainVisual == null)
+                mainVisual = GetComponentInChildren<SpriteRenderer>();
+            if (mainVisual != null)
+                defaultColor = mainVisual.color;
+        }
+
+        public virtual void Setup(PlayerController source)
         {
             owner = source;
-            hp = maxHp;
-            startX = transform.position.x;
+            currentHp = maxHp;
+            lifetimeTimer = 0f;
+            isDead = false;
         }
 
-        private void Update()
+        protected virtual void Update()
         {
-            if (lifetime > 0f)
+            if (isDead) return;
+
+            // Tự giảm % máu tối đa theo thời gian
+            if (decayPercentPerSecond > 0f)
             {
-                lifetime -= Time.deltaTime;
-                if (lifetime <= 0f) { Destroy(gameObject); return; }
+                float loss = (maxHp * (decayPercentPerSecond / 100f)) * Time.deltaTime;
+                currentHp -= loss;
+                if (currentHp <= 0f)
+                {
+                    Die();
+                    return;
+                }
             }
 
-            hp -= hpLossPerSecond * Time.deltaTime;
-            if (hp <= 0f) { Destroy(gameObject); return; }
-
-            if (moveSpeed == 0f) return;
-            transform.position += Vector3.right * (direction * moveSpeed * Time.deltaTime);
-            if (Mathf.Abs(transform.position.x - startX) >= patrolDistance) direction *= -1f;
+            // Giới hạn thời gian sống dự phòng
+            if (maxLifetime > 0f)
+            {
+                lifetimeTimer += Time.deltaTime;
+                if (lifetimeTimer >= maxLifetime)
+                {
+                    Die();
+                    return;
+                }
+            }
         }
 
-        public void TakeDamage(int amount)
+        public virtual void TakeDamage(int amount, PlayerController attacker = null)
         {
-            hp -= Mathf.Max(0, amount);
-            if (hp <= 0f) Destroy(gameObject);
+            if (isDead || amount <= 0) return;
+            currentHp -= amount;
+            PlayHitFlash();
+            if (currentHp <= 0f)
+            {
+                Die();
+            }
+        }
+
+        public void TakeDamage(int amount) => TakeDamage(amount, null);
+
+        public virtual void Heal(int amount)
+        {
+            if (isDead || amount <= 0) return;
+            currentHp = Mathf.Min(maxHp, currentHp + amount);
+        }
+
+        public virtual void Die()
+        {
+            if (isDead) return;
+            isDead = true;
+
+            if (deathEffectPrefab != null)
+            {
+                ParticleSystem ps = Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+                ps.Play(true);
+                Destroy(ps.gameObject, 1.5f);
+            }
+
+            Destroy(gameObject);
+        }
+
+        protected void PlayHitFlash()
+        {
+            if (mainVisual == null || !gameObject.activeInHierarchy) return;
+            if (flashRoutine != null) StopCoroutine(flashRoutine);
+            flashRoutine = StartCoroutine(HitFlashRoutine());
+        }
+
+        private IEnumerator HitFlashRoutine()
+        {
+            mainVisual.color = hitFlashColor;
+            yield return new WaitForSeconds(0.08f);
+            if (mainVisual != null) mainVisual.color = defaultColor;
+            flashRoutine = null;
         }
     }
 }

@@ -20,6 +20,9 @@ namespace AOG.Duel
         [SerializeField] private GameObject pvpButton;
         [SerializeField] private GameObject rankButton;
         [SerializeField] private GameObject settingButton;
+        [SerializeField] private MenuOptionBar setOptionBar;
+        [Header("Loadout Display (Chỉ hiển thị 5 icon kỹ năng trên bệ đứng)")]
+        [SerializeField] private SpriteRenderer[] pedestalSkillIcons;
 
         [Header("Tên Màn Đấu")]
         [SerializeField] private string pveSceneName = "Map1";
@@ -31,6 +34,8 @@ namespace AOG.Duel
             if (characterGear == null) characterGear = FindFirstObjectByType<Gear>();
             if (selectionUI == null) selectionUI = GetComponentInChildren<LoadoutSelectionUI>();
             if (settingsUI == null) settingsUI = FindFirstObjectByType<SettingsPopupUI>();
+            if (setOptionBar == null) setOptionBar = FindFirstObjectByType<MenuOptionBar>();
+            AutoFindPedestalIcons();
 
             AutoFindButtons();
             EnsureColliders();
@@ -38,14 +43,31 @@ namespace AOG.Duel
 
         private void Start()
         {
-            if (PlayerLoadoutManager.HasInstance)
+            if (setOptionBar == null) setOptionBar = FindFirstObjectByType<MenuOptionBar>();
+
+            PlayerLoadoutManager loadoutMgr = PlayerLoadoutManager.Instance;
+            if (loadoutMgr != null)
             {
-                PlayerLoadoutManager.Instance.BowChanged += HandleBowChanged;
-                if (characterGear != null && PlayerLoadoutManager.Instance.EquippedBow != null)
+                loadoutMgr.BowChanged -= HandleBowChanged;
+                loadoutMgr.BowChanged += HandleBowChanged;
+                loadoutMgr.ActiveSkillSetChanged -= HandleActiveSkillSetChanged;
+                loadoutMgr.ActiveSkillSetChanged += HandleActiveSkillSetChanged;
+                loadoutMgr.SkillChanged -= HandleSkillChanged;
+                loadoutMgr.SkillChanged += HandleSkillChanged;
+                loadoutMgr.LoadoutChanged -= RefreshPedestalSkillIcons;
+                loadoutMgr.LoadoutChanged += RefreshPedestalSkillIcons;
+
+                if (characterGear != null && loadoutMgr.EquippedBow != null)
                 {
-                    characterGear.EquipBow(PlayerLoadoutManager.Instance.EquippedBow);
+                    characterGear.EquipBow(loadoutMgr.EquippedBow);
+                }
+                if (setOptionBar != null)
+                {
+                    setOptionBar.Select(loadoutMgr.ActiveSkillSet, notify: false);
                 }
             }
+
+            RefreshPedestalSkillIcons();
         }
 
         private void OnDestroy()
@@ -53,7 +75,79 @@ namespace AOG.Duel
             if (PlayerLoadoutManager.HasInstance)
             {
                 PlayerLoadoutManager.Instance.BowChanged -= HandleBowChanged;
+                PlayerLoadoutManager.Instance.ActiveSkillSetChanged -= HandleActiveSkillSetChanged;
+                PlayerLoadoutManager.Instance.SkillChanged -= HandleSkillChanged;
+                PlayerLoadoutManager.Instance.LoadoutChanged -= RefreshPedestalSkillIcons;
             }
+        }
+
+        private void HandleActiveSkillSetChanged(int newSet)
+        {
+            RefreshPedestalSkillIcons();
+        }
+
+        private void HandleSkillChanged(int slot, SkillData skill)
+        {
+            RefreshPedestalSkillIcons();
+        }
+
+        private const float PedestalIconTargetSize = 0.72f;
+
+        public void RefreshPedestalSkillIcons()
+        {
+            if (pedestalSkillIcons == null || pedestalSkillIcons.Length == 0)
+            {
+                AutoFindPedestalIcons();
+            }
+
+            if (pedestalSkillIcons == null) return;
+
+            PlayerLoadoutManager loadoutMgr = PlayerLoadoutManager.Instance;
+            for (int i = 0; i < pedestalSkillIcons.Length; i++)
+            {
+                SpriteRenderer sr = pedestalSkillIcons[i];
+                if (sr == null) continue;
+
+                SkillData skill = loadoutMgr != null ? loadoutMgr.GetEquippedSkill(i) : null;
+                if (skill != null && skill.Icon != null)
+                {
+                    sr.sprite = skill.Icon;
+                    sr.gameObject.SetActive(true);
+
+                    // Phóng to và chuẩn hoá kích thước icon sao cho vừa vặn, đầy đặn trong vùng fill màu đen
+                    float iconW = skill.Icon.bounds.size.x;
+                    float iconH = skill.Icon.bounds.size.y;
+                    float maxDim = Mathf.Max(iconW, iconH);
+                    if (maxDim > 0.001f)
+                    {
+                        float scale = PedestalIconTargetSize / maxDim;
+                        sr.transform.localScale = new Vector3(scale, scale, 1f);
+                    }
+                }
+                else
+                {
+                    sr.sprite = null;
+                    sr.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        private void AutoFindPedestalIcons()
+        {
+            GameObject pedestal = GameObject.Find("PedestalBase");
+            if (pedestal == null) return;
+            Transform container = pedestal.transform.Find("SkillIcons") ?? pedestal.transform;
+            var list = new System.Collections.Generic.List<SpriteRenderer>();
+            for (int i = 1; i <= 5; i++)
+            {
+                Transform t = container.Find($"Icon{i}") ?? container.Find($"slot{i}");
+                if (t != null)
+                {
+                    SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
+                    if (sr != null) list.Add(sr);
+                }
+            }
+            if (list.Count > 0) pedestalSkillIcons = list.ToArray();
         }
 
         private void Update()
@@ -100,6 +194,21 @@ namespace AOG.Duel
 
             // Cùng cơ chế với MenuOptionBar: chỉ quét physics một lần đúng lúc click.
             Vector2 worldPoint = cam.ScreenToWorldPoint(screenPos);
+            if (pedestalSkillIcons != null)
+            {
+                foreach (Collider2D hit in Physics2D.OverlapPointAll(worldPoint))
+                {
+                    for (int i = 0; i < pedestalSkillIcons.Length; i++)
+                    {
+                        if (pedestalSkillIcons[i] != null && pedestalSkillIcons[i].gameObject.activeSelf && BelongsToButton(hit, pedestalSkillIcons[i].gameObject))
+                        {
+                            PlayButtonFeedback(pedestalSkillIcons[i].gameObject);
+                            OpenSkillSelection(i);
+                            return;
+                        }
+                    }
+                }
+            }
             foreach (Collider2D hit in Physics2D.OverlapPointAll(worldPoint))
             {
                 if (BelongsToButton(hit, settingButton)) { PlayButtonFeedback(settingButton); OpenSettings(); return; }

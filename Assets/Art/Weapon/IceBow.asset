@@ -16,7 +16,9 @@ MonoBehaviour:
   displayName: Ice Bow
   icon: {fileID: 0}
   bowSprite: {fileID: -9145116389740409384, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  rarity: 3
   arrowSprite: {fileID: 507831392600367878, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   damage: 10
+  arrowSpeed: 9
   attackSpeedMultiplier: 1
   passive: {fileID: 11400000, guid: a041cf0aa8104897b13dc76c36099f02, type: 2}

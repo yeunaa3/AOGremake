@@ -20,6 +20,7 @@ namespace AOG.Duel
 
         [Header("Khung Rarity & UI Assets")]
         [SerializeField] private SkillFrames frames;
+        [SerializeField] private BowFrames bowFrames;
         [SerializeField] private Sprite roundedBoxSprite;
         [SerializeField] private Sprite circleSprite;
         [SerializeField] private Sprite buttonSprite;
@@ -30,6 +31,7 @@ namespace AOG.Duel
         public BowData DefaultBow => defaultBow;
         public IReadOnlyList<SkillData> DefaultSkills => defaultSkills;
         public SkillFrames Frames => frames;
+        public BowFrames BowFrames => bowFrames;
         public Sprite RoundedBoxSprite => roundedBoxSprite;
         public Sprite CircleSprite => circleSprite;
         public Sprite ButtonSprite => buttonSprite;

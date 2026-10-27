@@ -46,6 +46,7 @@ namespace AOG.Duel
         public float MoveSpeed => moveSpeed * moveBuff * timedMoveMultiplier * slowMultiplier;
         public float AttackSpeed => Mathf.Max(.05f, attackSpeed * gear.BowAttackSpeedMultiplier);
         public float ClipSpeed => AttackSpeed;
+        public float ArrowSpeed => gear != null ? gear.BowArrowSpeed : 9f;
         public int Damage => Mathf.RoundToInt(gear.BowDamage * damageBuff);
         public Sprite ArrowSprite => gear.ArrowSprite;
         public bool Frozen => freezeTime > 0f;

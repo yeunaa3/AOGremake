@@ -16,7 +16,9 @@ MonoBehaviour:
   displayName: Magnet Bow
   icon: {fileID: 0}
   bowSprite: {fileID: 8488963402526672628, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  rarity: 3
   arrowSprite: {fileID: -203153084442760454, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   damage: 10
+  arrowSpeed: 9
   attackSpeedMultiplier: 1
   passive: {fileID: 11400000, guid: 10f7e4a8a00443788271cb7eb9b50068, type: 2}
