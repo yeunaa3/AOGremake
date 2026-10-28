@@ -21,6 +21,10 @@ namespace AOG.Duel
         [SerializeField] private GameObject rankButton;
         [SerializeField] private GameObject settingButton;
         [SerializeField] private MenuOptionBar setOptionBar;
+        [Header("Stand Bow Info Display")]
+        [SerializeField] private GameObject nameBowObject;
+        [SerializeField] private GameObject rareObject;
+
         [Header("Loadout Display (Chỉ hiển thị 5 icon kỹ năng trên bệ đứng)")]
         [SerializeField] private SpriteRenderer[] pedestalSkillIcons;
 
@@ -68,6 +72,7 @@ namespace AOG.Duel
             }
 
             RefreshPedestalSkillIcons();
+            UpdateStandBowLabels(PlayerLoadoutManager.HasInstance ? PlayerLoadoutManager.Instance.EquippedBow : null);
         }
 
         private void OnDestroy()
@@ -84,11 +89,13 @@ namespace AOG.Duel
         private void HandleActiveSkillSetChanged(int newSet)
         {
             RefreshPedestalSkillIcons();
+            UpdateStandBowLabels(PlayerLoadoutManager.HasInstance ? PlayerLoadoutManager.Instance.EquippedBow : null);
         }
 
         private void HandleSkillChanged(int slot, SkillData skill)
         {
             RefreshPedestalSkillIcons();
+            UpdateStandBowLabels(PlayerLoadoutManager.HasInstance ? PlayerLoadoutManager.Instance.EquippedBow : null);
         }
 
         private const float PedestalIconTargetSize = 0.72f;
@@ -252,6 +259,40 @@ namespace AOG.Duel
             {
                 characterGear.EquipBow(newBow);
             }
+            UpdateStandBowLabels(newBow);
+        }
+
+        private void AutoFindStandBowLabels()
+        {
+            if (nameBowObject == null || rareObject == null)
+            {
+                GameObject stand = GameObject.Find("Stand");
+                if (stand != null)
+                {
+                    var found = BowInfoDisplayUI.FindStandLabels(stand.transform);
+                    if (nameBowObject == null) nameBowObject = found.nameObj;
+                    if (rareObject == null) rareObject = found.rareObj;
+                }
+            }
+        }
+
+        public void UpdateStandBowLabels(BowData bow = null)
+        {
+            AutoFindStandBowLabels();
+            if (bow == null)
+            {
+                var mgr = PlayerLoadoutManager.Instance;
+                bow = mgr != null ? mgr.EquippedBow : null;
+                if (bow == null)
+                {
+                    var db = Resources.Load<LoadoutDatabase>("LoadoutDatabase");
+                    if (db != null && db.Bows != null && db.Bows.Count > 0)
+                        bow = db.Bows[0];
+                }
+            }
+            if (bow == null) return;
+
+            BowInfoDisplayUI.ApplyRarityAndName(nameBowObject, rareObject, bow);
         }
 
         private void PlayButtonFeedback(GameObject buttonObj)

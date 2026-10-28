@@ -70,6 +70,8 @@ namespace AOG.Duel
         public bool CanMove => !Stunned;
         public bool CanAttack => !Stunned;
         public bool CanUseSkill => !Stunned && !Silenced;
+        public bool Invulnerable => invulnerableTime > 0f;
+        public bool StatusImmune => immuneTime > 0f || invulnerableTime > 0f;
         public float ProjectileSpeedMultiplier => projectileSpeedMultiplier;
         public int ShieldLayers => shieldLayers;
         public event Action<int, int> HpChanged;
@@ -185,7 +187,11 @@ namespace AOG.Duel
             timedMoveMultiplier = Mathf.Max(0f, buff.moveMultiplier);
             dodgeChance = Mathf.Clamp01(buff.dodgeChance);
             projectileSpeedMultiplier = Mathf.Max(0.01f, buff.projectileSpeedMultiplier);
-            if (buff.invulnerable) invulnerableTime = Mathf.Max(invulnerableTime, buff.duration);
+            if (buff.invulnerable)
+            {
+                invulnerableTime = Mathf.Max(invulnerableTime, buff.duration);
+                immuneTime = Mathf.Max(immuneTime, buff.duration);
+            }
             if (buff.statusImmune) immuneTime = Mathf.Max(immuneTime, buff.duration);
         }
 

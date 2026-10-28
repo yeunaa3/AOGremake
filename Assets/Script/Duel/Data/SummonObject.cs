@@ -13,6 +13,8 @@ namespace AOG.Duel
         [SerializeField, Range(0f, 180f)] private float heldFanAngle = 35f;
 
         public override SkillType Type => SkillType.SpawnOnly;
+        public override int VolleyCount => spawn != null ? Mathf.Max(1, spawn.volleyCount) : 1;
+        public override float VolleyInterval => spawn != null ? spawn.volleyInterval : 0f;
 
         public override void ShowVisual(SkillCtx context)
         {
@@ -24,7 +26,7 @@ namespace AOG.Duel
         {
             if (context.Caster == null) return;
             context.Caster.HideHeldArrows();
-            context.Caster.Spawn(spawn, context.Slot);
+            context.Caster.SpawnSingleVolley(spawn, context.Slot);
         }
 
         public override void End(SkillCtx context) => context.Caster?.HideHeldArrows();

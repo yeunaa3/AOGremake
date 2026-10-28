@@ -33,6 +33,9 @@ namespace AOG.Duel
             base.Update();
             if (isDead) return;
 
+            // Nếu đang bị đóng băng (Freeze), tạm dừng tích lũy và bắn tên
+            if (IsFrozen) return;
+
             shootTimer += Time.deltaTime;
             if (shootTimer >= shootInterval)
             {

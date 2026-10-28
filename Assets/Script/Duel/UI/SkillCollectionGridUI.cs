@@ -182,7 +182,7 @@ namespace AOG.Duel
 
             if (contentContainer != null)
             {
-                if (gridSlots.Count == 0 || gridSlots[0] == null)
+                if (gridSlots.Count == 0 || gridSlots.Any(s => s == null) || gridSlots.Count < contentContainer.childCount)
                 {
                     gridSlots.Clear();
                     for (int i = 0; i < contentContainer.childCount; i++)
@@ -245,12 +245,15 @@ namespace AOG.Duel
 
         private void RefreshSkillGrid()
         {
-            if (database.Skills == null || database.Skills.Count == 0) return;
+            if (database == null) database = Resources.Load<LoadoutDatabase>("LoadoutDatabase");
+            if (database == null || database.Skills == null || database.Skills.Count == 0) return;
 
-            IEnumerable<SkillData> query = database.Skills.Where(s => s != null);
             List<SkillData> sortedSkills = isAscending
-                ? query.OrderBy(s => (int)s.Rarity).ThenBy(s => s.DisplayName).ToList()
-                : query.OrderByDescending(s => (int)s.Rarity).ThenBy(s => s.DisplayName).ToList();
+                ? database.Skills.Where(s => s != null).OrderBy(s => (int)s.Rarity).ThenBy(s => s.DisplayName).ToList()
+                : database.Skills.Where(s => s != null).OrderByDescending(s => (int)s.Rarity).ThenBy(s => s.DisplayName).ToList();
+
+            if (sortedSkills.Count == 0) return;
+            Debug.Log($"[SkillGrid] Refreshed with {sortedSkills.Count} skills (Database count: {database.Skills.Count})");
 
             for (int i = 0; i < gridSlots.Count; i++)
             {
@@ -290,10 +293,11 @@ namespace AOG.Duel
             if (database == null) database = Resources.Load<LoadoutDatabase>("LoadoutDatabase");
             if (database == null || database.Bows == null || database.Bows.Count == 0) return;
 
-            IEnumerable<BowData> bowQuery = database.Bows.Where(b => b != null);
             List<BowData> sortedBows = isAscending
-                ? bowQuery.OrderBy(b => (int)b.Rarity).ThenBy(b => b.DisplayName).ToList()
-                : bowQuery.OrderByDescending(b => (int)b.Rarity).ThenBy(b => b.DisplayName).ToList();
+                ? database.Bows.Where(b => b != null).OrderBy(b => (int)b.Rarity).ThenBy(b => b.DisplayName).ToList()
+                : database.Bows.Where(b => b != null).OrderByDescending(b => (int)b.Rarity).ThenBy(b => b.DisplayName).ToList();
+
+            if (sortedBows.Count == 0) return;
 
             BowData equippedBow = PlayerLoadoutManager.HasInstance ? PlayerLoadoutManager.Instance.EquippedBow : null;
             if (equippedBow == null && sortedBows.Count > 0)

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: engle_bow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
   bowId: bow_basic
-  displayName: Basic Bow
+  displayName: Phantom
   icon: {fileID: -3219188548066180312, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   rarity: 0
   bowSprite: {fileID: -3219188548066180312, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}

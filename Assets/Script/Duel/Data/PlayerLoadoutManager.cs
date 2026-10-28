@@ -54,14 +54,14 @@ namespace AOG.Duel
             if (found != null)
             {
                 instance = found;
-                DontDestroyOnLoad(found.gameObject);
+                if (Application.isPlaying) DontDestroyOnLoad(found.gameObject);
                 instance.InitializeIfNeeded();
                 return;
             }
 
             GameObject go = new GameObject("PlayerLoadoutManager");
             instance = go.AddComponent<PlayerLoadoutManager>();
-            DontDestroyOnLoad(go);
+            if (Application.isPlaying) DontDestroyOnLoad(go);
             instance.InitializeIfNeeded();
         }
 
@@ -74,7 +74,7 @@ namespace AOG.Duel
             }
 
             instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Application.isPlaying) DontDestroyOnLoad(gameObject);
             InitializeIfNeeded();
         }
 

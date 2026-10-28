@@ -27,6 +27,7 @@ namespace AOG.Duel
         private bool normalArrowFired;
         private bool skillEffectDone;
         private bool skillVisualShown;
+        private int currentVolleyIndex;
         private SkillData specialSkill;
 
         [Header("Đánh thường - thời gian của clip gốc")]
@@ -139,15 +140,63 @@ namespace AOG.Duel
                     EndSkillFromClip();
                     return;
                 }
-                if (!skillVisualShown && skill.ShowVisualTime >= 0f && time >= skill.ShowVisualTime)
+
+                int totalVolleys = skill.VolleyCount;
+                if (totalVolleys <= 1)
                 {
-                    skillVisualShown = true;
-                    skill.ShowVisual(CurrentSkillContext());
+                    if (!skillVisualShown && skill.ShowVisualTime >= 0f && time >= skill.ShowVisualTime)
+                    {
+                        skillVisualShown = true;
+                        skill.ShowVisual(CurrentSkillContext());
+                    }
+                    if (skill.UseOnce && !skillEffectDone && time >= skill.EffectTime)
+                        UseSkillFromClip();
+                    skill.Tick(CurrentSkillContext(), Time.deltaTime);
+                    if (time >= skill.Duration) EndSkillFromClip();
                 }
-                if (skill.UseOnce && !skillEffectDone && time >= skill.EffectTime)
-                    UseSkillFromClip();
-                skill.Tick(CurrentSkillContext(), Time.deltaTime);
-                if (time >= skill.Duration) EndSkillFromClip();
+                else
+                {
+                    // Multi-volley: Bắn nhiều đợt liên tiếp sau 1 lần bấm.
+                    // Tự động lặp lại đúng chu kỳ kéo cung (ShowVisual -> Use) cho từng phát bắn!
+                    float cycleDuration = Mathf.Max(skill.EffectTime + 0.05f, skill.VolleyInterval > 0f ? skill.VolleyInterval : skill.Duration);
+                    int volleyIndex = Mathf.Clamp(Mathf.FloorToInt(time / cycleDuration), 0, totalVolleys - 1);
+                    float cycleTime = time - (volleyIndex * cycleDuration);
+
+                    // Khi chuyển sang đợt mới: kích hoạt lại animation kéo cung và chuẩn bị cho phát tiếp theo
+                    if (volleyIndex > currentVolleyIndex)
+                    {
+                        currentVolleyIndex = volleyIndex;
+                        skillVisualShown = false;
+                        skillEffectDone = false;
+                        if (!string.IsNullOrWhiteSpace(skill.AnimationTrigger))
+                        {
+                            anim.Trigger(skill.AnimationTrigger);
+                        }
+                    }
+
+                    // 1. Đến thời điểm showTime trong chu kỳ: hiện mũi tên trên tay
+                    if (!skillVisualShown && skill.ShowVisualTime >= 0f && cycleTime >= skill.ShowVisualTime)
+                    {
+                        skillVisualShown = true;
+                        skill.ShowVisual(CurrentSkillContext());
+                    }
+
+                    // 2. Đến thời điểm effectTime trong chu kỳ: bắn mũi tên đi
+                    if (!skillEffectDone && cycleTime >= skill.EffectTime)
+                    {
+                        skillEffectDone = true;
+                        SkillData currentSkill = GetSkill(skillSlot);
+                        currentSkill?.Use(CurrentSkillContext());
+                    }
+
+                    skill.Tick(CurrentSkillContext(), Time.deltaTime);
+
+                    // 3. Hoàn tất toàn bộ M đợt bắn: kết thúc skill và mở khóa di chuyển
+                    if (time >= cycleDuration * totalVolleys)
+                    {
+                        EndSkillFromClip();
+                    }
+                }
             }
         }
 
@@ -195,6 +244,8 @@ namespace AOG.Duel
             skillDirection = Mathf.Sign(direction == 0f ? player.Face : direction);
             skillEffectDone = false;
             skillVisualShown = false;
+            currentVolleyIndex = 0;
+            currentVolleyIndex = 0;
             skillLeft[slot] = skill.Cooldown;
 
             // Mọi skill đều khóa điều khiển di chuyển và khóa mặt về phía Enemy.
@@ -234,6 +285,7 @@ namespace AOG.Duel
             skillDirection = Mathf.Sign(direction == 0f ? player.Face : direction);
             skillEffectDone = false;
             skillVisualShown = false;
+            currentVolleyIndex = 0;
 
             move.Lock(true);
             move.Stop();
@@ -325,6 +377,7 @@ namespace AOG.Duel
             normalArrowFired = false;
             skillEffectDone = false;
             skillVisualShown = false;
+            currentVolleyIndex = 0;
             for (int i = 0; i < skills.Length; i++)
             {
                 SkillData skill = GetSkill(i);

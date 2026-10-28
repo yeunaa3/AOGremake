@@ -75,6 +75,9 @@ namespace AOG.Duel
 
         private void Awake()
         {
+            Application.targetFrameRate = 60;
+            QualitySettings.vSyncCount = 0;
+
             SetupAudio();
             AutoDiscoverReferences();
             SetupRenderTextures();
@@ -274,8 +277,8 @@ namespace AOG.Duel
         {
             if (vp == null) return;
             vp.playOnAwake = false;
-            vp.waitForFirstFrame = true;
-            vp.skipOnDrop = true;
+            vp.waitForFirstFrame = false;
+            vp.skipOnDrop = false;
             vp.timeReference = VideoTimeReference.InternalTime;
             vp.playbackSpeed = 1f;
 
@@ -323,42 +326,43 @@ namespace AOG.Duel
                 playerC.isLooping = false;
             }
 
-            // 2. Nạp tuần tự Video 2 rồi đến Video 3 trong suốt 4.4 giây của Video 1.
-            // Cả hai sẽ nạp xong ngay từ 1.0 giây đầu, hoàn toàn không còn tác vụ nào chạy ngầm lúc Video 2 chạy.
-            if (playerB != null && video2 != null)
-            {
-                if (playerB.isPrepared)
-                {
-                    if (playerC != null && video3 != null && !playerC.isPrepared)
-                    {
-                        playerC.Prepare();
-                    }
-                }
-                else
-                {
-                    playerB.prepareCompleted += OnPlayerBPrepareCompleted;
-                    playerB.Prepare();
-                }
-            }
-            else if (playerC != null && video3 != null)
-            {
-                playerC.Prepare();
-            }
+            StartCoroutine(PrepareAndPlayRoutine());
+        }
 
-            // 3. Bắt đầu phát Video 1 trên Player A
+        private IEnumerator PrepareAndPlayRoutine()
+        {
+            // Nạp Video 1 trước để phát ngay từ frame 0 mà không bao giờ bị khựng lúc mở đầu
             if (playerA != null && video1 != null)
             {
+                if (!playerA.isPrepared)
+                {
+                    playerA.Prepare();
+                    while (!playerA.isPrepared)
+                    {
+                        yield return null;
+                    }
+                }
                 playerA.Play();
             }
             else
             {
                 SwitchToPhase2();
+                yield break;
             }
-        }
 
-        private void OnPlayerBPrepareCompleted(VideoPlayer source)
-        {
-            source.prepareCompleted -= OnPlayerBPrepareCompleted;
+            // Chờ 0.5s cho Video 1 chạy mượt mà ổn định rồi mới nạp Video 2
+            yield return new WaitForSeconds(0.5f);
+
+            if (playerB != null && video2 != null && !playerB.isPrepared)
+            {
+                playerB.Prepare();
+                while (!playerB.isPrepared)
+                {
+                    yield return null;
+                }
+            }
+
+            // Nạp tiếp Video 3
             if (playerC != null && video3 != null && !playerC.isPrepared)
             {
                 playerC.Prepare();
@@ -380,22 +384,16 @@ namespace AOG.Duel
             // 2. Chuyển quyền hiển thị sang B ngay lập tức (không delay, không rebuild canvas)
             SetDisplayVisibility(showA: false, showB: true, showC: false);
 
-            // 3. Dừng Player A sau 1 frame để đảm bảo frame cuối của Video 1 chuyển sang Video 2 không bao giờ chớp đen
-            StartCoroutine(StopPlayerADelayed());
+            // 3. Tạm dừng Player A thay vì Stop để không bị stall decoder và không drop frame Video 2
+            if (playerA != null)
+            {
+                playerA.Pause();
+            }
 
             // 4. Bật hiển thị chữ PRESS TO START qua CanvasGroup alpha (tuyệt đối không dùng SetActive để không lag canvas)
             if (pressToStartCanvasGroup != null)
             {
                 pressToStartCanvasGroup.alpha = 0.3f;
-            }
-        }
-
-        private IEnumerator StopPlayerADelayed()
-        {
-            yield return null;
-            if (playerA != null)
-            {
-                playerA.Stop();
             }
         }
 
@@ -419,16 +417,10 @@ namespace AOG.Duel
             // 2. Chuyển quyền hiển thị sang C ngay lập tức bằng CanvasGroup
             SetDisplayVisibility(showA: false, showB: false, showC: true);
 
-            // 3. Dừng Player B sau 1 frame
-            StartCoroutine(StopPlayerBDelayed());
-        }
-
-        private IEnumerator StopPlayerBDelayed()
-        {
-            yield return null;
+            // 3. Tạm dừng Player B
             if (playerB != null)
             {
-                playerB.Stop();
+                playerB.Pause();
             }
         }
 
@@ -457,11 +449,7 @@ namespace AOG.Duel
         {
             if (currentPhase == Phase.Video1)
             {
-                if (playerA != null && playerA.isPlaying && playerA.length > 0 && playerA.time >= playerA.length - 0.05)
-                {
-                    SwitchToPhase2();
-                }
-                else if (allowSkipVideo1 && CheckAnyInput())
+                if (allowSkipVideo1 && CheckAnyInput())
                 {
                     SwitchToPhase2();
                 }
@@ -568,10 +556,6 @@ namespace AOG.Duel
             if (playerA != null)
             {
                 playerA.loopPointReached -= OnPlayerALoopPoint;
-            }
-            if (playerB != null)
-            {
-                playerB.prepareCompleted -= OnPlayerBPrepareCompleted;
             }
             if (playerC != null)
             {

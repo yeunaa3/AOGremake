@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: LifestealBow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
   bowId: bow_lifesteal
-  displayName: Lifesteal Bow
+  displayName: Nemesis
   icon: {fileID: 0}
   bowSprite: {fileID: 2630720244013161647, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   rarity: 2

@@ -497,12 +497,12 @@ TextureImporter:
       name: sactx-512x512-Uncompressed-Atlas_Bow-5345ce25_8
       rect:
         serializedVersion: 2
-        x: 71
-        y: 434
-        width: 74
-        height: 18
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 74
+        y: 439
+        width: 68
+        height: 8
+      alignment: 9
+      pivot: {x: 0.27604508, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

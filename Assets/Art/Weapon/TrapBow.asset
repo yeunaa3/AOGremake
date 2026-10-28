@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: TrapBow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
   bowId: bow_trap
-  displayName: Trap Bow
+  displayName: Specter
   icon: {fileID: 0}
   bowSprite: {fileID: 3348148514784138721, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   rarity: 2
-  arrowSprite: {fileID: -3220988957822842125, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  arrowSprite: {fileID: -5345984347159870709, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   damage: 10
   attackSpeedMultiplier: 1
   arrowSpeed: 9

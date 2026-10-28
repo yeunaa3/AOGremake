@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MagnetBow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
   bowId: bow_magnet
-  displayName: Magnet Bow
+  displayName: Zenith
   icon: {fileID: 0}
   bowSprite: {fileID: 8488963402526672628, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   rarity: 3

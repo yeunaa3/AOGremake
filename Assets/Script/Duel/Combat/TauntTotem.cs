@@ -27,9 +27,10 @@ namespace AOG.Duel
             base.Die();
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             ClearTaunt();
+            base.OnDestroy();
         }
 
         private void ClearTaunt()

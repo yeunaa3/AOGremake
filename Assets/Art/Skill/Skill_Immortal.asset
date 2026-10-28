@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85b5d0e74bd04004a9614351d1cd0b73, type: 3}
+  m_Name: Skill_Immortal
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BuffSkill
+  skillId: skill_immortal
+  displayName: Immortal
+  description: Bat tu! Xoa sach hieu ung, mien nhiem moi hieu ung va bat tu truoc moi sat thuong trong 3 giay.
+  icon: {fileID: -5068528985121808201, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rarity: 3
+  cooldown: 18.0
+  animationTrigger: 
+  lockMovement: 0
+  cancelOnMove: 0
+  showTime: -1.0
+  effectTime: 0.05
+  duration: 0.2
+  buff:
+    heal: 0
+    duration: 3.0
+    moveMultiplier: 1
+    dodgeChance: 0
+    projectileSpeedMultiplier: 1
+    invulnerable: 1
+    cleanse: 1
+    statusImmune: 1
+    isRestSkill: 0
+    healPerSecond: 0
+    healInterval: 1.0
+    vfxPrefab: {fileID: 0}

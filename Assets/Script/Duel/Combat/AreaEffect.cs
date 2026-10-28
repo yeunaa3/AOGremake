@@ -48,9 +48,18 @@ namespace AOG.Duel
         private void ApplyGroundStatus(Collider2D other)
         {
             PlayerController target = other.GetComponentInParent<PlayerController>();
-            if (target == null || owner == null || target.Team == owner.Team) return;
-            if (!affectedTargets.Add(target)) return;
-            target.Stats.ApplyStatus(owner, effect, effectPower, effectDuration);
+            if (target != null && owner != null && target.Team != owner.Team)
+            {
+                if (!affectedTargets.Add(target)) return;
+                target.Stats.ApplyStatus(owner, effect, effectPower, effectDuration);
+                return;
+            }
+
+            SkillObject obstacle = other.GetComponentInParent<SkillObject>();
+            if (obstacle != null && owner != null && obstacle.Team != owner.Team)
+            {
+                obstacle.ApplyStatus(owner, effect, effectPower, effectDuration);
+            }
         }
 
         private void OnTriggerStay2D(Collider2D other)
@@ -75,7 +84,8 @@ namespace AOG.Duel
             SkillObject obstacle = other.GetComponentInParent<SkillObject>();
             if (obstacle != null && owner != null && obstacle.Team != owner.Team)
             {
-                obstacle.TakeDamage(damage, owner);
+                Vector2 hitDir = (Vector2)(obstacle.transform.position - transform.position).normalized;
+                obstacle.TakeDamage(damage, owner, hitDir, effect, effectPower, effectDuration);
             }
         }
     }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: IceBow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
   bowId: bow_ice
-  displayName: Ice Bow
+  displayName: Frostbite
   icon: {fileID: 0}
   bowSprite: {fileID: -9145116389740409384, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   rarity: 3

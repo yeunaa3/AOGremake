@@ -13,6 +13,8 @@ namespace AOG.Duel
         [SerializeField, Min(0.1f)] private float healRadius = 5f;
         [Tooltip("Hiệu ứng phát ra mỗi khi kích hoạt hồi máu")]
         [SerializeField] private ParticleSystem healPulsePrefab;
+        [Tooltip("Hiệu ứng dấu cộng hồi máu xuất hiện trên từng mục tiêu được hồi")]
+        [SerializeField] private GameObject healTargetEffectPrefab;
 
         private float healTimer;
 
@@ -20,6 +22,9 @@ namespace AOG.Duel
         {
             base.Update();
             if (isDead) return;
+
+            // Nếu đang bị đóng băng (Freeze), tạm dừng phát xung hồi máu
+            if (IsFrozen) return;
 
             healTimer += Time.deltaTime;
             if (healTimer >= healInterval)
@@ -41,6 +46,7 @@ namespace AOG.Duel
                 {
                     owner.Stats.Heal(healAmount);
                     healedAny = true;
+                    SpawnHealEffect(owner.transform.position);
                 }
             }
 
@@ -53,6 +59,7 @@ namespace AOG.Duel
                 {
                     ally.Heal(healAmount);
                     healedAny = true;
+                    SpawnHealEffect(ally.transform.position);
                 }
             }
 
@@ -61,6 +68,15 @@ namespace AOG.Duel
                 ParticleSystem pulse = Instantiate(healPulsePrefab, transform.position, Quaternion.identity);
                 pulse.Play(true);
                 Destroy(pulse.gameObject, 1.5f);
+            }
+        }
+
+        private void SpawnHealEffect(Vector3 pos)
+        {
+            GameObject fx = healTargetEffectPrefab != null ? healTargetEffectPrefab : (healPulsePrefab != null ? healPulsePrefab.gameObject : null);
+            if (fx != null)
+            {
+                Instantiate(fx, pos, Quaternion.identity);
             }
         }
 

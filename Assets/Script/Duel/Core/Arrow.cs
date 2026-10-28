@@ -441,8 +441,11 @@ namespace AOG.Duel
             if (obstacle != null)
             {
                 if (obstacle.Team == owner.Team) return;
-                obstacle.TakeDamage(damage, owner);
-                CreateWorldEffect(transform.position);
+                Vector2 hitDir = body != null && body.linearVelocity.sqrMagnitude > 0.01f
+                    ? body.linearVelocity.normalized
+                    : (Vector2)transform.right;
+                obstacle.TakeDamage(damage, owner, hitDir, effect, effectPower, effectDuration);
+                CreateImpactEffects(contact);
                 Despawn();
                 return;
             }

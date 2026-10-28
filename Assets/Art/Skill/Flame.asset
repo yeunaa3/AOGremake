@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e7d6450081bc374590da90ff332f781, type: 3}
   m_Name: Flame
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
-  skillId: skill_id
-  displayName: Skill
-  description: 
+  skillId: Flame
+  displayName: Flame
+  description: "B\u1EAFn m\u1ED9t m\u0169i t\xEAn l\u1EEDa g\xE2y ch\xE1y v\xE0 thi\xEAu \u0111\u1ED1t m\u1EE5c ti\xEAu."
   icon: {fileID: -4817424462726612959, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 1
   cooldown: 8

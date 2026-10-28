@@ -48,6 +48,7 @@ namespace AOG.Duel
         public int Team => team;
         public PlayerController Enemy { get; private set; }
         public PlayerStats Stats => stats;
+        public PlayerMove Move => move;
         public Gear Gear => gear;
         public PlayerAction Action => action;
         public PlayerAnim Anim => anim;
@@ -131,11 +132,13 @@ namespace AOG.Duel
         public void ResetPlayer()
         {
             playing = false;
+            StopRestHeal();
             move.Match(false);
             action.ResetAction();
             autoShoot.ResetAttack();
             stats.ResetAll();
             anim.ResetAnimation();
+            StopRestHeal();
             poweredArrowCount = 0;
             arrowBuff = null;
             arrowBuffSkillSlot = -1;
@@ -281,8 +284,74 @@ namespace AOG.Duel
             }
         }
 
+        public void SpawnSingleVolley(SpawnData data, int skillSlot)
+        {
+            ExecuteSingleVolley(data, skillSlot);
+        }
+
+        private Coroutine restHealCoroutine;
+
+        public void StartRestHeal(int healPerTick, float interval, GameObject vfxPrefab)
+        {
+            StopRestHeal();
+            restHealCoroutine = StartCoroutine(RestHealRoutine(healPerTick, interval, vfxPrefab));
+        }
+
+        public void StopRestHeal()
+        {
+            if (restHealCoroutine != null)
+            {
+                StopCoroutine(restHealCoroutine);
+                restHealCoroutine = null;
+            }
+        }
+
+        private IEnumerator RestHealRoutine(int healPerTick, float interval, GameObject vfxPrefab)
+        {
+            float waitSec = Mathf.Max(0.1f, interval);
+            while (Alive)
+            {
+                yield return new WaitForSeconds(waitSec);
+                if (!Alive) break;
+                if (healPerTick > 0) stats.Heal(healPerTick);
+                if (vfxPrefab != null)
+                {
+                    Instantiate(vfxPrefab, transform.position, Quaternion.identity);
+                }
+            }
+            restHealCoroutine = null;
+        }
+
         // Hệ spawn mới: prefab tự quyết định hành vi; Skill chỉ chọn điểm xuất hiện và số lượng.
         public void Spawn(SpawnData data, int skillSlot)
+        {
+            if (data == null || data.prefab == null || Enemy == null) return;
+
+            if (data.volleyCount > 1)
+            {
+                StartCoroutine(SpawnVolleysRoutine(data, skillSlot));
+            }
+            else
+            {
+                ExecuteSingleVolley(data, skillSlot);
+            }
+        }
+
+        private IEnumerator SpawnVolleysRoutine(SpawnData data, int skillSlot)
+        {
+            int volleys = Mathf.Max(1, data.volleyCount);
+            for (int v = 0; v < volleys; v++)
+            {
+                if (!Alive || Enemy == null) yield break;
+                ExecuteSingleVolley(data, skillSlot);
+                if (v < volleys - 1 && data.volleyInterval > 0f)
+                {
+                    yield return new WaitForSeconds(data.volleyInterval);
+                }
+            }
+        }
+
+        private void ExecuteSingleVolley(SpawnData data, int skillSlot)
         {
             if (data == null || data.prefab == null || Enemy == null) return;
 
@@ -332,6 +401,7 @@ namespace AOG.Duel
                         shotGroundLifetime: data.groundDuration);
                     gear?.TriggerOnShoot(projectile, true);
                 }
+                PlayBowShotEffect();
                 return;
             }
 
@@ -342,6 +412,13 @@ namespace AOG.Duel
                 GameObject created = Instantiate(data.prefab, position, Quaternion.identity);
                 SkillObject skillObject = created.GetComponent<SkillObject>();
                 if (skillObject != null) skillObject.Setup(this);
+
+                TrapObject trapObject = created.GetComponent<TrapObject>();
+                if (trapObject != null)
+                {
+                    if (count > 1) trapObject.IsClusterChild = true;
+                    trapObject.Setup(this);
+                }
             }
         }
 
@@ -395,6 +472,7 @@ namespace AOG.Duel
         public void Win()
         {
             playing = false;
+            StopRestHeal();
             move.Match(false);
             HideHeldArrows();
             action.Stop();
@@ -406,6 +484,7 @@ namespace AOG.Duel
         public void Die()
         {
             playing = false;
+            StopRestHeal();
             move.Match(false);
             if (stats.Alive) stats.Kill();
             action.Die();

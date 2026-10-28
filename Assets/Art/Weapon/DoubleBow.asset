@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DoubleBow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
   bowId: bow_double
-  displayName: Double Bow
+  displayName: Eclipse
   icon: {fileID: 0}
   bowSprite: {fileID: 3424275523366626701, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   rarity: 2

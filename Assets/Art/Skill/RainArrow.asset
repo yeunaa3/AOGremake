@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e7d6450081bc374590da90ff332f781, type: 3}
   m_Name: RainArrow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
-  skillId: skill_id
-  displayName: Skill
-  description: 
+  skillId: RainArrow
+  displayName: Rain Arrow
+  description: "B\u1EAFn m\u01B0a t\xEAn t\u1EEB tr\xEAn tr\u1EDDi xu\u1ED1ng khu v\u1EF1c m\u1EE5c ti\xEAu."
   icon: {fileID: -7120867972998118134, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 2
   cooldown: 12

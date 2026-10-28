@@ -27,6 +27,11 @@ namespace AOG.Duel
         public Vector2 offset;
         [Tooltip("Bán kính điểm đích quanh địch. Falling rải theo chiều ngang; các đường bay khác rải theo chiều dọc.")]
         [Min(0f)] public float targetRadius;
+        [Header("Bắn Nhiều Đợt (Multi-Volley / Multi-Burst)")]
+        [Tooltip("Số đợt bắn liên tiếp (M lần). 1 = bắn 1 đợt như cũ. Nếu > 1, sẽ bắn N mũi tên M lần.")]
+        [Min(1)] public int volleyCount = 1;
+        [Tooltip("Khoảng cách thời gian giữa mỗi đợt bắn (giây).")]
+        [Min(0.01f)] public float volleyInterval = 0.15f;
         [Header("Arrow Rain (Falling Path Only)")]
         [FormerlySerializedAs("randomizeFalling")]
         public bool randomizeRain;
@@ -94,14 +99,28 @@ namespace AOG.Duel
     [System.Serializable]
     public sealed class BuffData
     {
+        [Tooltip("Hồi máu tức thì cho bản thân ngay khi ấn.")]
         [Min(0)] public int heal;
+        [Tooltip("Thời lượng hiệu lực của buff (giây).")]
         [Min(0f)] public float duration;
         [Min(0f)] public float moveMultiplier = 1f;
         [Range(0f, 1f)] public float dodgeChance;
         [Min(0.01f)] public float projectileSpeedMultiplier = 1f;
+        [Tooltip("Bất tử: Không bị ảnh hưởng bởi sát thương hay hiệu ứng trong thời gian buff.")]
         public bool invulnerable;
+        [Tooltip("Xóa sạch toàn bộ hiệu ứng bất lợi đang có trên người.")]
         public bool cleanse;
+        [Tooltip("Miễn nhiễm mọi hiệu ứng bất lợi mới trong thời gian buff.")]
         public bool statusImmune;
+        [Header("Hồi Máu Nghỉ Ngơi / Theo Chu Kỳ (Rest / HoT)")]
+        [Tooltip("Bật nếu đây là chiêu nghỉ ngơi (Rest) hồi máu định kỳ.")]
+        public bool isRestSkill;
+        [Tooltip("Lượng máu hồi mỗi 1 giây (hoặc mỗi chu kỳ).")]
+        [Min(0)] public int healPerSecond;
+        [Tooltip("Chu kỳ hồi máu (mặc định 1 giây).")]
+        [Min(0.1f)] public float healInterval = 1f;
+        [Tooltip("Prefab hiệu ứng VFX khi hồi máu hoặc khi có buff.")]
+        public GameObject vfxPrefab;
     }
 
     public abstract class SkillData : ScriptableObject
@@ -147,6 +166,8 @@ namespace AOG.Duel
         public virtual bool Passive => false;
         public virtual bool UseOnce => true;
         public float ShowVisualTime => showTime;
+        public virtual int VolleyCount => 1;
+        public virtual float VolleyInterval => 0f;
         public abstract SkillType Type { get; }
         public virtual void Begin(SkillCtx context) { }
         public virtual void ShowVisual(SkillCtx context) { }

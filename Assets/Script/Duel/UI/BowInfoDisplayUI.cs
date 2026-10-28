@@ -18,8 +18,8 @@ namespace AOG.Duel
         [SerializeField] private SkillCardSlotUI equippedBowSlot;
 
         [Header("Tiêu Đề Cung")]
-        [SerializeField] private TextMeshPro rarityText;
-        [SerializeField] private TextMeshPro nameText;
+        [SerializeField] private TMP_Text rarityText;
+        [SerializeField] private TMP_Text nameText;
 
         [Header("3 Ô Thông Số")]
         [SerializeField] private GameObject damageBox;
@@ -105,16 +105,24 @@ namespace AOG.Duel
                 equippedBowSlot.SetMaskInteraction(SpriteMaskInteraction.None);
             }
 
-            // 2. Độ hiếm (Rarity) và Tên cung (Name) - Giữ nguyên vị trí người dùng đã chỉnh trong Scene
+            // 2. Độ hiếm (Rarity) và Tên cung (Name) - Cập nhật đồng bộ cả reference lẫn NameBow / Rare trong Stand
+            var (foundName, foundRare) = FindStandLabels(transform);
+            ApplyRarityAndName(foundName != null ? foundName : (nameText != null ? nameText.gameObject : null),
+                               foundRare != null ? foundRare : (rarityText != null ? rarityText.gameObject : null),
+                               bow);
+
             if (rarityText != null)
             {
-                rarityText.text = bow.Rarity.ToString().ToUpper();
-                rarityText.color = GetRarityColor(bow.Rarity);
+                var visual = GetRarityVisual(bow.Rarity);
+                rarityText.text = visual.label;
+                rarityText.color = visual.color;
             }
 
             if (nameText != null)
             {
                 nameText.text = bow.DisplayName;
+                if (nameText.fontSize < 2f) nameText.fontSize = 2f;
+                nameText.textWrappingMode = TextWrappingModes.NoWrap;
             }
 
             // 3. Ô 1: Sát thương (Damage) - Chỉ cập nhật nội dung số, giữ nguyên vị trí của người dùng
@@ -154,20 +162,131 @@ namespace AOG.Duel
             }
         }
 
-        public static Color GetRarityColor(BowRarity rarity)
+        public static (string label, Color color) GetRarityVisual(BowRarity rarity)
         {
             switch (rarity)
             {
                 case BowRarity.Common:
-                    return new Color(0.85f, 0.85f, 0.85f, 1f); // Xám bạc
+                    // Màu sáng (Trắng sáng / bạc sáng)
+                    return ("Common", new Color(0.95f, 0.95f, 0.95f, 1f));
                 case BowRarity.Rare:
-                    return new Color(0.3f, 0.65f, 1f, 1f); // Xanh dương
+                    // Xanh nước biển (Cyan / Azure Blue)
+                    return ("Rare", new Color(0.18f, 0.65f, 1f, 1f));
                 case BowRarity.Heroic:
-                    return new Color(0.75f, 0.4f, 1f, 1f); // Tím
+                    // Đỏ (Vibrant Red)
+                    return ("Heroic", new Color(1f, 0.25f, 0.25f, 1f));
                 case BowRarity.Legendary:
-                    return new Color(1f, 0.8f, 0.2f, 1f); // Vàng kim (Gold)
+                    // Vàng (Gold / Bright Yellow)
+                    return ("Legendary", new Color(1f, 0.82f, 0.1f, 1f));
                 default:
-                    return Color.white;
+                    return (rarity.ToString(), Color.white);
+            }
+        }
+
+        public static Color GetRarityColor(BowRarity rarity) => GetRarityVisual(rarity).color;
+        public static string GetRarityName(BowRarity rarity) => GetRarityVisual(rarity).label;
+
+        public static void SetTextAndColor(GameObject targetObj, string text, Color color)
+        {
+            if (targetObj == null) return;
+
+            // 1. TMP_Text (hỗ trợ cả TextMeshPro 3D lẫn TextMeshProUGUI UI)
+            TMP_Text tmp = targetObj.GetComponentInChildren<TMP_Text>(true);
+            if (tmp != null)
+            {
+                tmp.text = text;
+                tmp.color = color;
+                return;
+            }
+
+            // 2. UnityEngine.UI.Text
+            UnityEngine.UI.Text uiText = targetObj.GetComponentInChildren<UnityEngine.UI.Text>(true);
+            if (uiText != null)
+            {
+                uiText.text = text;
+                uiText.color = color;
+                return;
+            }
+
+            // 3. TextMesh (Legacy 3D Text)
+            TextMesh tm = targetObj.GetComponentInChildren<TextMesh>(true);
+            if (tm != null)
+            {
+                tm.text = text;
+                tm.color = color;
+                return;
+            }
+
+            // 4. SpriteRenderer nếu đối tượng có Sprite
+            SpriteRenderer sr = targetObj.GetComponentInChildren<SpriteRenderer>(true);
+            if (sr != null)
+            {
+                sr.color = color;
+            }
+        }
+
+        public static (GameObject nameObj, GameObject rareObj) FindStandLabels(Transform standTransform)
+        {
+            if (standTransform == null) return (null, null);
+
+            GameObject nameObj = null;
+            GameObject rareObj = null;
+
+            // 1. Tìm trực tiếp theo con cấp 1
+            Transform nt = standTransform.Find("NameBow") ?? 
+                           standTransform.Find("BowName") ?? 
+                           standTransform.Find("BowNameText") ?? 
+                           standTransform.Find("Name");
+            if (nt != null) nameObj = nt.gameObject;
+
+            Transform rt = standTransform.Find("Rare") ?? 
+                           standTransform.Find("Rarity") ?? 
+                           standTransform.Find("RarityText");
+            if (rt != null) rareObj = rt.gameObject;
+
+            // 2. Tìm đệ quy trong tất cả các con nếu chưa thấy
+            if (nameObj == null || rareObj == null)
+            {
+                Transform[] allChildren = standTransform.GetComponentsInChildren<Transform>(true);
+                for (int i = 0; i < allChildren.Length; i++)
+                {
+                    Transform c = allChildren[i];
+                    if (c == standTransform) continue;
+                    string n = c.name.ToLower();
+                    if (nameObj == null && (n == "namebow" || n == "bowname" || n == "bownametext" || n == "name"))
+                    {
+                        nameObj = c.gameObject;
+                    }
+                    if (rareObj == null && (n == "rare" || n == "rarity" || n == "raritytext"))
+                    {
+                        rareObj = c.gameObject;
+                    }
+                }
+            }
+
+            return (nameObj, rareObj);
+        }
+
+        public static void ApplyRarityAndName(GameObject nameObj, GameObject rareObj, BowData bow)
+        {
+            if (bow == null) return;
+
+            var visual = GetRarityVisual(bow.Rarity);
+
+            if (nameObj != null)
+            {
+                SetTextAndColor(nameObj, bow.DisplayName, Color.white);
+                TMP_Text tmp = nameObj.GetComponentInChildren<TMP_Text>(true);
+                if (tmp != null)
+                {
+                    if (tmp.fontSize < 2f) tmp.fontSize = 2f;
+                    tmp.textWrappingMode = TextWrappingModes.NoWrap;
+                }
+            }
+
+            if (rareObj != null)
+            {
+                SetTextAndColor(rareObj, visual.label, visual.color);
             }
         }
 
@@ -239,28 +358,40 @@ namespace AOG.Duel
                 EnsureBoxTexts(abilityBox.transform, ref abilityLabelText, ref abilityNameText, font);
             }
 
-            // 6. Rarity Text - Giữ nguyên 100% Transform do người dùng căn chỉnh
+            // 6. Rarity Text & Bow Name Text - Tự động tìm NameBow và Rare trong Stand
+            if (rarityText == null || nameText == null)
+            {
+                var (foundName, foundRare) = FindStandLabels(transform);
+                if (rarityText == null && foundRare != null)
+                {
+                    rarityText = foundRare.GetComponentInChildren<TMP_Text>(true);
+                }
+                if (nameText == null && foundName != null)
+                {
+                    nameText = foundName.GetComponentInChildren<TMP_Text>(true);
+                }
+            }
+
             if (rarityText == null)
             {
                 Transform rt = transform.Find("RarityText");
-                if (rt != null) rarityText = rt.GetComponent<TextMeshPro>();
+                if (rt != null) rarityText = rt.GetComponent<TMP_Text>();
             }
             if (rarityText != null)
             {
                 if (font != null && rarityText.font == null) rarityText.font = font;
-                if (rarityText.sortingOrder < 3) rarityText.sortingOrder = 5;
+                if (rarityText is TextMeshPro tmpR && tmpR.sortingOrder < 3) tmpR.sortingOrder = 5;
             }
 
-            // 7. Bow Name Text - Giữ nguyên 100% Transform do người dùng căn chỉnh
             if (nameText == null)
             {
-                Transform nt = transform.Find("BowNameText");
-                if (nt != null) nameText = nt.GetComponent<TextMeshPro>();
+                Transform nt = transform.Find("BowNameText") ?? transform.Find("NameBow");
+                if (nt != null) nameText = nt.GetComponent<TMP_Text>();
             }
             if (nameText != null)
             {
                 if (font != null && nameText.font == null) nameText.font = font;
-                if (nameText.sortingOrder < 3) nameText.sortingOrder = 5;
+                if (nameText is TextMeshPro tmpN && tmpN.sortingOrder < 3) tmpN.sortingOrder = 5;
             }
         }
 

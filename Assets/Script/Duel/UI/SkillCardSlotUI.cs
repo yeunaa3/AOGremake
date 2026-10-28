@@ -81,6 +81,11 @@ namespace AOG.Duel
             currentBow = null;
             if (font != null) defaultFont = font;
             EnsureHierarchyAndComponents();
+            if (defaultFont != null)
+            {
+                if (levelText != null && levelText.font == null) levelText.font = defaultFont;
+                if (progressText != null && progressText.font == null) progressText.font = defaultFont;
+            }
 
             if (skill != null)
             {
@@ -169,6 +174,11 @@ namespace AOG.Duel
             currentBow = bow;
             if (font != null) defaultFont = font;
             EnsureHierarchyAndComponents();
+            if (defaultFont != null)
+            {
+                if (levelText != null && levelText.font == null) levelText.font = defaultFont;
+                if (progressText != null && progressText.font == null) progressText.font = defaultFont;
+            }
 
             if (bow != null)
             {
@@ -405,6 +415,14 @@ namespace AOG.Duel
             {
                 baseRenderer = GetComponent<SpriteRenderer>();
                 if (baseRenderer != null) baseRenderer.sortingOrder = 2;
+            }
+            if (cardBaseSprite == null && baseRenderer != null && baseRenderer.sprite != null)
+            {
+                cardBaseSprite = baseRenderer.sprite;
+            }
+            if (emptyPlaceholderSprite == null && baseRenderer != null && baseRenderer.sprite != null)
+            {
+                emptyPlaceholderSprite = baseRenderer.sprite;
             }
 
             // 1. Frame skill
