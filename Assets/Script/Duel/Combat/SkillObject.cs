@@ -189,6 +189,7 @@ namespace AOG.Duel
         /// </summary>
         public void OrientTowardsEnemy()
         {
+            if (this is RollingBoulder) return;
             if (owner == null) return;
 
             float enemyDirection = owner.Face;
@@ -378,7 +379,14 @@ namespace AOG.Duel
                 Destroy(ps.gameObject, 1.5f);
             }
 
-            Destroy(gameObject);
+            if (SummonPool.Instance != null)
+            {
+                SummonPool.Instance.Return(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         protected void PlayHitReaction(Vector2 hitDirection)
@@ -562,9 +570,14 @@ namespace AOG.Duel
                 hitReactionRoutine = null;
                 ResetColors();
             }
-            if (activeBurnParticles != null) activeBurnParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            if (activePoisonParticles != null) activePoisonParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            if (activeFreezeParticles != null) activeFreezeParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            CleanupStatusParticles();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+            }
+
+
         }
 
         protected virtual void OnDestroy()
@@ -619,6 +632,7 @@ namespace AOG.Duel
             if (other == null) return false;
             int layerBit = 1 << other.gameObject.layer;
             if ((groundLayers.value & layerBit) != 0) return true;
+            if (other.CompareTag("Ground")) return true;
             return string.Equals(LayerMask.LayerToName(other.gameObject.layer), "Ground",
                 System.StringComparison.OrdinalIgnoreCase);
         }

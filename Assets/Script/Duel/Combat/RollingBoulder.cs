@@ -36,13 +36,34 @@ namespace AOG.Duel
         private float direction = 1f;
         private float lastBounceTime;
         private float nextContactTime;
+        private float initialLeftBoundary;
+        private float initialRightBoundary;
+        private bool boundaryInitialized;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            if (!boundaryInitialized)
+            {
+                initialLeftBoundary = leftBoundary;
+                initialRightBoundary = rightBoundary;
+                boundaryInitialized = true;
+            }
+        }
 
         public override void Setup(PlayerController source)
         {
             base.Setup(source);
+            if (boundaryInitialized)
+            {
+                leftBoundary = initialLeftBoundary;
+                rightBoundary = initialRightBoundary;
+            }
+            lastBounceTime = 0f;
+            nextContactTime = 0f;
             if (owner != null)
             {
-                // Mặc định quay mặt và lăn về phía địch dựa vào Aim Target của địch
+                // Mặc định hướng lăn về phía đối thủ
                 float enemyDirection = owner.Face;
                 if (owner.Enemy != null)
                 {
@@ -55,33 +76,62 @@ namespace AOG.Duel
                 }
                 direction = enemyDirection;
 
+                // GIỮ NGUYÊN SCALE DƯƠNG:
+                // Đối với hình cầu / con lăn tròn, xoay tròn Transform con (visualTransform) trong không gian
+                // khi Transform cha có localScale.x âm sẽ tạo hiệu ứng biến dạng kéo dẹt (shear / elip).
+                // Do đó luôn giữ localScale dương đồng nhất, chiều lăn và xoay tròn do direction (+1 hoặc -1) quyết định.
                 Vector3 s = transform.localScale;
-                float absX = Mathf.Abs(s.x);
-                s.x = (direction >= 0f) ? absX : -absX;
-                transform.localScale = s;
+                transform.localScale = new Vector3(Mathf.Abs(s.x), Mathf.Abs(s.y), Mathf.Abs(s.z));
 
                 // Căn chỉnh biên nảy tọa độ theo vị trí của người triệu hồi so với đối thủ
-                // (Không phụ thuộc vào teamId; nếu xuất hiện bên phải đối thủ thì dùng nửa sân bên phải)
                 bool isSpawnedOnRightSide = (owner.Enemy != null && transform.position.x > owner.Enemy.transform.position.x) || transform.position.x > 0f;
+                float boundaryA = Mathf.Abs(initialLeftBoundary);
+                float boundaryB = Mathf.Abs(initialRightBoundary);
+                float minBound = Mathf.Min(boundaryA, boundaryB);
+                float maxBound = Mathf.Max(boundaryA, boundaryB);
                 if (isSpawnedOnRightSide)
                 {
-                    float oldLeft = leftBoundary;
-                    float oldRight = rightBoundary;
-                    leftBoundary = -oldRight;
-                    rightBoundary = -oldLeft;
-                    if (leftBoundary > rightBoundary)
-                    {
-                        float tmp = leftBoundary;
-                        leftBoundary = rightBoundary;
-                        rightBoundary = tmp;
-                    }
+                    leftBoundary = minBound;
+                    rightBoundary = maxBound;
+                }
+                else
+                {
+                    leftBoundary = -maxBound;
+                    rightBoundary = -minBound;
                 }
             }
+
             if (visualTransform == null)
             {
                 visualTransform = transform.Find("Visual");
                 if (visualTransform == null && mainVisual != null)
                     visualTransform = mainVisual.transform;
+            }
+
+            if (visualTransform != null)
+            {
+                visualTransform.localScale = Vector3.one;
+                visualTransform.localRotation = Quaternion.identity;
+            }
+
+            // Tự động tìm mặt đất ngay bên dưới vị trí triệu hồi để đặt con lăn xuống đất lập tức,
+            // tránh trường hợp rơi từ trên trời xuống gây hiện tượng lăn lơ lửng trên không
+            float colRadius = 0.7f;
+            CircleCollider2D circle = GetComponent<CircleCollider2D>();
+            if (circle != null)
+            {
+                colRadius = circle.radius * Mathf.Abs(transform.lossyScale.x);
+            }
+            int mask = groundLayers.value != 0 ? groundLayers.value : (1 << 8);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 30f, mask);
+            if (hit.collider != null)
+            {
+                transform.position = new Vector3(transform.position.x, hit.point.y + colRadius + 0.05f, transform.position.z);
+                hasLanded = true;
+                if (rb != null)
+                {
+                    rb.linearVelocity = Vector2.zero;
+                }
             }
 
             // Tự động tắt Animator nếu có để code tự xoay tròn, người dùng không cần phải tạo animation
@@ -96,6 +146,16 @@ namespace AOG.Duel
         {
             base.Update();
             if (isDead) return;
+
+            // Nếu đang rơi chưa chạm đất, chỉ rơi tự do theo trọng lực Y, KHÔNG lăn ngang trên trời
+            if (!hasLanded)
+            {
+                if (rb != null)
+                {
+                    rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+                }
+                return;
+            }
 
             // Nếu đang bị đóng băng (Freeze), dừng toàn bộ lăn và xoay tròn
             if (IsFrozen)
@@ -138,7 +198,8 @@ namespace AOG.Duel
                 if (rotSpeed > 0f)
                 {
                     // Xoay trong không gian thế giới (Space.World) quanh trục forward (Z)
-                    // Lăn sang phải -> xoay theo chiều kim đồng hồ; Lăn sang trái -> xoay ngược chiều kim đồng hồ
+                    // Lăn sang phải (direction = 1) -> xoay theo chiều kim đồng hồ (-Z)
+                    // Lăn sang trái (direction = -1) -> xoay ngược chiều kim đồng hồ (+Z)
                     visualTransform.Rotate(Vector3.forward, -direction * rotSpeed * Time.deltaTime, Space.World);
                 }
             }
@@ -245,11 +306,8 @@ namespace AOG.Duel
         {
             direction = -direction;
             lastBounceTime = Time.time;
-
-            // Đổi hướng nhìn: tự scale x * với âm 1 theo yêu cầu người chơi
-            Vector3 s = transform.localScale;
-            s.x = -s.x;
-            transform.localScale = s;
+            // GIỮ NGUYÊN localScale DƯƠNG! Không đổi dấu transform.localScale.x
+            // vì hình tròn xoay Space.World trong parent có scale.x âm sẽ bị biến dạng elip (dẹt)
         }
 
         private void TryDealContactDamage(Collider2D other)

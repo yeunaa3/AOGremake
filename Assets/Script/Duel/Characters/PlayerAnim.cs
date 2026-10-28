@@ -22,6 +22,27 @@ namespace AOG.Duel
 
         [Header("Particle trạng thái trên người")]
         [SerializeField] private StatusParticleSetting[] statusParticles;
+        [Header("Foot Smoke Prefabs")]
+        [Tooltip("Prefab khói phía trước khi nhân vật dừng lại.")]
+        [SerializeField] private GameObject smokeAheadPrefab;
+        [Tooltip("Prefab khói phía sau khi bắt đầu di chuyển và lặp lại mỗi 1s.")]
+        [SerializeField] private GameObject smokeBackPrefab;
+        [Tooltip("Prefab khói ở giữa chân khi nhảy bằng skill Jump.")]
+        [SerializeField] private GameObject smokeMidPrefab;
+
+        [Header("Foot Smoke Spawn Points")]
+        [Tooltip("Điểm xuất hiện khói dừng lại (SmokeAhead).")]
+        [SerializeField] private Transform smokeAheadPoint;
+        [Tooltip("Điểm xuất hiện khói chạy (SmokeBack).")]
+        [SerializeField] private Transform smokeBackPoint;
+        [Tooltip("Điểm xuất hiện khói nhảy (SmokeMid).")]
+        [SerializeField] private Transform smokeMidPoint;
+
+        private PlayerMove move;
+        private bool wasMoving;
+        private float moveSmokeTimer;
+        private float lastJumpSmokeTime = -1f;
+
         private Transform visual;
         private float normalX;
         private Transform[] frozenParts;
@@ -33,6 +54,7 @@ namespace AOG.Duel
         private void Awake()
         {
             stats = GetComponent<PlayerStats>();
+            move = GetComponent<PlayerMove>();
             animator = GetComponentInChildren<Animator>();
             visual = animator == null ? null : animator.transform;
             if (visual == null) return;
@@ -45,7 +67,16 @@ namespace AOG.Duel
                 foreach (Animator item in effect.GetComponentsInChildren<Animator>(true))
                     if (item.transform != effect) effects.Add(item);
                 effectAnimators = effects.ToArray();
+
+                if (smokeAheadPoint == null) smokeAheadPoint = effect.Find("SmokeAhead");
+                if (smokeBackPoint == null) smokeBackPoint = effect.Find("SmokeBack");
+                if (smokeMidPoint == null) smokeMidPoint = effect.Find("SmokeMid");
             }
+
+            if (smokeAheadPrefab == null) smokeAheadPrefab = Resources.Load<GameObject>("SmokeAhead");
+            if (smokeBackPrefab == null) smokeBackPrefab = Resources.Load<GameObject>("SmokeBack");
+            if (smokeMidPrefab == null) smokeMidPrefab = Resources.Load<GameObject>("SmokeMid");
+
             InitializeStatusParticles(effect != null ? effect : visual);
 
             normalX = Mathf.Abs(visual.localScale.x);
@@ -82,6 +113,7 @@ namespace AOG.Duel
             EffectBool("IsBurning", burning);
             UpdateStatusParticles();
             EffectBool("IsPoisoned", stats != null && stats.Poisoned);
+            UpdateFootSmoke(moving);
 
             if (frozen && !poseFrozen)
             {
@@ -135,6 +167,7 @@ namespace AOG.Duel
 
         private void OnDisable()
         {
+            moveSmokeTimer = 0f;
             if (statusParticles == null) return;
             foreach (StatusParticleSetting setting in statusParticles)
             {
@@ -143,6 +176,62 @@ namespace AOG.Duel
                 if (setting.instance != null)
                     setting.instance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             }
+        }
+
+        private void UpdateFootSmoke(bool moving)
+        {
+            bool isGrounded = move == null || !move.IsAirborne;
+
+            // 1. SmokeAhead: Khi dừng lại (từ đang chạy -> đứng yên trên mặt đất)
+            if (wasMoving && !moving && isGrounded)
+            {
+                SpawnSmoke(smokeAheadPrefab, smokeAheadPoint, -0.7f);
+            }
+
+            // 2. SmokeBack: Khi bắt đầu di chuyển & lặp lại mỗi 1s khi đang di chuyển trên đất
+            if (moving && isGrounded)
+            {
+                if (!wasMoving)
+                {
+                    // Vừa bắt đầu di chuyển: kích hoạt ngay lập tức
+                    moveSmokeTimer = 0f;
+                    SpawnSmoke(smokeBackPrefab, smokeBackPoint, 0.8f);
+                }
+                else
+                {
+                    // Đang tiếp tục di chuyển: đếm 1s nổ 1 lần
+                    moveSmokeTimer += Time.deltaTime;
+                    if (moveSmokeTimer >= 1.0f)
+                    {
+                        moveSmokeTimer = 0f;
+                        SpawnSmoke(smokeBackPrefab, smokeBackPoint, 0.8f);
+                    }
+                }
+            }
+            else
+            {
+                moveSmokeTimer = 0f;
+            }
+
+            wasMoving = moving;
+        }
+
+        // 3. SmokeMid: Kích hoạt khi nhảy bằng skill Jump
+        public void PlayJumpSmoke()
+        {
+            if (Time.time - lastJumpSmokeTime < 0.2f) return;
+            lastJumpSmokeTime = Time.time;
+            SpawnSmoke(smokeMidPrefab, smokeMidPoint, 1.0f);
+        }
+
+        private void SpawnSmoke(GameObject prefab, Transform point, float baseScaleX)
+        {
+            if (prefab == null) return;
+            Vector3 spawnPos = point != null ? point.position : transform.position;
+            float faceSign = visual != null ? Mathf.Sign(visual.localScale.x) : 1f;
+            Vector3 scale = prefab.transform.localScale;
+            scale.x = (baseScaleX != 0f ? baseScaleX : scale.x) * faceSign;
+            EffectPool.Instance.Spawn(prefab, spawnPos, Quaternion.identity, scale);
         }
 
         // Animator chạy trước LateUpdate, nên đặt lại tư thế tại đây sẽ giữ nguyên từng khớp.

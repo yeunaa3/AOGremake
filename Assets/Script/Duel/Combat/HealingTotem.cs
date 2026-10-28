@@ -18,6 +18,12 @@ namespace AOG.Duel
 
         private float healTimer;
 
+        public override void Setup(PlayerController source)
+        {
+            base.Setup(source);
+            healTimer = 0f;
+        }
+
         protected override void Update()
         {
             base.Update();

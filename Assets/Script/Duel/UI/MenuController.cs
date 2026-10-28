@@ -29,9 +29,21 @@ namespace AOG.Duel
         [SerializeField] private SpriteRenderer[] pedestalSkillIcons;
 
         [Header("Tên Màn Đấu")]
+        [SerializeField] private string[] pveSceneNames = new string[] { "Map1", "Map2" };
         [SerializeField] private string pveSceneName = "Map1";
         [SerializeField] private string pvpSceneName = "Map2";
         [SerializeField] private string loadoutSceneName = "Loadout";
+
+        [Header("Nhạc Nền Menu (Lobby)")]
+        [SerializeField] private AudioSource audioSource;
+        [Tooltip("Nhạc nền Lobby Angel (BGM_Lobby_Angel)")]
+        [SerializeField] private AudioClip angelLobbyBgm;
+        [Tooltip("Âm lượng nhạc nền Angel")]
+        [SerializeField, Range(0f, 1f)] private float angelLobbyVolume = 0.5f;
+        [Tooltip("Nhạc nền Lobby Devil (BGM_Lobby_Devil)")]
+        [SerializeField] private AudioClip devilLobbyBgm;
+        [Tooltip("Âm lượng nhạc nền Devil")]
+        [SerializeField, Range(0f, 1f)] private float devilLobbyVolume = 0.5f;
 
         private void Awake()
         {
@@ -73,6 +85,41 @@ namespace AOG.Duel
 
             RefreshPedestalSkillIcons();
             UpdateStandBowLabels(PlayerLoadoutManager.HasInstance ? PlayerLoadoutManager.Instance.EquippedBow : null);
+            SetupMenuMusic();
+        }
+
+        private void SetupMenuMusic()
+        {
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+            }
+
+#if UNITY_EDITOR
+            if (angelLobbyBgm == null)
+                angelLobbyBgm = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/BGM_Lobby_Angel.ogg");
+            if (devilLobbyBgm == null)
+                devilLobbyBgm = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/BGM_Lobby_Devil.ogg");
+#endif
+
+            bool chooseAngel = Random.value < 0.5f;
+            AudioClip chosen = chooseAngel ? angelLobbyBgm : devilLobbyBgm;
+            float vol = chooseAngel ? angelLobbyVolume : devilLobbyVolume;
+            if (chosen == null)
+            {
+                chosen = chooseAngel ? devilLobbyBgm : angelLobbyBgm;
+                vol = chooseAngel ? devilLobbyVolume : angelLobbyVolume;
+            }
+
+            if (chosen != null)
+            {
+                audioSource.clip = chosen;
+                audioSource.volume = vol;
+                audioSource.loop = true;
+                audioSource.playOnAwake = false;
+                audioSource.Play();
+            }
         }
 
         private void OnDestroy()
@@ -250,7 +297,18 @@ namespace AOG.Duel
 
         public void OpenBowSelection() => LoadoutSceneController.Open(loadoutSceneName, LoadoutSceneController.LoadoutTab.Bow);
         public void OpenSkillSelection(int targetSlot = 0) => LoadoutSceneController.Open(loadoutSceneName, LoadoutSceneController.LoadoutTab.Skill);
-        public void LoadPVEScene() => SceneManager.LoadScene(pveSceneName);
+        public void LoadPVEScene()
+        {
+            if (pveSceneNames != null && pveSceneNames.Length > 0)
+            {
+                int index = Random.Range(0, pveSceneNames.Length);
+                SceneManager.LoadScene(pveSceneNames[index]);
+            }
+            else
+            {
+                SceneManager.LoadScene(pveSceneName);
+            }
+        }
         public void LoadPVPScene() => SceneManager.LoadScene(pvpSceneName);
 
         private void HandleBowChanged(BowData newBow)

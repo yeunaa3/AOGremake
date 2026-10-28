@@ -29,7 +29,9 @@ namespace AOG.Duel
             if (state.shotCount >= shotsRequired)
             {
                 state.shotCount = 0;
-                GameObject trapObj = Object.Instantiate(trapPrefab);
+                GameObject trapObj = SummonPool.Instance != null
+                    ? SummonPool.Instance.Spawn(trapPrefab, Vector3.zero, Quaternion.identity)
+                    : Object.Instantiate(trapPrefab);
                 TrapObject trap = trapObj.GetComponent<TrapObject>();
                 if (trap != null)
                 {

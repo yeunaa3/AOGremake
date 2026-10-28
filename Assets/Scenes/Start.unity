@@ -534,7 +534,7 @@ MonoBehaviour:
   canvasGroupA: {fileID: 916000005}
   canvasGroupB: {fileID: 917000005}
   musicSource: {fileID: 910000003}
-  backgroundMusic: {fileID: 8300000, guid: eb5b7e0a0bb3e894b9dd7e1e25a6b4d9, type: 3}
+  backgroundMusic: {fileID: 8300000, guid: b0d8f8eef724abb489c5b5518275253a, type: 3}
   musicVolume: 0.5
   pressToStartUI: {fileID: 920000000}
   pressToStartCanvasGroup: {fileID: 920000002}

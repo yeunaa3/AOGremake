@@ -205,6 +205,7 @@ namespace AOG.Duel
         {
             move.Lock(true);
             move.Jump(direction, horizontalSpeed, jumpForce);
+            anim?.PlayJumpSmoke();
         }
 
         public void ShootSkill(ShotData shot, int skillSlot)
@@ -284,7 +285,10 @@ namespace AOG.Duel
             float first = -(Mathf.Max(1, count) - 1) * spacing * 0.5f;
             for (int i = 0; i < Mathf.Max(1, count); i++)
             {
-                GameObject created = Instantiate(prefab, center + Vector2.right * (first + i * spacing), Quaternion.identity);
+                Vector2 position = center + Vector2.right * (first + i * spacing);
+                GameObject created = SummonPool.Instance != null
+                    ? SummonPool.Instance.Spawn(prefab, position, Quaternion.identity)
+                    : Instantiate(prefab, position, Quaternion.identity);
                 SkillObject skillObject = created.GetComponent<SkillObject>();
                 if (skillObject != null) skillObject.Setup(this);
             }
@@ -415,7 +419,9 @@ namespace AOG.Duel
             for (int i = 0; i < count; i++)
             {
                 Vector2 position = start + Vector2.right * (first + i * data.objectSpacing);
-                GameObject created = Instantiate(data.prefab, position, Quaternion.identity);
+                GameObject created = SummonPool.Instance != null
+                    ? SummonPool.Instance.Spawn(data.prefab, position, Quaternion.identity)
+                    : Instantiate(data.prefab, position, Quaternion.identity);
                 SkillObject skillObject = created.GetComponent<SkillObject>();
                 if (skillObject != null) skillObject.Setup(this);
 

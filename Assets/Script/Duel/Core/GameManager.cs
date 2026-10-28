@@ -22,8 +22,30 @@ namespace AOG.Duel
 
         [Header("Rules")]
         [SerializeField] private bool startAutomatically = true;
-        [SerializeField, Min(0f)] private float countdownDuration = 3f;
+        [SerializeField, Min(0f)] private float countdownDuration = 4f;
         [SerializeField, Min(0f)] private float matchDuration = 90f;
+
+        [Header("Audio (Nhạc Trận Đấu & Âm Thanh Thắng / Thua)")]
+        [SerializeField] private AudioSource bgmSource;
+        [Tooltip("Nhạc nền trận đấu Map 1 (BGM_PowerWar_Angel)")]
+        [SerializeField] private AudioClip map1Bgm;
+        [Tooltip("Âm lượng nhạc nền Map 1")]
+        [SerializeField, Range(0f, 1f)] private float map1BgmVolume = 0.5f;
+
+        [Tooltip("Nhạc nền trận đấu Map 2 (BGM_PowerWar_Devil)")]
+        [SerializeField] private AudioClip map2Bgm;
+        [Tooltip("Âm lượng nhạc nền Map 2")]
+        [SerializeField, Range(0f, 1f)] private float map2BgmVolume = 0.5f;
+
+        [Tooltip("Âm thanh khi người chơi 1 chiến thắng (BGM_Win)")]
+        [SerializeField] private AudioClip winSfx;
+        [Tooltip("Âm lượng âm thanh chiến thắng")]
+        [SerializeField, Range(0f, 1f)] private float winSfxVolume = 0.8f;
+
+        [Tooltip("Âm thanh khi người chơi 1 thất bại (BGM_Lose)")]
+        [SerializeField] private AudioClip loseSfx;
+        [Tooltip("Âm lượng âm thanh thất bại")]
+        [SerializeField, Range(0f, 1f)] private float loseSfxVolume = 0.8f;
 
         private Coroutine countdownRoutine;
 
@@ -41,11 +63,73 @@ namespace AOG.Duel
 
         private void Start()
         {
+            if (GetComponent<CountdownDisplayUI>() == null && FindFirstObjectByType<CountdownDisplayUI>() == null)
+            {
+                gameObject.AddComponent<CountdownDisplayUI>();
+            }
+
+            if (GetComponent<MatchTimerDisplayUI>() == null && FindFirstObjectByType<MatchTimerDisplayUI>() == null)
+            {
+                gameObject.AddComponent<MatchTimerDisplayUI>();
+            }
+
+            SetupAudio();
+
             if (startAutomatically)
             {
                 StartMatch();
             }
             else ConfigureParticipants();
+        }
+
+        private void SetupAudio()
+        {
+            if (bgmSource == null)
+            {
+                bgmSource = GetComponent<AudioSource>();
+                if (bgmSource == null)
+                {
+                    bgmSource = gameObject.AddComponent<AudioSource>();
+                    bgmSource.playOnAwake = false;
+                }
+            }
+
+#if UNITY_EDITOR
+            if (map1Bgm == null)
+                map1Bgm = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/BGM_PowerWar_Angel.ogg");
+            if (map2Bgm == null)
+                map2Bgm = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/BGM_PowerWar_Devil.ogg");
+            if (winSfx == null)
+                winSfx = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/BGM_Win.ogg");
+            if (loseSfx == null)
+                loseSfx = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/BGM_Lose.ogg");
+#endif
+
+            PlayMatchBgm();
+        }
+
+        public void PlayMatchBgm()
+        {
+            if (bgmSource == null) return;
+
+            string sceneName = SceneManager.GetActiveScene().name;
+            AudioClip clipToPlay = map1Bgm;
+            float vol = map1BgmVolume;
+
+            if (sceneName.IndexOf("Map2", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                sceneName.IndexOf("Devil", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                clipToPlay = map2Bgm;
+                vol = map2BgmVolume;
+            }
+
+            if (clipToPlay != null)
+            {
+                bgmSource.clip = clipToPlay;
+                bgmSource.volume = vol;
+                bgmSource.loop = true;
+                bgmSource.Play();
+            }
         }
 
         private void Update()
@@ -74,6 +158,7 @@ namespace AOG.Duel
             }
 
             projectilePool?.ReturnAll();
+            SummonPool.Instance.ReturnAll();
             ConfigureParticipants();
             playerOne.ResetPlayer();
             playerTwo.ResetPlayer();
@@ -83,6 +168,12 @@ namespace AOG.Duel
             Winner = null;
             MatchTimeRemaining = matchDuration;
             MatchTimeChanged?.Invoke(MatchTimeRemaining);
+
+            if (bgmSource != null && !bgmSource.isPlaying)
+            {
+                PlayMatchBgm();
+            }
+
             countdownRoutine = StartCoroutine(CountdownRoutine());
         }
 
@@ -139,6 +230,20 @@ namespace AOG.Duel
             playerOne.Play(false);
             playerTwo.Play(false);
             projectilePool?.ReturnAll();
+            SummonPool.Instance.ReturnAll();
+
+            if (bgmSource != null)
+            {
+                bgmSource.Stop();
+            }
+
+            // Phát âm thanh Thắng / Thua tương ứng với người chơi 1
+            AudioClip finishClip = (winner == playerOne) ? winSfx : loseSfx;
+            float finishVol = (winner == playerOne) ? winSfxVolume : loseSfxVolume;
+            if (finishClip != null && bgmSource != null)
+            {
+                bgmSource.PlayOneShot(finishClip, finishVol);
+            }
 
             if (winner != null)
             {

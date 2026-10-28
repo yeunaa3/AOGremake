@@ -266,6 +266,12 @@ namespace AOG.Duel
             anim.Face(player.Face);
             SkillCtx context = CurrentSkillContext();
             skill.Begin(context);
+            if (skill is MoveSkill ms && ms.Movement == MovementShotType.Jump ||
+                (skill != null && skill.name.IndexOf("jump", System.StringComparison.OrdinalIgnoreCase) >= 0) ||
+                (skill != null && skill.DisplayName.IndexOf("jump", System.StringComparison.OrdinalIgnoreCase) >= 0))
+            {
+                anim?.PlayJumpSmoke();
+            }
             if (skill.ShowVisualTime == 0f)
             {
                 skillVisualShown = true;

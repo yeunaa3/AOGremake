@@ -490,6 +490,11 @@ MonoBehaviour:
   pveSceneName: Map1
   pvpSceneName: Map2
   loadoutSceneName: Loadout
+  audioSource: {fileID: 0}
+  angelLobbyBgm: {fileID: 8300000, guid: eb5b7e0a0bb3e894b9dd7e1e25a6b4d9, type: 3}
+  angelLobbyVolume: 0.5
+  devilLobbyBgm: {fileID: 8300000, guid: d5cdbbf8cb8190f42aaef785155d14d8, type: 3}
+  devilLobbyVolume: 0.5
 --- !u!1 &321529311
 GameObject:
   m_ObjectHideFlags: 0

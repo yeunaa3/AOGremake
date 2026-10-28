@@ -5958,8 +5958,17 @@ MonoBehaviour:
   playerHealthBar: {fileID: 2200000004}
   enemyHealthBar: {fileID: 2200000029}
   startAutomatically: 1
-  countdownDuration: 3
+  countdownDuration: 4
   matchDuration: 120
+  bgmSource: {fileID: 0}
+  map1Bgm: {fileID: 8300000, guid: d91217a9a296453448fddbc5ba191472, type: 3}
+  map1BgmVolume: 0.5
+  map2Bgm: {fileID: 8300000, guid: ae81d24e45c010548a91aba1b5489679, type: 3}
+  map2BgmVolume: 0.5
+  winSfx: {fileID: 8300000, guid: c73c8a14a8e09aa47953b7d1e6d1d913, type: 3}
+  winSfxVolume: 0.8
+  loseSfx: {fileID: 8300000, guid: 86fcc739ad7e51b43aee223077095129, type: 3}
+  loseSfxVolume: 0.8
 --- !u!114 &1876664479
 MonoBehaviour:
   m_ObjectHideFlags: 0

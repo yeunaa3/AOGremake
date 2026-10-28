@@ -42,6 +42,7 @@ namespace AOG.Duel
                     dashing ? dashDir * dashSpeed : body.linearVelocity.x,
                     Mathf.Max(0f, jumpForce));
             }
+            GetComponent<PlayerAnim>()?.PlayJumpSmoke();
         }
         public void Stop() { input = 0f; dashing = false; }
     }

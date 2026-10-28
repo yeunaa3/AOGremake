@@ -124,7 +124,7 @@ MonoBehaviour:
   hitJoltDistance: 0.12
   hitDuration: 0.1
   enableFallPhysics: 1
-  dropHeight: 10
+  dropHeight: 1
   fallGravity: 3
   initialFallSpeed: 0
   groundLayers:

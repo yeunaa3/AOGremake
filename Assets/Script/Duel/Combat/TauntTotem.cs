@@ -33,6 +33,12 @@ namespace AOG.Duel
             base.OnDestroy();
         }
 
+        protected override void OnDisable()
+        {
+            ClearTaunt();
+            base.OnDisable();
+        }
+
         private void ClearTaunt()
         {
             if (owner != null && owner.ActiveTauntEntity == this)

@@ -16,6 +16,7 @@ namespace AOG.Duel
         [SerializeField] private bool showArrowInHand = true;
         [SerializeField] private ShotData shot = new ShotData();
 
+        public MovementShotType Movement => movement;
         public override SkillType Type => SkillType.PlayerAndSpawn;
 
         public override void Begin(SkillCtx context)

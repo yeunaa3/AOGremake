@@ -149,7 +149,9 @@ namespace AOG.Duel
                 {
                     float randXi = horizontalRandomness > 0f ? Random.Range(-horizontalRandomness, horizontalRandomness) : 0f;
                     Vector3 childPos = new Vector3(basePos.x + first + i * spreadDistance + randXi, basePos.y + actualDrop, basePos.z);
-                    GameObject siblingObj = Instantiate(gameObject, childPos, Quaternion.identity);
+                    GameObject siblingObj = SummonPool.Instance != null
+                        ? SummonPool.Instance.Spawn(gameObject, childPos, Quaternion.identity)
+                        : Instantiate(gameObject, childPos, Quaternion.identity);
                     TrapObject sibling = siblingObj.GetComponent<TrapObject>();
                     if (sibling != null)
                     {
@@ -185,7 +187,7 @@ namespace AOG.Duel
             lifeTimer -= Time.deltaTime;
             if (lifeTimer <= 0f)
             {
-                Destroy(gameObject);
+                Despawn();
                 return;
             }
 
@@ -314,7 +316,7 @@ namespace AOG.Duel
                 Destroy(ps.gameObject, 1.5f);
             }
 
-            Destroy(gameObject);
+            Despawn();
         }
 
         private void ApplyTrapEffect(PlayerController primaryTarget)
@@ -373,6 +375,29 @@ namespace AOG.Duel
             return other.CompareTag("Ground") ||
                    string.Equals(LayerMask.LayerToName(other.gameObject.layer), "Ground", System.StringComparison.OrdinalIgnoreCase) ||
                    other.gameObject.name.ToLower().Contains("ground");
+        }
+
+        public void Despawn()
+        {
+            StopAllCoroutines();
+            if (SummonPool.Instance != null)
+            {
+                SummonPool.Instance.Return(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+            if (body != null)
+            {
+                body.linearVelocity = Vector2.zero;
+                body.angularVelocity = 0f;
+            }
         }
     }
 }
