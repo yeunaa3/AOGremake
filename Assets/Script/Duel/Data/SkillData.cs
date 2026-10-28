@@ -141,6 +141,8 @@ namespace AOG.Duel
         [SerializeField] private string animationTrigger;
         [SerializeField] private bool lockMovement = true;
         [SerializeField] private bool cancelOnMove;
+        [Tooltip("Chiêu duy trì liên tục (channeling) cho đến khi người chơi di chuyển hoặc dùng hành động khác để ngắt.")]
+        [SerializeField] private bool channelUntilCancelled;
         [Header("Timing")]
         [InspectorName("Show Arrow Time")]
         [Tooltip("Giây trong clip mà hình mũi tên xuất hiện. Đặt -1 nếu skill không có hình cần hiện.")]
@@ -161,6 +163,7 @@ namespace AOG.Duel
         public string AnimationTrigger => animationTrigger;
         public bool LockMovement => lockMovement;
         public bool CancelOnMove => cancelOnMove;
+        public bool ChannelUntilCancelled => channelUntilCancelled;
         public float EffectTime => effectTime;
         public float Duration => duration;
         public virtual bool Passive => false;

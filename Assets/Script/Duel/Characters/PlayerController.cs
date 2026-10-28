@@ -44,6 +44,11 @@ namespace AOG.Duel
         [SerializeField] private GameObject bowShotEffectPrefab;
         [Tooltip("Thời gian hiển thị của mỗi nhịp vòng tròn (giây).")]
         [SerializeField, Min(0.02f)] private float ringBeatDuration = 0.07f;
+        [Header("Hiệu ứng kỹ năng High")]
+        [Tooltip("Prefab cột ánh sáng vút thẳng lên trời từ aimtarget khi gọi trigger High.")]
+        [SerializeField] private GameObject highBeamEffectPrefab;
+        [Tooltip("Thời gian trễ (giây) sau khi gọi trigger High trước khi cột sáng xuất hiện.")]
+        [SerializeField] private float highBeamDelay = 1.0f;
 
         public int Team => team;
         public PlayerController Enemy { get; private set; }
@@ -112,7 +117,8 @@ namespace AOG.Duel
                 cmd.Skill5Pressed |= next.Skill5Pressed;
             }
             bool usingSkill = action.State == ActionState.UsingSkill;
-            float direction = CanMove && !usingSkill ? cmd.Move : 0f;
+            // Cho phép nhận cmd.Move khi đang channeling (như Rest) để move.WantsMove kích hoạt và ngắt chiêu
+            float direction = CanMove && (!usingSkill || action.IsChanneling) ? cmd.Move : 0f;
             move.Input(direction);
             if (move.Moving) action.CancelAttack();
             // Trong lúc dùng skill luôn nhìn Enemy; phím A/D không được đổi hướng.
@@ -517,6 +523,21 @@ namespace AOG.Duel
             if (!Alive || Enemy == null || arrowSpawnPoint == null || stats.ArrowSprite == null) yield break;
             Fire(arrowSpawnPoint.position, Enemy.Aim, ProjectilePath.NormalArc, 0f,
                 stats.Damage, stats.ArrowSprite, 1f, ArrowEffect.None, 0, 0f, 0f, null, -1, true);
+        }
+
+        public void PlayHighBeamEffect()
+        {
+            StartCoroutine(PlayHighBeamRoutine(highBeamDelay));
+        }
+
+        private IEnumerator PlayHighBeamRoutine(float delay)
+        {
+            if (delay > 0f) yield return new WaitForSeconds(delay);
+            if (!Alive) yield break;
+            GameObject prefab = highBeamEffectPrefab != null ? highBeamEffectPrefab : Resources.Load<GameObject>("HighBeamEffect");
+            if (prefab == null) yield break;
+            Vector3 spawnPos = aimPoint != null ? aimPoint.position : (arrowSpawnPoint != null ? arrowSpawnPoint.position : transform.position);
+            Instantiate(prefab, spawnPos, Quaternion.identity);
         }
 
         private void PlayBowShotEffect()

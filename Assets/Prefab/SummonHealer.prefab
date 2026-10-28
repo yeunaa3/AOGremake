@@ -155,8 +155,8 @@ MonoBehaviour:
     m_Bits: 256
   landEffectPrefab: {fileID: 0}
   healInterval: 1
-  healAmount: 15
-  healRadius: 5
+  healAmount: 20
+  healRadius: 1
   healPulsePrefab: {fileID: 19800001, guid: c1010001000200030004000500060009, type: 3}
   healTargetEffectPrefab: {fileID: 100001, guid: c1010001000200030004000500060009, type: 3}
 --- !u!60 &5651325598518563649

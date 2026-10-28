@@ -14,19 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BuffSkill
   skillId: skill_rest
   displayName: Rest
-  description: Khoa di chuyen vao trang thai nghi ngoi, cu moi 1 giay hoi 25 mau (tong hoi 125 mau trong 5 giay).
-  icon: {fileID: 8027680052567441124, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
-  rarity: 2
-  cooldown: 15.0
+  description: Khoa di chuyen vao trang thai nghi ngoi, cu moi 1 giay hoi 25 mau
+    (tong hoi 125 mau trong 5 giay).
+  icon: {fileID: -1148056187835553646, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rarity: 1
+  cooldown: 15
   animationTrigger: Rest
   lockMovement: 1
-  cancelOnMove: 0
-  showTime: -1.0
+  cancelOnMove: 1
+  channelUntilCancelled: 1
+  showTime: -1
   effectTime: 0.05
-  duration: 5.0
+  duration: 999999
   buff:
     heal: 0
-    duration: 5.0
+    duration: 999999
     moveMultiplier: 1
     dodgeChance: 0
     projectileSpeedMultiplier: 1
@@ -35,5 +37,5 @@ MonoBehaviour:
     statusImmune: 0
     isRestSkill: 1
     healPerSecond: 25
-    healInterval: 1.0
+    healInterval: 1
     vfxPrefab: {fileID: 100001, guid: c1010001000200030004000500060009, type: 3}

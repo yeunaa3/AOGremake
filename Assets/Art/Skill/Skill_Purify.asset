@@ -14,19 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BuffSkill
   skillId: skill_purify
   displayName: Purify
-  description: Xoa sach toan bo hieu ung bat loi va mien nhiem hieu ung bat loi trong 4 giay.
-  icon: {fileID: 6597165044541539804, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
-  rarity: 1
-  cooldown: 12.0
+  description: Xoa sach toan bo hieu ung bat loi va mien nhiem hieu ung bat loi trong
+    4 giay.
+  icon: {fileID: -765370794, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rarity: 2
+  cooldown: 12
   animationTrigger: 
   lockMovement: 0
   cancelOnMove: 0
-  showTime: -1.0
+  showTime: -1
   effectTime: 0.05
   duration: 0.2
   buff:
     heal: 0
-    duration: 4.0
+    duration: 4
     moveMultiplier: 1
     dodgeChance: 0
     projectileSpeedMultiplier: 1
@@ -35,5 +36,5 @@ MonoBehaviour:
     statusImmune: 1
     isRestSkill: 0
     healPerSecond: 0
-    healInterval: 1.0
+    healInterval: 1
     vfxPrefab: {fileID: 0}

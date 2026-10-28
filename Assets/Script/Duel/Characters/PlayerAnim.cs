@@ -160,7 +160,14 @@ namespace AOG.Duel
         }
 
         // Dùng trực tiếp các hàm này khi bạn thêm Parameter mới.
-        public void Trigger(string name) { if (Has(animator, name, AnimatorControllerParameterType.Trigger)) animator.SetTrigger(name); }
+        public void Trigger(string name)
+        {
+            if (Has(animator, name, AnimatorControllerParameterType.Trigger)) animator.SetTrigger(name);
+            if (string.Equals(name, "High", System.StringComparison.OrdinalIgnoreCase))
+            {
+                GetComponent<PlayerController>()?.PlayHighBeamEffect();
+            }
+        }
         public void Bool(string name, bool value) { if (Has(animator, name, AnimatorControllerParameterType.Bool)) animator.SetBool(name, value); }
         public void Float(string name, float value) { if (Has(animator, name, AnimatorControllerParameterType.Float)) animator.SetFloat(name, value); }
         public void Win() => Trigger("Win");

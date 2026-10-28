@@ -45,6 +45,8 @@ namespace AOG.Duel
 
         public ActionState State { get; private set; } = ActionState.Ready;
         public bool Ready => State == ActionState.Ready;
+        public SkillData CurrentSkill => specialSkill != null ? specialSkill : (skillSlot >= 0 ? GetSkill(skillSlot) : null);
+        public bool IsChanneling => State == ActionState.UsingSkill && CurrentSkill != null && CurrentSkill.ChannelUntilCancelled;
         public bool ShieldOn => false;
         public float DashCooldownRemaining => 0f;
         public float ShieldCooldownRemaining => 0f;
@@ -135,7 +137,7 @@ namespace AOG.Duel
                     if (time >= 1f) EndSkillFromClip();
                     return;
                 }
-                if (skill.CancelOnMove && move.WantsMove)
+                if ((skill.CancelOnMove || skill.ChannelUntilCancelled) && move.WantsMove)
                 {
                     EndSkillFromClip();
                     return;
@@ -152,7 +154,7 @@ namespace AOG.Duel
                     if (skill.UseOnce && !skillEffectDone && time >= skill.EffectTime)
                         UseSkillFromClip();
                     skill.Tick(CurrentSkillContext(), Time.deltaTime);
-                    if (time >= skill.Duration) EndSkillFromClip();
+                    if (!skill.ChannelUntilCancelled && time >= skill.Duration) EndSkillFromClip();
                 }
                 else
                 {
@@ -202,6 +204,7 @@ namespace AOG.Duel
 
         public bool Attack()
         {
+            if (IsChanneling) EndSkillFromClip();
             if (!Ready || !player.CanAttack) return false;
 
             if (player.Gear != null && player.Gear.BowState.specialSkillReady)
@@ -232,12 +235,20 @@ namespace AOG.Duel
         public bool Skill(int slot, float direction)
         {
             SkillData skill = GetSkill(slot);
-            bool canInterruptAttack = Ready || State == ActionState.AutoAttacking;
-            if (!canInterruptAttack || !player.CanSkill || skill == null || skill.Passive || skillLeft[slot] > 0f)
+            bool isChanneling = IsChanneling;
+            bool canInterrupt = Ready || State == ActionState.AutoAttacking || isChanneling;
+            if (!canInterrupt || !player.CanSkill || skill == null || skill.Passive || skillLeft[slot] > 0f)
                 return false;
 
-            // Chỉ hủy đánh thường sau khi chắc chắn skill thật sự được phép dùng.
-            if (State == ActionState.AutoAttacking) CancelAttack();
+            // Hủy trạng thái channeling (như Rest) hoặc hủy đánh thường khi dùng skill mới
+            if (isChanneling)
+            {
+                EndSkillFromClip();
+            }
+            else if (State == ActionState.AutoAttacking)
+            {
+                CancelAttack();
+            }
             State = ActionState.UsingSkill;
             time = 0f;
             skillSlot = slot;

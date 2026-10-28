@@ -15,18 +15,18 @@ MonoBehaviour:
   skillId: skill_heal
   displayName: Heal
   description: Hoi 80 mau ngay lap tuc cho ban than.
-  icon: {fileID: 5889504202448276547, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
-  rarity: 0
-  cooldown: 8.0
+  icon: {fileID: -9060023563291207507, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rarity: 1
+  cooldown: 12
   animationTrigger: 
   lockMovement: 0
   cancelOnMove: 0
-  showTime: -1.0
+  showTime: -1
   effectTime: 0.05
   duration: 0.2
   buff:
     heal: 80
-    duration: 0.0
+    duration: 0
     moveMultiplier: 1
     dodgeChance: 0
     projectileSpeedMultiplier: 1
@@ -35,5 +35,5 @@ MonoBehaviour:
     statusImmune: 0
     isRestSkill: 0
     healPerSecond: 0
-    healInterval: 1.0
+    healInterval: 1
     vfxPrefab: {fileID: 100001, guid: c1010001000200030004000500060009, type: 3}
