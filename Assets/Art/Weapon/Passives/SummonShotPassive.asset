@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e7aa5c8f5884a61883c9a9c1d128395, type: 3}
+  m_Name: SummonShotPassive
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonShotPassive
+  passiveName: "Triệu Hồi Pháo Đài"
+  description: "Sau các phát bắn tích lũy, phát bắn thường tiếp theo sẽ triệu hồi pháo đài tại chân đối thủ."
+  shotsRequired: 6
+  prefabToSummon: {fileID: 1300000000, guid: e1010001000200030004000500060003, type: 3}
+  summonAtTarget: 1
+  spawnOffset: {x: 0, y: 0}

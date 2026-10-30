@@ -75,6 +75,8 @@ namespace AOG.Duel
         public float ProjectileSpeedMultiplier => projectileSpeedMultiplier;
         public int ShieldLayers => shieldLayers;
         public event Action<int, int> HpChanged;
+        public void SetInvulnerable(float duration) => invulnerableTime = Mathf.Max(invulnerableTime, duration);
+        public float InvulnerableTimeRemaining => invulnerableTime;
 
         private void Awake()
         {
@@ -150,6 +152,10 @@ namespace AOG.Duel
                 ApplyEffect(hit);
             }
             if (Hp == 0) player.Die(); else player.Hit();
+            if (dealt > 0)
+            {
+                DamageNumberDisplay.Show(player != null ? player.transform.position : transform.position, dealt);
+            }
             return dealt;
         }
         public void Heal(int amount)
@@ -239,6 +245,12 @@ namespace AOG.Duel
                 case ArrowEffect.Slow:
                     slowMultiplier = Mathf.Clamp(hit.EffectPower / 100f, 0.05f, 1f);
                     slowTime = Mathf.Max(slowTime, hit.EffectDuration);
+                    break;
+                case ArrowEffect.Boom:
+                    if (hit.EffectPower > 0)
+                    {
+                        TakeDamage(new DamageInfo(hit.Attacker, hit.EffectPower, false, hit.HitPoint, ArrowEffect.None));
+                    }
                     break;
             }
         }

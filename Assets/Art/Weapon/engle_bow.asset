@@ -15,10 +15,13 @@ MonoBehaviour:
   bowId: bow_basic
   displayName: Phantom
   icon: {fileID: -3219188548066180312, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  bowSprite: {fileID: 6140227996943036050, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   rarity: 0
-  bowSprite: {fileID: -3219188548066180312, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   arrowSprite: {fileID: -4633047966210821302, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
-  damage: 10
-  arrowSpeed: 9
+  damage: 24
   attackSpeedMultiplier: 1
+  arrowSpeed: 8
+  damageGrowthPerLevel: 0.1
+  attackSpeedGrowthPerLevel: 0
+  arrowSpeedGrowthPerLevel: 0
   passive: {fileID: 0}

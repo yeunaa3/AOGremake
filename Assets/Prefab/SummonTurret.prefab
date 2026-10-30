@@ -135,7 +135,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1010001000200030004000500060003, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.TurretSentinel
-  maxHp: 100
+  maxHp: 250
   decayPercentPerSecond: 10
   maxLifetime: 0
   miniHealthBar: {fileID: 1300000012}

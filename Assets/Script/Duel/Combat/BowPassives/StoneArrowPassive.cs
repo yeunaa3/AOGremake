@@ -20,7 +20,7 @@ namespace AOG.Duel
         public float SizeGrowthRate => sizeGrowthRate;
         public float MaxSizeMultiplier => maxSizeMultiplier;
 
-        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isSecondaryShot)
+        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isNormalShot)
         {
             if (arrow == null) return;
 

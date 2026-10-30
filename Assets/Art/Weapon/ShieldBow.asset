@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c97008a94119bd34aad36c9d4614096b, type: 3}
+  m_Name: ShieldBow
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BowData
+  bowId: bow_shield
+  displayName: Aegis Bow
+  icon: {fileID: 0}
+  bowSprite: {fileID: -3219188548066180312, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  rarity: 3
+  arrowSprite: {fileID: -5145490624789590510, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
+  damage: 10
+  attackSpeedMultiplier: 1
+  arrowSpeed: 9
+  damageGrowthPerLevel: 0.1
+  attackSpeedGrowthPerLevel: 0
+  arrowSpeedGrowthPerLevel: 0
+  passive: {fileID: 11400000, guid: 1b5b084b081640159ac14c93111bfedc, type: 2}

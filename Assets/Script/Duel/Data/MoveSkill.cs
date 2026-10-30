@@ -38,7 +38,34 @@ namespace AOG.Duel
         {
             if (context.Caster == null) return;
             context.Caster.HideHeldArrows();
-            context.Caster.ShootSkill(shot, context.Slot);
+
+            int level = GetCasterLevel(context);
+            ShotData activeShot = (level <= 1) ? shot : CloneLeveledShot(shot, level);
+            context.Caster.ShootSkill(activeShot, context.Slot);
+        }
+
+        private ShotData CloneLeveledShot(ShotData src, int level)
+        {
+            if (src == null) return null;
+            return new ShotData
+            {
+                path = src.path,
+                formation = src.formation,
+                count = src.count,
+                spacing = src.spacing,
+                spawnNearTarget = src.spawnNearTarget,
+                spawnOffset = src.spawnOffset,
+                arc = src.arc,
+                damageMultiplier = GetDamageMultiplier(src.damageMultiplier, level),
+                speedMultiplier = src.speedMultiplier,
+                effect = src.effect,
+                effectPower = GetEffectPower(src.effectPower, level),
+                effectDuration = src.effectDuration,
+                lifeSteal = src.lifeSteal,
+                worldEffectPrefab = src.worldEffectPrefab,
+                resetCooldownOnHit = src.resetCooldownOnHit,
+                onlyHitAirborne = src.onlyHitAirborne
+            };
         }
 
         public override void End(SkillCtx context) => context.Caster?.HideHeldArrows();

@@ -59,6 +59,12 @@ namespace AOG.Duel
         [Tooltip("Hiệu ứng nổ / kẹp khi bẫy kích hoạt")]
         [SerializeField] private ParticleSystem triggerParticlePrefab;
 
+        [Header("Hiệu Ứng Trói Bằng Xích (Chain Binding)")]
+        [Tooltip("GameObject chứa hiệu ứng xích trói quản lý bởi Animator")]
+        [SerializeField] private GameObject chainEffect;
+        [Tooltip("Animator điều khiển bẫy và xích")]
+        [SerializeField] private Animator animator;
+
         private PlayerController owner;
         private Collider2D trapCollider;
         private Rigidbody2D body;
@@ -85,12 +91,20 @@ namespace AOG.Duel
         private void Awake()
         {
             trapCollider = GetComponent<Collider2D>();
-            if (trapCollider != null)
-            {
-                trapCollider.isTrigger = true; // Luôn luôn là trigger để rơi xuyên qua người chơi
-            }
             body = GetComponent<Rigidbody2D>();
             lifeTimer = lifetime;
+            EnsureTriggerColliders();
+
+            if (animator == null) animator = GetComponent<Animator>();
+            if (chainEffect == null)
+            {
+                Transform t = transform.Find("Chains");
+                if (t != null) chainEffect = t.gameObject;
+            }
+            if (chainEffect != null)
+            {
+                chainEffect.SetActive(false);
+            }
         }
 
         public void Setup(PlayerController source)
@@ -101,12 +115,27 @@ namespace AOG.Duel
         public void Setup(PlayerController source, float customDropHeight)
         {
             owner = source;
+            if (source != null && source.Gear != null && source.Gear.BowState != null)
+            {
+                source.Gear.BowState.RegisterSummon(gameObject);
+            }
             lifeTimer = lifetime;
             triggered = false;
             isArming = false;
             landed = false;
 
+            if (chainEffect != null)
+            {
+                chainEffect.SetActive(false);
+            }
+            if (animator != null)
+            {
+                animator.Rebind();
+                animator.Play("TrapTrigger", 0, 0f);
+            }
+
             float actualDrop = customDropHeight > 0f ? customDropHeight : dropHeight;
+            if (actualDrop <= 0f) actualDrop = 4.5f;
 
             if (isClusterChild)
             {
@@ -114,7 +143,7 @@ namespace AOG.Duel
                 return;
             }
 
-            // Xác định tọa độ gốc rơi theo dropTarget
+            // Xác định tọa độ gốc rơi theo dropTarget (mặc định rơi trên đầu đối thủ)
             Vector3 basePos = transform.position;
             if (dropTarget == TrapDropTarget.Enemy && source != null && source.Enemy != null)
             {
@@ -123,6 +152,10 @@ namespace AOG.Duel
             else if (dropTarget == TrapDropTarget.Player && source != null)
             {
                 basePos = source.transform.position;
+            }
+            else if (source != null && source.Enemy != null)
+            {
+                basePos = source.Enemy.transform.position;
             }
             // Thêm độ lệch dropOffset
             basePos.x += dropOffset.x;
@@ -159,6 +192,10 @@ namespace AOG.Duel
                         sibling.owner = source;
                         sibling.lifeTimer = lifetime;
                         sibling.InitFallPhysics();
+                    }
+                    if (source != null && source.Gear != null && source.Gear.BowState != null)
+                    {
+                        source.Gear.BowState.RegisterSummon(siblingObj);
                     }
                 }
             }
@@ -241,6 +278,18 @@ namespace AOG.Duel
             }
         }
 
+        public void EnsureTriggerColliders()
+        {
+            Collider2D[] allCols = GetComponentsInChildren<Collider2D>(true);
+            for (int i = 0; i < allCols.Length; i++)
+            {
+                if (allCols[i] != null && !allCols[i].isTrigger)
+                {
+                    allCols[i].isTrigger = true;
+                }
+            }
+        }
+
         private void Land(Collider2D groundCol = null)
         {
             if (landed) return;
@@ -256,6 +305,7 @@ namespace AOG.Duel
             {
                 trapCollider.isTrigger = true;
             }
+            EnsureTriggerColliders();
 
             // Căn chỉnh nằm sát mặt đất
             RaycastHit2D hit = Physics2D.Raycast(transform.position + Vector3.up * 0.5f, Vector2.down, 2.5f, groundLayers);
@@ -305,15 +355,59 @@ namespace AOG.Duel
 
             triggered = true;
 
-            // Gây sát thương và khóa nạn nhân
+            // LÚC CẮN TRÚNG:
+            // 1. Chỉnh position x của trap = position x của aim target địch theo yêu cầu
+            if (target != null)
+            {
+                Vector3 trapPos = transform.position;
+                trapPos.x = target.Aim.x;
+                transform.position = trapPos;
+            }
+
+            // 2. Hiển thị hiệu ứng xích trói khớp với aim target của địch
+            if (chainEffect != null)
+            {
+                if (target != null)
+                {
+                    chainEffect.transform.position = new Vector3(target.Aim.x, target.Aim.y, 0f);
+                }
+                chainEffect.SetActive(true);
+            }
+
+            // 3. Quản lý bởi Animator: Chuyển sang TrapCap (cắn bẫy & kích hoạt hiệu ứng xích)
+            if (animator != null)
+            {
+                animator.SetTrigger("Cap");
+                animator.Play("TrapCap", 0, 0f);
+            }
+
+            // 4. Gây sát thương và khóa nạn nhân (Stun)
             ApplyTrapEffect(target);
 
             // Hiệu ứng bẫy nổ/sập
+            SkillAudioManager.PlayBoom();
             if (triggerParticlePrefab != null)
             {
                 ParticleSystem ps = Instantiate(triggerParticlePrefab, transform.position, Quaternion.identity);
                 ps.Play(true);
                 Destroy(ps.gameObject, 1.5f);
+            }
+
+            // 5. Duy trì hiệu ứng trói và khóa nạn nhân trong suốt thời gian lockDuration
+            float elapsedLock = 0f;
+            while (elapsedLock < lockDuration)
+            {
+                elapsedLock += Time.deltaTime;
+                if (chainEffect != null && target != null)
+                {
+                    chainEffect.transform.position = new Vector3(target.Aim.x, target.Aim.y, 0f);
+                }
+                yield return null;
+            }
+
+            if (chainEffect != null)
+            {
+                chainEffect.SetActive(false);
             }
 
             Despawn();
@@ -393,6 +487,11 @@ namespace AOG.Duel
         private void OnDisable()
         {
             StopAllCoroutines();
+            isClusterChild = false;
+            if (chainEffect != null)
+            {
+                chainEffect.SetActive(false);
+            }
             if (body != null)
             {
                 body.linearVelocity = Vector2.zero;

@@ -10,7 +10,7 @@ namespace AOG.Duel
 
         public float LifestealRate => lifestealRate;
 
-        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isSecondaryShot)
+        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isNormalShot)
         {
             if (arrow == null) return;
             arrow.LifeSteal = Mathf.Max(arrow.LifeSteal, lifestealRate);

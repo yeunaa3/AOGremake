@@ -73,6 +73,11 @@ namespace AOG.Duel
                 gameObject.AddComponent<MatchTimerDisplayUI>();
             }
 
+            if (GetComponent<MatchEndPresentationUI>() == null && FindFirstObjectByType<MatchEndPresentationUI>() == null)
+            {
+                gameObject.AddComponent<MatchEndPresentationUI>();
+            }
+
             SetupAudio();
 
             if (startAutomatically)
@@ -84,6 +89,7 @@ namespace AOG.Duel
 
         private void SetupAudio()
         {
+            MenuMusicManager.StopMusic();
             if (bgmSource == null)
             {
                 bgmSource = GetComponent<AudioSource>();
@@ -165,6 +171,8 @@ namespace AOG.Duel
             PlaceAtSpawn(playerOne, playerSpawn);
             PlaceAtSpawn(playerTwo, enemySpawn);
             Physics2D.SyncTransforms();
+            playerOne.LookAtEnemy();
+            playerTwo.LookAtEnemy();
             Winner = null;
             MatchTimeRemaining = matchDuration;
             MatchTimeChanged?.Invoke(MatchTimeRemaining);
@@ -200,14 +208,21 @@ namespace AOG.Duel
             CountdownRemaining = countdownDuration;
             CountdownChanged?.Invoke(CountdownRemaining);
 
+            if (playerOne != null) playerOne.LookAtEnemy();
+            if (playerTwo != null) playerTwo.LookAtEnemy();
+
             while (CountdownRemaining > 0f)
             {
                 yield return null;
                 CountdownRemaining = Mathf.Max(0f, CountdownRemaining - Time.unscaledDeltaTime);
                 CountdownChanged?.Invoke(CountdownRemaining);
+                if (playerOne != null) playerOne.LookAtEnemy();
+                if (playerTwo != null) playerTwo.LookAtEnemy();
             }
 
             countdownRoutine = null;
+            if (playerOne != null) playerOne.LookAtEnemy();
+            if (playerTwo != null) playerTwo.LookAtEnemy();
             SetState(GameState.Playing);
             playerOne.Play(true);
             playerTwo.Play(true);
@@ -232,6 +247,9 @@ namespace AOG.Duel
             projectilePool?.ReturnAll();
             SummonPool.Instance.ReturnAll();
 
+            if (playerOne != null) playerOne.LookAtEnemy();
+            if (playerTwo != null) playerTwo.LookAtEnemy();
+
             if (bgmSource != null)
             {
                 bgmSource.Stop();
@@ -248,9 +266,11 @@ namespace AOG.Duel
             if (winner != null)
             {
                 PlayerController loser = winner == playerOne ? playerTwo : playerOne;
+                winner.LookAtEnemy();
                 winner.Win();
                 if (loser != null)
                 {
+                    loser.LookAtEnemy();
                     if (loser.Stats.Alive)
                         loser.Die();
                     else
@@ -259,8 +279,16 @@ namespace AOG.Duel
             }
             else
             {
-                if (playerOne != null && playerOne.Stats.Alive) playerOne.Die();
-                if (playerTwo != null && playerTwo.Stats.Alive) playerTwo.Die();
+                if (playerOne != null)
+                {
+                    playerOne.LookAtEnemy();
+                    if (playerOne.Stats.Alive) playerOne.Die();
+                }
+                if (playerTwo != null)
+                {
+                    playerTwo.LookAtEnemy();
+                    if (playerTwo.Stats.Alive) playerTwo.Die();
+                }
             }
 
             MatchFinished?.Invoke(winner);
@@ -275,6 +303,11 @@ namespace AOG.Duel
             if (PlayerLoadoutManager.Instance != null)
             {
                 PlayerLoadoutManager.Instance.ApplyToPlayer(playerOne);
+            }
+
+            if (CharacterSkinManager.Instance != null)
+            {
+                CharacterSkinManager.Instance.ApplyCurrentSkin(playerOne.gameObject);
             }
 
             playerOne.Setup(this, playerTwo, 0, projectilePool);

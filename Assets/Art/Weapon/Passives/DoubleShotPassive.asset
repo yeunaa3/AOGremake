@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: DoubleShotPassive
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.DoubleShotPassive
   passiveName: "Song Ti\xEAn"
-  description: "M\u0169i t\xEAn \u0111i tr\u01B0\u1EDBc c\xF3 30% t\u1EF7 l\u1EC7 t\u1EF1 sinh ra m\u1ED9t m\u0169i t\xEAn ti\u1EBFp theo bay ngay sau n\xF3."
-  chance: 0.3
-  delay: 0.08
-  maxChainDepth: 5
+  description: "M\u0169i t\xEAn \u0111i tr\u01B0\u1EDBc c\xF3 30% t\u1EF7 l\u1EC7
+    t\u1EF1 sinh ra m\u1ED9t m\u0169i t\xEAn ti\u1EBFp theo bay ngay sau n\xF3."
+  chance: 0.345
+  delay: 1.5
+  maxChainDepth: 6

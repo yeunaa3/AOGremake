@@ -44,11 +44,11 @@ namespace AOG.Duel
         [SerializeField] private GameObject bowShotEffectPrefab;
         [Tooltip("Thời gian hiển thị của mỗi nhịp vòng tròn (giây).")]
         [SerializeField, Min(0.02f)] private float ringBeatDuration = 0.07f;
-        [Header("Hiệu ứng kỹ năng High")]
+        [Header("Hiệu ứng kỹ năng High (High Beam)")]
         [Tooltip("Prefab cột ánh sáng vút thẳng lên trời từ aimtarget khi gọi trigger High.")]
         [SerializeField] private GameObject highBeamEffectPrefab;
-        [Tooltip("Thời gian trễ (giây) sau khi gọi trigger High trước khi cột sáng xuất hiện.")]
-        [SerializeField] private float highBeamDelay = 1.0f;
+        [Tooltip("Thời gian trễ (giây) sau khi gọi trigger High trước khi cột sáng xuất hiện. Kéo thanh trượt để chỉnh nhanh hay chậm (ví dụ 0.5s - 1.2s).")]
+        [SerializeField, Range(0f, 3f)] private float highBeamDelay = 1.0f;
 
         public int Team => team;
         public PlayerController Enemy { get; private set; }
@@ -94,6 +94,44 @@ namespace AOG.Duel
             BodyEffectPoint = visualT != null ? visualT.Find("Effect") : null;
         }
 
+        private void OnEnable()
+        {
+            if (CharacterSkinManager.HasInstance)
+            {
+                CharacterSkinManager.Instance.SkinChanged -= HandleSkinChanged;
+                CharacterSkinManager.Instance.SkinChanged += HandleSkinChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (CharacterSkinManager.HasInstance)
+            {
+                CharacterSkinManager.Instance.SkinChanged -= HandleSkinChanged;
+            }
+        }
+
+        private void Start()
+        {
+            ApplySavedSkinIfPlayer();
+        }
+
+        public void ApplySavedSkinIfPlayer()
+        {
+            if (team == 0 && CharacterSkinManager.Instance != null)
+            {
+                CharacterSkinManager.Instance.ApplyCurrentSkin(gameObject);
+            }
+        }
+
+        private void HandleSkinChanged(CharacterSkinData skin)
+        {
+            if (team == 0 && skin != null)
+            {
+                CharacterSkinManager.ApplySkin(gameObject, skin);
+            }
+        }
+
         private void Update()
         {
             if (!Alive || inputs == null || inputs.Length == 0)
@@ -130,9 +168,25 @@ namespace AOG.Duel
             if (cmd.TryGetSkillSlot(out int slot)) action.Skill(slot, direction == 0f ? Face : direction);
         }
 
+        public void LookAtEnemy()
+        {
+            if (anim == null) return;
+            float dir = Enemy != null
+                ? (Mathf.Abs(Enemy.transform.position.x - transform.position.x) > 0.001f
+                    ? Mathf.Sign(Enemy.transform.position.x - transform.position.x)
+                    : (team == 0 ? 1f : -1f))
+                : (team == 0 ? 1f : -1f);
+            if (Mathf.Abs(dir) > 0.001f)
+            {
+                anim.Face(dir);
+            }
+        }
+
         public void Setup(GameManager manager, PlayerController enemy, int id, ArrowPool arrowPool)
         {
             game = manager; Enemy = enemy; team = id; pool = arrowPool;
+            ApplySavedSkinIfPlayer();
+            LookAtEnemy();
         }
 
         public void ResetPlayer()
@@ -146,16 +200,22 @@ namespace AOG.Duel
             anim.ResetAnimation();
             StopRestHeal();
             poweredArrowCount = 0;
+            ApplySavedSkinIfPlayer();
             arrowBuff = null;
             arrowBuffSkillSlot = -1;
             gear?.ResetState();
+            LookAtEnemy();
         }
 
         public void Play(bool on)
         {
             playing = on && stats.Alive;
             move.Match(playing);
-            if (playing) action.StartPassives();
+            if (playing)
+            {
+                LookAtEnemy();
+                action.StartPassives();
+            }
             if (!playing) action.Stop();
         }
 
@@ -174,15 +234,23 @@ namespace AOG.Duel
                 powered ? arrowBuff.effectDuration : 0f,
                 powered ? arrowBuff.lifeSteal : 0f,
                 powered ? arrowBuff.worldEffectPrefab : null,
-                powered && arrowBuff.resetCooldownOnHit ? arrowBuffSkillSlot : -1);
+                powered && arrowBuff.resetCooldownOnHit ? arrowBuffSkillSlot : -1, isNormalShot: true);
 
-            if (fired && powered)
+            if (fired)
             {
-                poweredArrowCount--;
-                if (poweredArrowCount == 0)
+                if (!powered)
                 {
-                    arrowBuff = null;
-                    arrowBuffSkillSlot = -1;
+                    SkillAudioManager.PlayNormalArrowShoot();
+                }
+                else
+                {
+                    SkillAudioManager.PlaySkillShot(null, arrowBuff.effect);
+                    poweredArrowCount--;
+                    if (poweredArrowCount == 0)
+                    {
+                        arrowBuff = null;
+                        arrowBuffSkillSlot = -1;
+                    }
                 }
             }
         }
@@ -199,6 +267,7 @@ namespace AOG.Duel
         {
             move.Lock(true);
             move.Dash(direction, speed);
+            SkillAudioManager.PlayDash();
         }
 
         public void StartSkillJump(float direction, float horizontalSpeed, float jumpForce)
@@ -211,6 +280,8 @@ namespace AOG.Duel
         public void ShootSkill(ShotData shot, int skillSlot)
         {
             if (shot == null || Enemy == null || (shot.onlyHitAirborne && !Enemy.IsAirborne)) return;
+            SkillData currentSkill = action != null ? action.CurrentSkill : null;
+            SkillAudioManager.PlaySkillShot(currentSkill, shot.effect);
             int count = Mathf.Max(1, shot.count);
             int damage = Mathf.RoundToInt(stats.Damage * Mathf.Max(0f, shot.damageMultiplier));
             Sprite sprite = stats.ArrowSprite;
@@ -280,6 +351,10 @@ namespace AOG.Duel
         public void SpawnSkillObject(GameObject prefab, bool nearTarget, Vector2 offset, int count, float spacing)
         {
             if (prefab == null) return;
+            if (prefab.GetComponent<TrapObject>() != null)
+                SkillAudioManager.PlayMine();
+            else if (prefab.GetComponent<SkillObject>() != null)
+                SkillAudioManager.PlaySummon();
             Vector2 center = nearTarget && Enemy != null ? Enemy.transform.position : transform.position;
             center += new Vector2(offset.x * Face, offset.y);
             float first = -(Mathf.Max(1, count) - 1) * spacing * 0.5f;
@@ -323,7 +398,7 @@ namespace AOG.Duel
             {
                 yield return new WaitForSeconds(waitSec);
                 if (!Alive) break;
-                if (healPerTick > 0) stats.Heal(healPerTick);
+                if (healPerTick > 0) { stats.Heal(healPerTick); SkillAudioManager.PlayHeal(); }
                 if (vfxPrefab != null)
                 {
                     Instantiate(vfxPrefab, transform.position, Quaternion.identity);
@@ -378,6 +453,9 @@ namespace AOG.Duel
             Arrow projectilePrefab = data.prefab.GetComponent<Arrow>();
             if (projectilePrefab != null)
             {
+                SkillData currentSkill = action != null ? action.CurrentSkill : null;
+                ArrowEffect eff = data.hasEffect ? data.effect : ArrowEffect.None;
+                SkillAudioManager.PlaySkillShot(currentSkill, eff);
                 Vector2 targetSnapshot = Enemy.Aim;
                 for (int i = 0; i < count; i++)
                 {
@@ -408,11 +486,22 @@ namespace AOG.Duel
                         data.hasEffect ? data.effect : ArrowEffect.None,
                         data.effectPower, data.effectDuration,
                         shotResetCooldownSlot: -1,
-                        shotGroundLifetime: data.groundDuration);
-                    gear?.TriggerOnShoot(projectile, true);
+                        shotGroundLifetime: data.groundDuration,
+                        onHitSpawnPrefab: data.onHitPrefab,
+                        customFlightAnimation: data.flightAnimationState);
+                    gear?.TriggerOnShoot(projectile, false);
                 }
                 PlayBowShotEffect();
                 return;
+            }
+
+            if (data.prefab.GetComponent<TrapObject>() != null)
+            {
+                SkillAudioManager.PlayMine();
+            }
+            else if (data.prefab.GetComponent<SkillObject>() != null)
+            {
+                SkillAudioManager.PlaySummon();
             }
 
             float first = -(count - 1) * data.objectSpacing * 0.5f;
@@ -428,8 +517,9 @@ namespace AOG.Duel
                 TrapObject trapObject = created.GetComponent<TrapObject>();
                 if (trapObject != null)
                 {
-                    if (count > 1) trapObject.IsClusterChild = true;
+                    trapObject.TrapCount = 1;
                     trapObject.Setup(this);
+                    trapObject.transform.position = position;
                 }
             }
         }
@@ -479,7 +569,11 @@ namespace AOG.Duel
                 if (item != null) item.gameObject.SetActive(false);
         }
 
-        public void Hit() => anim.Trigger("Hit");
+        public void Hit()
+        {
+            SkillAudioManager.PlayPlayerHit();
+            anim.Trigger("Hit");
+        }
 
         public void Win()
         {
@@ -490,6 +584,7 @@ namespace AOG.Duel
             action.Stop();
             move.Lock(true);
             move.Stop();
+            LookAtEnemy();
             anim.Trigger("Win");
         }
 
@@ -498,6 +593,7 @@ namespace AOG.Duel
             playing = false;
             StopRestHeal();
             move.Match(false);
+            LookAtEnemy();
             if (stats.Alive) stats.Kill();
             action.Die();
             game?.NotifyCharacterDied(this);
@@ -506,7 +602,7 @@ namespace AOG.Duel
         private bool Fire(Vector2 start, Vector2 target, ProjectilePath path, float arc,
             int damage, Sprite sprite, float speedMultiplier, ArrowEffect effect,
             int effectPower, float effectDuration, float lifeSteal,
-            GameObject worldEffect, int resetCooldownSlot, bool isSecondaryShot = false)
+            GameObject worldEffect, int resetCooldownSlot, bool isNormalShot = false)
         {
             Arrow arrow = pool == null ? null : pool.Spawn();
             if (arrow == null || sprite == null) return false;
@@ -514,7 +610,7 @@ namespace AOG.Duel
             arrow.Launch(this, start, target, path, arc, damage, sprite, speedMultiplier,
                 effect, effectPower, effectDuration, lifeSteal, worldEffect, resetCooldownSlot);
             PlayBowShotEffect();
-            gear?.TriggerOnShoot(arrow, isSecondaryShot);
+            gear?.TriggerOnShoot(arrow, isNormalShot);
             return true;
         }
 
@@ -528,7 +624,8 @@ namespace AOG.Duel
             yield return new WaitForSeconds(delay);
             if (!Alive || Enemy == null || arrowSpawnPoint == null || stats.ArrowSprite == null) yield break;
             Fire(arrowSpawnPoint.position, Enemy.Aim, ProjectilePath.NormalArc, 0f,
-                stats.Damage, stats.ArrowSprite, 1f, ArrowEffect.None, 0, 0f, 0f, null, -1, true);
+                stats.Damage, stats.ArrowSprite, 1f, ArrowEffect.None, 0, 0f, 0f, null, -1, false);
+            SkillAudioManager.PlayNormalArrowShoot();
         }
 
         public void PlayHighBeamEffect()

@@ -517,6 +517,7 @@ namespace AOG.Duel
         private void LoadMenuScene()
         {
             if (currentPhase == Phase.LoadingMenu) return;
+            ButtonAudioManager.PlayClick();
             currentPhase = Phase.LoadingMenu;
 
             if (musicSource != null && musicSource.isPlaying)

@@ -95,6 +95,11 @@ namespace AOG.Duel
         public void Face(float direction)
         {
             if (visual == null || direction == 0f) return;
+            if (normalX <= 0.0001f)
+            {
+                normalX = Mathf.Abs(visual.localScale.x);
+                if (normalX <= 0.0001f) normalX = 1f;
+            }
             Vector3 scale = visual.localScale;
             scale.x = normalX * Mathf.Sign(direction);
             visual.localScale = scale;
@@ -257,12 +262,44 @@ namespace AOG.Duel
                 GetComponent<PlayerController>()?.PlayHighBeamEffect();
             }
         }
+        public void ReplayTrigger(string name)
+        {
+            if (animator == null) return;
+            if (Has(animator, name, AnimatorControllerParameterType.Trigger))
+            {
+                animator.ResetTrigger(name);
+                animator.SetTrigger(name);
+            }
+            animator.Play(name, 0, 0f);
+        }
         public void Bool(string name, bool value) { if (Has(animator, name, AnimatorControllerParameterType.Bool)) animator.SetBool(name, value); }
         public void Float(string name, float value) { if (Has(animator, name, AnimatorControllerParameterType.Float)) animator.SetFloat(name, value); }
         public void Win() => Trigger("Win");
         public void Die() => Trigger("Die");
+        public void SetPlaybackSpeed(float speed)
+        {
+            float s = Mathf.Max(0.01f, speed);
+            if (animator != null) animator.speed = s;
+            if (effectAnimators != null)
+            {
+                for (int i = 0; i < effectAnimators.Length; i++)
+                    if (effectAnimators[i] != null) effectAnimators[i].speed = s;
+            }
+        }
+
+        public void ResetPlaybackSpeed()
+        {
+            if (animator != null) animator.speed = 1f;
+            if (effectAnimators != null)
+            {
+                for (int i = 0; i < effectAnimators.Length; i++)
+                    if (effectAnimators[i] != null) effectAnimators[i].speed = 1f;
+            }
+        }
+
         public void ResetAnimation()
         {
+            ResetPlaybackSpeed();
             if (animator == null) return;
             if (Has(animator, "Win", AnimatorControllerParameterType.Trigger)) animator.ResetTrigger("Win");
             if (Has(animator, "Die", AnimatorControllerParameterType.Trigger)) animator.ResetTrigger("Die");

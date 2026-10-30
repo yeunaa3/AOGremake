@@ -29,6 +29,7 @@ namespace AOG.Duel
         private bool skillVisualShown;
         private int currentVolleyIndex;
         private SkillData specialSkill;
+        private BowPassive activePassiveRelease;
 
         [Header("Đánh thường - thời gian của clip gốc")]
         [InspectorName("Show Arrow Time")]
@@ -108,12 +109,14 @@ namespace AOG.Duel
                 }
                 if (time >= cycleDuration)
                 {
-                    if (player.Gear != null && player.Gear.BowState.specialSkillReady)
+                    // Nếu đã tích đủ nội tại và nhân vật ĐANG ĐỨNG IM bắn thường -> giải phóng nội tại đặc biệt
+                    if (!move.WantsMove && player.Gear != null && player.Gear.BowState.specialSkillReady)
                     {
-                        if (player.Gear.EquippedBow != null && player.Gear.EquippedBow.Passive is IceShotPassive icePassive)
+                        BowPassive passive = player.Gear.EquippedBow != null ? player.Gear.EquippedBow.Passive : null;
+                        if (passive != null && passive.HasChargeRelease)
                         {
                             player.Gear.BowState.specialSkillReady = false;
-                            if (TriggerSpecialSkill(icePassive.IceSkill, icePassive.AnimationTrigger))
+                            if (TriggerPassiveRelease(passive))
                                 return;
                         }
                     }
@@ -126,7 +129,36 @@ namespace AOG.Duel
             }
             else if (State == ActionState.UsingSkill)
             {
-                SkillData skill = GetSkill(skillSlot);
+                if (activePassiveRelease != null)
+                {
+                    SkillData spSkill = specialSkill;
+                    float pSpeed = spSkill != null ? Mathf.Max(0.05f, spSkill.EffectiveDrawSpeed) : 1f;
+                    float pShowAt = (spSkill != null && spSkill.ShowVisualTime >= 0f) ? spSkill.ShowVisualTime / pSpeed : 0.2f;
+                    float pEffectAt = spSkill != null ? (spSkill.EffectTime / pSpeed) : 0.5f;
+                    float pDuration = spSkill != null ? (spSkill.Duration / pSpeed) : 0.85f;
+
+                    if (!skillVisualShown && time >= pShowAt)
+                    {
+                        skillVisualShown = true;
+                        if (spSkill != null) spSkill.ShowVisual(CurrentSkillContext());
+                    }
+
+                    if (!skillEffectDone && time >= pEffectAt)
+                    {
+                        skillEffectDone = true;
+                        player.HideHeldArrows();
+                        activePassiveRelease.ExecuteSpecialRelease(player, player.Gear != null ? player.Gear.BowState : null);
+                    }
+
+                    if (time >= pDuration)
+                    {
+                        activePassiveRelease = null;
+                        EndSkillFromClip();
+                    }
+                    return;
+                }
+
+                SkillData skill = CurrentSkill;
                 if (skill == null)
                 {
                     if (!skillEffectDone && time >= 0.76f)
@@ -143,24 +175,30 @@ namespace AOG.Duel
                     return;
                 }
 
+                float speed = Mathf.Max(0.05f, skill.EffectiveDrawSpeed);
+                float showAt = skill.ShowVisualTime >= 0f ? skill.ShowVisualTime / speed : -1f;
+                float effectAt = skill.EffectTime / speed;
+                float duration = skill.Duration / speed;
+
                 int totalVolleys = skill.VolleyCount;
                 if (totalVolleys <= 1)
                 {
-                    if (!skillVisualShown && skill.ShowVisualTime >= 0f && time >= skill.ShowVisualTime)
+                    if (!skillVisualShown && showAt >= 0f && time >= showAt)
                     {
                         skillVisualShown = true;
                         skill.ShowVisual(CurrentSkillContext());
                     }
-                    if (skill.UseOnce && !skillEffectDone && time >= skill.EffectTime)
+                    if (skill.UseOnce && !skillEffectDone && time >= effectAt)
                         UseSkillFromClip();
                     skill.Tick(CurrentSkillContext(), Time.deltaTime);
-                    if (!skill.ChannelUntilCancelled && time >= skill.Duration) EndSkillFromClip();
+                    if (!skill.ChannelUntilCancelled && time >= duration) EndSkillFromClip();
                 }
                 else
                 {
                     // Multi-volley: Bắn nhiều đợt liên tiếp sau 1 lần bấm.
                     // Tự động lặp lại đúng chu kỳ kéo cung (ShowVisual -> Use) cho từng phát bắn!
-                    float cycleDuration = Mathf.Max(skill.EffectTime + 0.05f, skill.VolleyInterval > 0f ? skill.VolleyInterval : skill.Duration);
+                    float scaledInterval = skill.VolleyInterval > 0f ? (skill.VolleyInterval / speed) : duration;
+                    float cycleDuration = Mathf.Max(effectAt + 0.05f, scaledInterval);
                     int volleyIndex = Mathf.Clamp(Mathf.FloorToInt(time / cycleDuration), 0, totalVolleys - 1);
                     float cycleTime = time - (volleyIndex * cycleDuration);
 
@@ -172,22 +210,22 @@ namespace AOG.Duel
                         skillEffectDone = false;
                         if (!string.IsNullOrWhiteSpace(skill.AnimationTrigger))
                         {
-                            anim.Trigger(skill.AnimationTrigger);
+                            anim.ReplayTrigger(skill.AnimationTrigger);
                         }
                     }
 
-                    // 1. Đến thời điểm showTime trong chu kỳ: hiện mũi tên trên tay
-                    if (!skillVisualShown && skill.ShowVisualTime >= 0f && cycleTime >= skill.ShowVisualTime)
+                    // 1. Đến thời điểm showAt trong chu kỳ: hiện mũi tên trên tay
+                    if (!skillVisualShown && showAt >= 0f && cycleTime >= showAt)
                     {
                         skillVisualShown = true;
                         skill.ShowVisual(CurrentSkillContext());
                     }
 
-                    // 2. Đến thời điểm effectTime trong chu kỳ: bắn mũi tên đi
-                    if (!skillEffectDone && cycleTime >= skill.EffectTime)
+                    // 2. Đến thời điểm effectAt trong chu kỳ: bắn mũi tên đi
+                    if (!skillEffectDone && cycleTime >= effectAt)
                     {
                         skillEffectDone = true;
-                        SkillData currentSkill = GetSkill(skillSlot);
+                        SkillData currentSkill = CurrentSkill;
                         currentSkill?.Use(CurrentSkillContext());
                     }
 
@@ -207,12 +245,14 @@ namespace AOG.Duel
             if (IsChanneling) EndSkillFromClip();
             if (!Ready || !player.CanAttack) return false;
 
-            if (player.Gear != null && player.Gear.BowState.specialSkillReady)
+            // Nếu đã tích đủ nội tại và nhân vật ĐANG ĐỨNG IM bắn thường -> giải phóng nội tại đặc biệt
+            if (!move.WantsMove && player.Gear != null && player.Gear.BowState.specialSkillReady)
             {
-                if (player.Gear.EquippedBow != null && player.Gear.EquippedBow.Passive is IceShotPassive icePassive)
+                BowPassive passive = player.Gear.EquippedBow != null ? player.Gear.EquippedBow.Passive : null;
+                if (passive != null && passive.HasChargeRelease)
                 {
                     player.Gear.BowState.specialSkillReady = false;
-                    return TriggerSpecialSkill(icePassive.IceSkill, icePassive.AnimationTrigger);
+                    return TriggerPassiveRelease(passive);
                 }
             }
 
@@ -264,8 +304,11 @@ namespace AOG.Duel
             move.Lock(true);
             move.Stop();
             anim.Face(player.Face);
+            float drawSpd = skill != null ? skill.EffectiveDrawSpeed : 1f;
+            anim.SetPlaybackSpeed(drawSpd);
             SkillCtx context = CurrentSkillContext();
             skill.Begin(context);
+            player.Gear?.TriggerOnSkillUsed(skill, slot, skillDirection);
             if (skill is MoveSkill ms && ms.Movement == MovementShotType.Jump ||
                 (skill != null && skill.name.IndexOf("jump", System.StringComparison.OrdinalIgnoreCase) >= 0) ||
                 (skill != null && skill.DisplayName.IndexOf("jump", System.StringComparison.OrdinalIgnoreCase) >= 0))
@@ -290,6 +333,43 @@ namespace AOG.Duel
             return true;
         }
 
+        public bool TriggerPassiveRelease(BowPassive passive)
+        {
+            if (!player.Alive || passive == null) return false;
+
+            if (State == ActionState.AutoAttacking) CancelAttack();
+            State = ActionState.UsingSkill;
+            time = 0f;
+            specialSkill = passive.SpecialSkill;
+            activePassiveRelease = passive;
+            skillSlot = -1;
+            skillDirection = player.Face;
+            skillEffectDone = false;
+            skillVisualShown = false;
+            currentVolleyIndex = 0;
+
+            move.Lock(true);
+            move.Stop();
+            anim.Face(player.Face);
+            float specialSpd = specialSkill != null ? specialSkill.EffectiveDrawSpeed : 1f;
+            anim.SetPlaybackSpeed(specialSpd);
+
+            if (specialSkill != null)
+            {
+                SkillCtx context = CurrentSkillContext();
+                specialSkill.Begin(context);
+                if (specialSkill.ShowVisualTime == 0f)
+                {
+                    skillVisualShown = true;
+                    specialSkill.ShowVisual(context);
+                }
+            }
+
+            string trig = passive.SpecialAnimationTrigger;
+            anim.Trigger(trig);
+            return true;
+        }
+
         public bool TriggerSpecialSkill(SkillData skill, string fallbackTrigger = "Low", float direction = 0f)
         {
             if (!player.Alive) return false;
@@ -307,6 +387,8 @@ namespace AOG.Duel
             move.Lock(true);
             move.Stop();
             anim.Face(player.Face);
+            float specialSpd = skill != null ? skill.EffectiveDrawSpeed : 1f;
+            anim.SetPlaybackSpeed(specialSpd);
 
             if (skill != null)
             {
@@ -325,7 +407,7 @@ namespace AOG.Duel
                 }
                 else
                 {
-                    anim.Trigger(skill.AnimationTrigger);
+                    anim.ReplayTrigger(skill.AnimationTrigger);
                 }
             }
             else
@@ -340,13 +422,15 @@ namespace AOG.Duel
             if (State != ActionState.UsingSkill) return;
             if (skillEffectDone) return;
             skillEffectDone = true;
-            SkillData skill = GetSkill(skillSlot);
+            SkillData skill = CurrentSkill;
             skill?.Use(new SkillCtx(player, player.Enemy, skillSlot, skillDirection));
         }
 
         public void EndSkillFromClip()
         {
             if (State != ActionState.UsingSkill) return;
+            SkillData activeSkill = CurrentSkill;
+            anim.ResetPlaybackSpeed();
             EndCurrentSkill();
             move.Stop();
             move.Lock(false);
@@ -354,6 +438,10 @@ namespace AOG.Duel
             specialSkill = null;
             State = ActionState.Ready;
             anim.EndSkillAnimation();
+            if (activeSkill != null)
+            {
+                player.Gear?.TriggerOnSkillEnded(activeSkill);
+            }
         }
 
         public void StartPassives()
@@ -404,7 +492,6 @@ namespace AOG.Duel
         }
         public SkillData GetSkill(int slot)
         {
-            if (specialSkill != null) return specialSkill;
             if (slot < 0 || slot >= skills.Length) return null;
             return loadout != null ? loadout.GetSkill(slot) : skills[slot];
         }
@@ -440,10 +527,12 @@ namespace AOG.Duel
         }
         public float GetSkillCooldownRemaining(int slot) => slot >= 0 && slot < skillLeft.Length ? skillLeft[slot] : 0f;
 
-        private SkillCtx CurrentSkillContext() => new SkillCtx(player, player.Enemy, skillSlot, skillDirection);
+        public SkillCtx CurrentSkillContext() => new SkillCtx(player, player.Enemy, skillSlot, skillDirection);
 
         private void EndCurrentSkill()
         {
+            activePassiveRelease = null;
+            anim.ResetPlaybackSpeed();
             if (specialSkill != null)
             {
                 specialSkill.End(CurrentSkillContext());

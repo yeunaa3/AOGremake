@@ -12,6 +12,8 @@ namespace AOG.Duel
         private readonly Dictionary<Arrow, Arrow> sourcePrefab = new Dictionary<Arrow, Arrow>();
         private readonly HashSet<Arrow> active = new HashSet<Arrow>();
 
+        public IEnumerable<Arrow> ActiveArrows => active;
+
         public Vector3 DefaultProjectileScale => arrowPrefab == null
             ? Vector3.one
             : arrowPrefab.transform.localScale;

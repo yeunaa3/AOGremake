@@ -212,3 +212,5 @@ MonoBehaviour:
   effect: 1
   effectPower: 0
   effectDuration: 0
+  fireSound: {fileID: 8300000, guid: 6143c5b8b8ea92a40b8a4f9448154687, type: 3}
+  soundVolume: 0.7

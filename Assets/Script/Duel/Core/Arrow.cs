@@ -65,6 +65,10 @@ namespace AOG.Duel
         [Tooltip("Prefab vùng hiệu ứng được tạo tại điểm tên chạm người hoặc mặt đất.")]
         [InspectorName("Impact Effects")]
         [SerializeField] private GroundEffectSetting[] groundEffects;
+        [Header("Vật thể sinh ra khi va chạm (On Hit / Impact)")]
+        [Tooltip("Prefab sinh ra khi mũi tên chạm mục tiêu hoặc mặt đất (ví dụ Bom hẹn giờ).")]
+        [SerializeField] private GameObject onHitPrefab;
+        private GameObject activeOnHitPrefab;
         [FormerlySerializedAs("groundFirePrefab")]
         [SerializeField, HideInInspector] private AreaEffect legacyGroundFirePrefab;
         [Header("Vệt hiệu ứng khi bay")]
@@ -85,6 +89,8 @@ namespace AOG.Duel
         private float lifetime;
         private ProjectilePath path;
         private float shotSpeedMultiplier = 1f;
+        private float timeScale = 1f;
+        public float TimeScale { get => timeScale; set => timeScale = Mathf.Max(0.001f, value); }
         private bool flying;
         private bool stuckInGround;
         private float groundTime;
@@ -104,6 +110,7 @@ namespace AOG.Duel
         private Vector3 initialScale = Vector3.one;
 
         public Action<Arrow, float> OnFlightUpdate;
+        public GameObject OnHitPrefab => onHitPrefab;
         public PlayerController Owner => owner;
         public int Damage { get => damage; set => damage = Mathf.Max(0, value); }
         public float ShotSpeedMultiplier { get => shotSpeedMultiplier; set => shotSpeedMultiplier = Mathf.Max(0.01f, value); }
@@ -168,7 +175,7 @@ namespace AOG.Duel
             }
 
             float ownerSpeed = owner == null ? 1f : owner.Stats.ProjectileSpeedMultiplier;
-            float moveDistance = Time.fixedDeltaTime * flightSpeed * shotSpeedMultiplier * ownerSpeed;
+            float moveDistance = Time.fixedDeltaTime * flightSpeed * shotSpeedMultiplier * ownerSpeed * timeScale;
             if (path == ProjectilePath.Straight)
             {
                 Vector2 nextStraightPoint = body.position + straightDirection * moveDistance;
@@ -236,7 +243,9 @@ namespace AOG.Duel
             float shotLifeSteal = 0f,
             GameObject shotWorldEffect = null,
             int shotResetCooldownSlot = -1,
-            float shotGroundLifetime = -1f)
+            float shotGroundLifetime = -1f,
+            GameObject onHitSpawnPrefab = null,
+            string customFlightAnimation = null)
         {
             owner = projectileOwner;
             startPoint = start;
@@ -280,6 +289,7 @@ namespace AOG.Duel
             resetCooldownSlot = shotResetCooldownSlot;
             worldEffectPrefab = shotWorldEffect;
             worldEffectCreated = false;
+            activeOnHitPrefab = onHitSpawnPrefab != null ? onHitSpawnPrefab : onHitPrefab;
             if (visual != null)
             {
                 if (arrowSprite != null) visual.sprite = arrowSprite;
@@ -303,7 +313,7 @@ namespace AOG.Duel
             if (rotateAlongPath) body.rotation = firstAngle;
             hitbox.enabled = true;
             StartTrail(shotEffect);
-            StartFlightEffect(shotEffect);
+            StartFlightEffect(shotEffect, customFlightAnimation);
             flying = true;
         }
 
@@ -326,6 +336,7 @@ namespace AOG.Duel
             lifeSteal = 0f;
             resetCooldownSlot = -1;
             shotSpeedMultiplier = 1f;
+            timeScale = 1f;
             worldEffectPrefab = null;
             worldEffectCreated = false;
             transform.localScale = initialScale;
@@ -344,29 +355,68 @@ namespace AOG.Duel
                 + t * t * endPoint;
         }
 
-        private void StartFlightEffect(ArrowEffect arrowEffect)
+        private void StartFlightEffect(ArrowEffect arrowEffect, string customState = null)
         {
             StopFlightEffect();
-            if (flightEffectAnimator == null || flightEffectAnimator.runtimeAnimatorController == null
-                || flightAnimations == null) return;
-            foreach (FlightAnimationSetting setting in flightAnimations)
+            if (flightEffectAnimator == null || flightEffectAnimator.runtimeAnimatorController == null) return;
+
+            string targetState = customState;
+            if (string.IsNullOrEmpty(targetState) && flightAnimations != null)
             {
-                if (setting == null || setting.effect != arrowEffect || string.IsNullOrEmpty(setting.trigger)) continue;
-                foreach (AnimatorControllerParameter parameter in flightEffectAnimator.parameters)
+                foreach (FlightAnimationSetting setting in flightAnimations)
                 {
-                    if (parameter.name != setting.trigger || parameter.type != AnimatorControllerParameterType.Trigger) continue;
-                    flightEffectRoot.gameObject.SetActive(true);
-                    flightEffectAnimator.Rebind();
-                    flightEffectAnimator.Update(0f);
-                    flightEffectAnimator.SetTrigger(setting.trigger);
-                    flightEffectAnimator.Update(0f);
-                    return;
+                    if (setting != null && setting.effect == arrowEffect && !string.IsNullOrEmpty(setting.trigger))
+                    {
+                        targetState = setting.trigger;
+                        break;
+                    }
                 }
             }
+
+            if (string.IsNullOrEmpty(targetState))
+            {
+                switch (arrowEffect)
+                {
+                    case ArrowEffect.Burn:
+                        targetState = HasAnimatorState("Burn") ? "Burn" : "FireOnArrow";
+                        break;
+                    case ArrowEffect.Boom:
+                        targetState = HasAnimatorState("MineOnArrow") ? "MineOnArrow" : "Boom";
+                        break;
+                    case ArrowEffect.Freeze:
+                        targetState = "Freeze";
+                        break;
+                    case ArrowEffect.Poison:
+                        targetState = "Poison";
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(targetState) || (arrowEffect == ArrowEffect.None && string.IsNullOrEmpty(customState)))
+            {
+                return;
+            }
+
+            if (flightEffectRoot != null) flightEffectRoot.gameObject.SetActive(true);
+            flightEffectAnimator.gameObject.SetActive(true);
+            flightEffectAnimator.enabled = true;
+            flightEffectAnimator.Play(targetState, 0, 0f);
+            flightEffectAnimator.Update(0f);
+        }
+
+        private bool HasAnimatorState(string stateName)
+        {
+            if (flightEffectAnimator == null || flightEffectAnimator.runtimeAnimatorController == null || string.IsNullOrEmpty(stateName))
+                return false;
+            return flightEffectAnimator.HasState(0, Animator.StringToHash(stateName));
         }
 
         private void StopFlightEffect()
         {
+            if (flightEffectAnimator != null)
+            {
+                flightEffectAnimator.enabled = false;
+            }
             if (flightEffectRoot != null) flightEffectRoot.gameObject.SetActive(false);
         }
 
@@ -427,7 +477,7 @@ namespace AOG.Duel
             if (!flying || owner == null) return;
             if (other.transform == owner.transform || other.transform.IsChildOf(owner.transform)) return;
             // Vùng lửa/độc chỉ truyền trạng thái, không phải vật cản chặn tên.
-            if (other.GetComponentInParent<AreaEffect>() != null) return;
+            if (other.GetComponentInParent<AreaEffect>() != null || other.GetComponentInParent<BombObject>() != null) return;
 
             if (stuckInGround)
             {
@@ -444,8 +494,12 @@ namespace AOG.Duel
                 Vector2 hitDir = body != null && body.linearVelocity.sqrMagnitude > 0.01f
                     ? body.linearVelocity.normalized
                     : (Vector2)transform.right;
+                TriggerOnHit(contact, obstacle.transform);
                 obstacle.TakeDamage(damage, owner, hitDir, effect, effectPower, effectDuration);
-                CreateImpactEffects(contact);
+                if (effect == ArrowEffect.Poison)
+                {
+                    SkillAudioManager.PlayPoisonHit();
+                }
                 Despawn();
                 return;
             }
@@ -454,18 +508,29 @@ namespace AOG.Duel
             if (target == null)
             {
                 if (IsGround(other)) StickInGround(contact);
-                else { CreateWorldEffect(transform.position); Despawn(); }
+                else { Despawn(); }
                 return;
             }
             if (target.Team == owner.Team) return;
 
+            TriggerOnHit(contact, target.transform);
             int dealt = target.Stats.TakeDamage(new DamageInfo(owner, damage, false, contact,
                 effect, effectPower, effectDuration));
             OnHitPlayer(target, dealt);
+            SkillAudioManager.PlayPlayerHit();
+            if (effect == ArrowEffect.Poison)
+            {
+                SkillAudioManager.PlayPoisonHit();
+            }
+            else if (effect == ArrowEffect.Boom)
+            {
+                SkillAudioManager.PlayBoom();
+            }
             if (dealt > 0 && lifeSteal > 0f) owner.Stats.Heal(Mathf.RoundToInt(dealt * lifeSteal));
             if (dealt > 0 && resetCooldownSlot >= 0) owner.Action.ResetSkillCooldown(resetCooldownSlot);
             SpawnBloodEffect(target);
-            CreateImpactEffects(contact, target);
+            // Khi bắn trúng Player/Enemy, chỉ gây sát thương và truyền hiệu ứng (như Burn/Poison) vào nhân vật,
+            // KHÔNG tạo prefab lửa/vùng độc dưới đất. Chỉ khi mũi tên cắm xuống đất (StickInGround) mới tạo prefab mặt đất.
             if (owner != null && owner.Gear != null)
             {
                 owner.Gear.TriggerOnArrowHit(this, target, dealt);
@@ -481,10 +546,32 @@ namespace AOG.Duel
                 StringComparison.OrdinalIgnoreCase);
         }
 
+        private void TriggerOnHit(Vector2 contact, Transform hitTarget)
+        {
+            if (activeOnHitPrefab == null) return;
+            GameObject spawned = Instantiate(activeOnHitPrefab, contact, Quaternion.identity);
+            BombObject bomb = spawned.GetComponent<BombObject>();
+            if (bomb != null)
+            {
+                bomb.Setup(owner, hitTarget);
+            }
+            else
+            {
+                SkillObject skillObj = spawned.GetComponent<SkillObject>();
+                if (skillObj != null) skillObj.Setup(owner);
+                else
+                {
+                    AreaEffect area = spawned.GetComponent<AreaEffect>();
+                    if (area != null) area.Setup(owner);
+                }
+            }
+        }
+
         private void StickInGround(Vector2 contact)
         {
             stuckInGround = true;
             groundTime = 0f;
+            TriggerOnHit(contact, null);
             CreateImpactEffects(contact);
             SpawnGroundSmoke(contact);
             FinishTrail();
@@ -526,10 +613,8 @@ namespace AOG.Duel
             return target.transform.position;
         }
 
-        private void CreateImpactEffects(Vector2 contact, PlayerController hitTarget = null)
+        private void CreateImpactEffects(Vector2 contact)
         {
-            if ((effect == ArrowEffect.Burn || effect == ArrowEffect.Poison) && hitTarget != null)
-                contact = GroundBelow(hitTarget);
             CreateWorldEffect(contact);
             AreaEffect prefab = FindGroundEffect();
             if (prefab == null) return;
@@ -623,6 +708,7 @@ namespace AOG.Duel
 
         private void Despawn()
         {
+            activeOnHitPrefab = null;
             if (!flying) return;
             flying = false;
             if (hitbox != null) hitbox.enabled = false;

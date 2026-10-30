@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: LifestealPassive
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.LifestealPassive
   passiveName: "H\xFAt M\xE1u"
-  description: "T\xEAn b\u1EAFn tr\xFAng \u0111\u1ECBch h\u1ED3i 50% m\xE1u c\u1EE7a s\xE1t th\u01B0\u01A1ng g\xE2y ra."
-  lifestealRate: 0.5
+  description: "T\xEAn b\u1EAFn tr\xFAng \u0111\u1ECBch h\u1ED3i 50% m\xE1u c\u1EE7a
+    s\xE1t th\u01B0\u01A1ng g\xE2y ra."
+  lifestealRate: 0.3

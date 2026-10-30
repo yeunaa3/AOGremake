@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 798259ad056242e0af1a073ece4436f0, type: 3}
+  m_Name: TimeStopSkill
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.TimeStopSkill
+  skillId: skill_timestop
+  displayName: Time Stop
+  description: "Ng\u1EEBng \u0111\u1ECDng th\u1EDDi gian! L\xE0m ch\u1EADm 10x t\u1EA5t
+    c\u1EA3 m\u0169i t\xEAn \u0111ang bay c\u1EE7a b\u1EA1n trong 5 gi\xE2y."
+  icon: {fileID: 2382717428535433824, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rarity: 3
+  cooldown: 18
+  cooldownReductionPerLevel: 0
+  damageGrowthPerLevel: 0.1
+  effectPowerGrowthPerLevel: 0.1
+  healGrowthPerLevel: 0
+  animationTrigger: 
+  lockMovement: 0
+  cancelOnMove: 0
+  channelUntilCancelled: 0
+  drawSpeed: 1
+  showTime: -1
+  effectTime: 0.05
+  duration: 0.2
+  timeSlowDuration: 5
+  slowMultiplier: 0.1
+  vfxPrefab: {fileID: 0}

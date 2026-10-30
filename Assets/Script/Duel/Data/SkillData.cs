@@ -32,6 +32,9 @@ namespace AOG.Duel
         [Min(1)] public int volleyCount = 1;
         [Tooltip("Khoảng cách thời gian giữa mỗi đợt bắn (giây).")]
         [Min(0.01f)] public float volleyInterval = 0.15f;
+        [Tooltip("Tốc độ kéo cung khi bắn nhiều đợt (1 = tốc độ gốc, 1.5 = kéo nhanh hơn 50%, 2 = nhanh gấp đôi). Để 0 nếu muốn dùng Draw Speed mặc định của Skill.")]
+        [FormerlySerializedAs("drawSpeed")]
+        [Min(0f)] public float volleyDrawSpeed = 0f;
         [Header("Arrow Rain (Falling Path Only)")]
         [FormerlySerializedAs("randomizeFalling")]
         public bool randomizeRain;
@@ -59,6 +62,12 @@ namespace AOG.Duel
         [Tooltip("Sát thương mỗi lần của độc/lửa, hoặc phần trăm tốc độ còn lại của Slow.")]
         [Min(0)] public int effectPower;
         [Min(0f)] public float effectDuration;
+        [Header("Animation hiệu ứng mũi tên khi bay")]
+        [Tooltip("Tên state animation trên mũi tên (ví dụ: FireOnArrow, MineOnArrow). Bỏ trống sẽ tự động lấy theo Effect.")]
+        public string flightAnimationState;
+        [Header("Vật thể sinh ra khi va chạm (On Hit / Impact)")]
+        [Tooltip("Prefab sinh ra khi mũi tên chạm mục tiêu hoặc mặt đất (ví dụ Bom hẹn giờ).")]
+        public GameObject onHitPrefab;
     }
 
     [System.Serializable]
@@ -132,9 +141,19 @@ namespace AOG.Duel
         [SerializeField] private Sprite icon;
         [SerializeField] private SkillRarity rarity = SkillRarity.Common;
 
-        [Header("Cooldown")]
+        [Header("Cooldown (Level 1 Mặc Định)")]
         [Tooltip("Bắt đầu tính ngay khi bấm skill.")]
         [SerializeField, Min(0f)] private float cooldown = 5f;
+
+        [Header("Công Thức Tăng Trưởng Theo Level")]
+        [Tooltip("Tỉ lệ giảm hồi chiêu mỗi level (mặc định 0.03 = giảm 3% cooldown/level, tối đa giảm 50%).")]
+        [SerializeField, Range(0f, 0.2f)] private float cooldownReductionPerLevel = 0.03f;
+        [Tooltip("Tỉ lệ tăng sát thương / hệ số sát thương mỗi level (mặc định 0.1 = tăng 10% mỗi level).")]
+        [SerializeField, Range(0f, 1f)] private float damageGrowthPerLevel = 0.10f;
+        [Tooltip("Tỉ lệ tăng lực hiệu ứng (lửa, độc, slow...) mỗi level (mặc định 0.1 = tăng 10% mỗi level).")]
+        [SerializeField, Range(0f, 1f)] private float effectPowerGrowthPerLevel = 0.10f;
+        [Tooltip("Tỉ lệ tăng lượng máu hồi mỗi level (mặc định 0.1 = tăng 10% mỗi level).")]
+        [SerializeField, Range(0f, 1f)] private float healGrowthPerLevel = 0.10f;
 
         [Header("Use")]
         [Tooltip("Tên Trigger của State animation skill. Để trống nếu skill không có animation.")]
@@ -143,7 +162,10 @@ namespace AOG.Duel
         [SerializeField] private bool cancelOnMove;
         [Tooltip("Chiêu duy trì liên tục (channeling) cho đến khi người chơi di chuyển hoặc dùng hành động khác để ngắt.")]
         [SerializeField] private bool channelUntilCancelled;
-        [Header("Timing")]
+        [Header("Timing & Tốc Độ Kéo Cung")]
+        [InspectorName("Draw Speed (Tốc Độ Kéo Cung)")]
+        [Tooltip("Tốc độ kéo cung / animation khi dùng kỹ năng (1 = tốc độ gốc, 1.5 = kéo nhanh hơn 50%, 2 = kéo nhanh gấp đôi). Tự động co giãn thời gian show, bắn và chu kỳ đợt.")]
+        [SerializeField, Min(0.1f)] private float drawSpeed = 1f;
         [InspectorName("Show Arrow Time")]
         [Tooltip("Giây trong clip mà hình mũi tên xuất hiện. Đặt -1 nếu skill không có hình cần hiện.")]
         [SerializeField, Min(-1f)] private float showTime = -1f;
@@ -159,11 +181,12 @@ namespace AOG.Duel
         public string Description => description;
         public Sprite Icon => icon;
         public SkillRarity Rarity => rarity;
-        public float Cooldown => cooldown;
         public string AnimationTrigger => animationTrigger;
         public bool LockMovement => lockMovement;
         public bool CancelOnMove => cancelOnMove;
         public bool ChannelUntilCancelled => channelUntilCancelled;
+        public float DrawSpeed => Mathf.Max(0.05f, drawSpeed);
+        public virtual float EffectiveDrawSpeed => DrawSpeed;
         public float EffectTime => effectTime;
         public float Duration => duration;
         public virtual bool Passive => false;
@@ -172,6 +195,73 @@ namespace AOG.Duel
         public virtual int VolleyCount => 1;
         public virtual float VolleyInterval => 0f;
         public abstract SkillType Type { get; }
+
+        // Chỉ số Level 1 nguyên bản và các tỷ lệ tăng trưởng
+        public float BaseCooldown => cooldown;
+        public float CooldownReductionPerLevel => cooldownReductionPerLevel;
+        public float DamageGrowthPerLevel => damageGrowthPerLevel;
+        public float EffectPowerGrowthPerLevel => effectPowerGrowthPerLevel;
+        public float HealGrowthPerLevel => healGrowthPerLevel;
+
+        /// <summary>
+        /// Cấp độ hiện tại của kỹ năng lấy từ bộ nhớ thẻ PlayerSkillInventory.
+        /// </summary>
+        public int CurrentLevel
+        {
+            get
+            {
+                if (PlayerSkillInventory.HasInstance)
+                {
+                    return PlayerSkillInventory.Instance.GetLevel(skillId);
+                }
+                return 1;
+            }
+        }
+
+        /// <summary>
+        /// Tính toán thời gian hồi chiêu theo cấp độ.
+        /// Level 1: giữ nguyên cooldown gốc.
+        /// Level > 1: cooldown * (1 - reduction * (level - 1)), tối đa giảm 50%.
+        /// </summary>
+        public float GetCooldown(int level)
+        {
+            if (level <= 1 || cooldownReductionPerLevel <= 0f) return cooldown;
+            float reduction = Mathf.Clamp(cooldownReductionPerLevel * (level - 1), 0f, 0.5f);
+            return Mathf.Max(0.5f, cooldown * (1f - reduction));
+        }
+
+        public float Cooldown => GetCooldown(CurrentLevel);
+
+        public float GetDamageMultiplier(float baseMultiplier, int level)
+        {
+            if (level <= 1 || damageGrowthPerLevel <= 0f) return baseMultiplier;
+            return baseMultiplier * (1f + damageGrowthPerLevel * (level - 1));
+        }
+
+        public int GetEffectPower(int basePower, int level)
+        {
+            if (level <= 1 || effectPowerGrowthPerLevel <= 0f || basePower <= 0) return basePower;
+            return Mathf.RoundToInt(basePower * (1f + effectPowerGrowthPerLevel * (level - 1)));
+        }
+
+        public int GetHealAmount(int baseHeal, int level)
+        {
+            if (level <= 1 || healGrowthPerLevel <= 0f || baseHeal <= 0) return baseHeal;
+            return Mathf.RoundToInt(baseHeal * (1f + healGrowthPerLevel * (level - 1)));
+        }
+
+        /// <summary>
+        /// Lấy cấp độ kỹ năng của người thi triển (Player 1 lấy theo bộ nhớ thẻ, Enemy lấy theo level 1).
+        /// </summary>
+        public int GetCasterLevel(SkillCtx context)
+        {
+            if (context.Caster != null && context.Caster.Team == 0 && PlayerSkillInventory.HasInstance)
+            {
+                return PlayerSkillInventory.Instance.GetLevel(skillId);
+            }
+            return 1;
+        }
+
         public virtual void Begin(SkillCtx context) { }
         public virtual void ShowVisual(SkillCtx context) { }
         public virtual void Tick(SkillCtx context, float deltaTime) { }

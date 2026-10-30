@@ -69,6 +69,11 @@ namespace AOG.Duel
                 }
             }
 
+            if (healedAny)
+            {
+                SkillAudioManager.PlayHeal();
+            }
+
             if (healedAny && healPulsePrefab != null)
             {
                 ParticleSystem pulse = Instantiate(healPulsePrefab, transform.position, Quaternion.identity);

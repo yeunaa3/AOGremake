@@ -18,7 +18,10 @@ MonoBehaviour:
   bowSprite: {fileID: 2630720244013161647, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
   rarity: 2
   arrowSprite: {fileID: -4805778372435739706, guid: 1ed2dda59b589904590f56fd3a47004e, type: 3}
-  damage: 10
-  arrowSpeed: 9
+  damage: 19
   attackSpeedMultiplier: 1
+  arrowSpeed: 9
+  damageGrowthPerLevel: 0.1
+  attackSpeedGrowthPerLevel: 0
+  arrowSpeedGrowthPerLevel: 0
   passive: {fileID: 11400000, guid: f4d3a2fdbf7642cdb22338d046a95cd2, type: 2}

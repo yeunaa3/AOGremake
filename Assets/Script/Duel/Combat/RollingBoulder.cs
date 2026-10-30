@@ -49,6 +49,8 @@ namespace AOG.Duel
                 initialRightBoundary = rightBoundary;
                 boundaryInitialized = true;
             }
+            // Đảm bảo kích thước chuẩn 1.8 đồng nhất
+            transform.localScale = new Vector3(1.8f, 1.8f, 1f);
         }
 
         public override void Setup(PlayerController source)
@@ -61,6 +63,19 @@ namespace AOG.Duel
             }
             lastBounceTime = 0f;
             nextContactTime = 0f;
+
+            // Bỏ qua va chạm vật lý giữa con lăn và người triệu hồi (không bị cấn đầu/chân người triệu hồi)
+            if (owner != null && col != null)
+            {
+                foreach (Collider2D ownerCol in owner.GetComponentsInChildren<Collider2D>(true))
+                {
+                    if (ownerCol != null)
+                    {
+                        Physics2D.IgnoreCollision(col, ownerCol, true);
+                    }
+                }
+            }
+
             if (owner != null)
             {
                 // Mặc định hướng lăn về phía đối thủ
@@ -76,30 +91,24 @@ namespace AOG.Duel
                 }
                 direction = enemyDirection;
 
-                // GIỮ NGUYÊN SCALE DƯƠNG:
-                // Đối với hình cầu / con lăn tròn, xoay tròn Transform con (visualTransform) trong không gian
-                // khi Transform cha có localScale.x âm sẽ tạo hiệu ứng biến dạng kéo dẹt (shear / elip).
-                // Do đó luôn giữ localScale dương đồng nhất, chiều lăn và xoay tròn do direction (+1 hoặc -1) quyết định.
-                Vector3 s = transform.localScale;
-                transform.localScale = new Vector3(Mathf.Abs(s.x), Mathf.Abs(s.y), Mathf.Abs(s.z));
-
-                // Căn chỉnh biên nảy tọa độ theo vị trí của người triệu hồi so với đối thủ
-                bool isSpawnedOnRightSide = (owner.Enemy != null && transform.position.x > owner.Enemy.transform.position.x) || transform.position.x > 0f;
-                float boundaryA = Mathf.Abs(initialLeftBoundary);
-                float boundaryB = Mathf.Abs(initialRightBoundary);
-                float minBound = Mathf.Min(boundaryA, boundaryB);
-                float maxBound = Mathf.Max(boundaryA, boundaryB);
-                if (isSpawnedOnRightSide)
+                // Biên nảy tọa độ theo từng hòn đảo để con lăn không bao giờ lăn xuống vực thẳm ở giữa map (x: -1.35 đến +1.35)
+                // Đảo bên trái (Player): [-6.8, -1.8]
+                // Đảo bên phải (Enemy): [1.8, 6.8]
+                bool isRightSide = (owner.Enemy != null && transform.position.x > owner.Enemy.transform.position.x) || transform.position.x > 0f;
+                if (isRightSide)
                 {
-                    leftBoundary = minBound;
-                    rightBoundary = maxBound;
+                    leftBoundary = 1.8f;
+                    rightBoundary = 6.8f;
                 }
                 else
                 {
-                    leftBoundary = -maxBound;
-                    rightBoundary = -minBound;
+                    leftBoundary = -6.8f;
+                    rightBoundary = -1.8f;
                 }
             }
+
+            // Ép scale luôn là 1.8 đồng nhất, tuyệt đối không bị dẹt méo
+            transform.localScale = new Vector3(1.8f, 1.8f, 1f);
 
             if (visualTransform == null)
             {
@@ -114,24 +123,43 @@ namespace AOG.Duel
                 visualTransform.localRotation = Quaternion.identity;
             }
 
-            // Tự động tìm mặt đất ngay bên dưới vị trí triệu hồi để đặt con lăn xuống đất lập tức,
+            // Tự động tìm mặt đất ngay bên dưới vị trí triệu hồi để đặt con lăn xuống đất chuẩn xác lập tức,
             // tránh trường hợp rơi từ trên trời xuống gây hiện tượng lăn lơ lửng trên không
-            float colRadius = 0.7f;
+            float colRadius = 0.702f;
             CircleCollider2D circle = GetComponent<CircleCollider2D>();
             if (circle != null)
             {
                 colRadius = circle.radius * Mathf.Abs(transform.lossyScale.x);
             }
+
             int mask = groundLayers.value != 0 ? groundLayers.value : (1 << 8);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 30f, mask);
-            if (hit.collider != null)
+            int groundLayer = LayerMask.NameToLayer("Ground");
+            if (groundLayer >= 0) mask |= (1 << groundLayer);
+
+            // Bắn raycast từ trên cao xuống tìm mặt đất thực tế bên dưới, bỏ qua caster và trigger
+            RaycastHit2D[] hits = Physics2D.RaycastAll(new Vector2(transform.position.x, 5f), Vector2.down, 40f, mask);
+            bool foundGround = false;
+            foreach (RaycastHit2D h in hits)
             {
-                transform.position = new Vector3(transform.position.x, hit.point.y + colRadius + 0.05f, transform.position.z);
-                hasLanded = true;
-                if (rb != null)
+                if (h.collider != null && !h.collider.isTrigger && IsGround(h.collider))
                 {
-                    rb.linearVelocity = Vector2.zero;
+                    if (owner != null && (h.collider.transform == owner.transform || h.collider.transform.IsChildOf(owner.transform)))
+                        continue;
+
+                    transform.position = new Vector3(transform.position.x, h.point.y + colRadius, transform.position.z);
+                    hasLanded = true;
+                    foundGround = true;
+                    if (rb != null) rb.linearVelocity = Vector2.zero;
+                    break;
                 }
+            }
+
+            // Nếu không tìm thấy mặt đất qua raycast (do map setup), đặt về độ cao mặt đất chuẩn của game (-2.35f)
+            if (!foundGround)
+            {
+                transform.position = new Vector3(transform.position.x, -2.35f + colRadius, transform.position.z);
+                hasLanded = true;
+                if (rb != null) rb.linearVelocity = Vector2.zero;
             }
 
             // Tự động tắt Animator nếu có để code tự xoay tròn, người dùng không cần phải tạo animation
@@ -200,20 +228,28 @@ namespace AOG.Duel
                     // Xoay trong không gian thế giới (Space.World) quanh trục forward (Z)
                     // Lăn sang phải (direction = 1) -> xoay theo chiều kim đồng hồ (-Z)
                     // Lăn sang trái (direction = -1) -> xoay ngược chiều kim đồng hồ (+Z)
-                    visualTransform.Rotate(Vector3.forward, -direction * rotSpeed * Time.deltaTime, Space.World);
+                    visualTransform.Rotate(Vector3.forward, -direction * rotSpeed * Time.deltaTime, Space.Self);
                 }
             }
 
-            // Kiểm tra biên tọa độ
+            // Kiểm tra biên tọa độ và ngăn chặn hoàn toàn việc rớt xuống vực
             if (useCoordinateBoundary)
             {
-                if (transform.position.x <= leftBoundary && direction < 0f && Time.time >= lastBounceTime + bounceCooldown)
+                if (transform.position.x <= leftBoundary)
                 {
-                    ReverseDirection();
+                    if (direction < 0f && Time.time >= lastBounceTime + bounceCooldown)
+                    {
+                        ReverseDirection();
+                    }
+                    transform.position = new Vector3(Mathf.Max(leftBoundary, transform.position.x), transform.position.y, transform.position.z);
                 }
-                else if (transform.position.x >= rightBoundary && direction > 0f && Time.time >= lastBounceTime + bounceCooldown)
+                else if (transform.position.x >= rightBoundary)
                 {
-                    ReverseDirection();
+                    if (direction > 0f && Time.time >= lastBounceTime + bounceCooldown)
+                    {
+                        ReverseDirection();
+                    }
+                    transform.position = new Vector3(Mathf.Min(rightBoundary, transform.position.x), transform.position.y, transform.position.z);
                 }
             }
         }

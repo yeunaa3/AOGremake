@@ -14,13 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
   skillId: RainArrow
   displayName: Rain Arrow
-  description: "B\u1EAFn m\u01B0a t\xEAn t\u1EEB tr\xEAn tr\u1EDDi xu\u1ED1ng khu v\u1EF1c m\u1EE5c ti\xEAu."
+  description: "B\u1EAFn m\u01B0a t\xEAn t\u1EEB tr\xEAn tr\u1EDDi xu\u1ED1ng khu
+    v\u1EF1c m\u1EE5c ti\xEAu."
   icon: {fileID: -7120867972998118134, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 2
   cooldown: 12
+  cooldownReductionPerLevel: 0
+  damageGrowthPerLevel: 0.1
+  effectPowerGrowthPerLevel: 0.1
+  healGrowthPerLevel: 0
   animationTrigger: High
   lockMovement: 1
   cancelOnMove: 0
+  channelUntilCancelled: 0
+  drawSpeed: 1
   showTime: 0.2
   effectTime: 0.76
   duration: 1
@@ -29,7 +36,10 @@ MonoBehaviour:
     spawnPoint: 2
     count: 10
     offset: {x: -2, y: 6}
-    targetRadius: 1.5
+    targetRadius: 1.2
+    volleyCount: 1
+    volleyInterval: 0.15
+    volleyDrawSpeed: 0
     randomizeRain: 1
     horizontalRandomness: 0.8
     spawnHeightVariation: 2

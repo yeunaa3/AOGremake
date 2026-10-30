@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f010001000200030004000500060010, type: 3}
+  m_Name: CharacterSkinDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.CharacterSkinDatabase
+  skins:
+  - skinId: skin1
+    displayName: Skin 1
+    head: {fileID: 21300000, guid: 8e2b1679f5684ea469a471aef61cad0a, type: 3}
+    body: {fileID: 21300000, guid: 08a560010525d664f858c4112e8348f1, type: 3}
+    shoulderL: {fileID: 21300000, guid: 8ebb9a8a624928144b3f88cda5f3f737, type: 3}
+    armL: {fileID: 21300000, guid: e7e75dbff56beec4982ac46601f9704a, type: 3}
+    handL: {fileID: 21300000, guid: 29ab07e6ed52cb340885e057f54b94d7, type: 3}
+    shoulderR: {fileID: 21300000, guid: b7341a9d852d7c4469719d03a1154f5c, type: 3}
+    armR: {fileID: 21300000, guid: 0e8f87d3820494e4198d588b319e397d, type: 3}
+    handR: {fileID: 21300000, guid: b1416739e70c4a44cb055a01c523b972, type: 3}
+    thighL: {fileID: 21300000, guid: e5dce4223179ee540beb59654bbf234f, type: 3}
+    thighR: {fileID: 21300000, guid: 514d701bb04ec0542b76d8790a3a391f, type: 3}
+    legL: {fileID: 21300000, guid: e3867d0b524f52c49891bd5a56bb42d7, type: 3}
+    legR: {fileID: 21300000, guid: 2c3450b09e21e5e4093efce89b95f37d, type: 3}
+  - skinId: skin2
+    displayName: Skin 2
+    head: {fileID: 21300000, guid: 631972b64ac7d4e4a930c09ad73ed2d8, type: 3}
+    body: {fileID: 21300000, guid: 248fefc3c6834c640aed5474e09de3a2, type: 3}
+    shoulderL: {fileID: 21300000, guid: 1fa49ff4a6dd2554e914abbf80564f9a, type: 3}
+    armL: {fileID: 21300000, guid: c976d29741ece5b4cb2863da147645be, type: 3}
+    handL: {fileID: 21300000, guid: bd336bcb63e5a8d4fb960a99317f989b, type: 3}
+    shoulderR: {fileID: 21300000, guid: 44e995905cc152e468e47f7b18cfee78, type: 3}
+    armR: {fileID: 21300000, guid: 507858ec18af6344f8d09baf64d9be06, type: 3}
+    handR: {fileID: 21300000, guid: b5883a1a328eb64408561f1ed147add8, type: 3}
+    thighL: {fileID: 21300000, guid: 34a14d457d3dcde489609905e41b85b5, type: 3}
+    thighR: {fileID: 21300000, guid: adf6040bf9dd12e4aab29e5a29a922c8, type: 3}
+    legL: {fileID: 21300000, guid: df4a9b99fad71c4488fab568153fc78a, type: 3}
+    legR: {fileID: 21300000, guid: 9a04fd5f430e6e344ad7b6223546b0a9, type: 3}
+  - skinId: skin_angle
+    displayName: Skin Angle
+    head: {fileID: 21300000, guid: 495a7d251cc46ab4c99bb423df6d7575, type: 3}
+    body: {fileID: 21300000, guid: 27760ab932f57304dadf4de57c6648f4, type: 3}
+    shoulderL: {fileID: 21300000, guid: b677c9f013f45044fa7e4fec3e34fe74, type: 3}
+    armL: {fileID: 21300000, guid: 8cb5759be39767f4d90490da8141b653, type: 3}
+    handL: {fileID: 21300000, guid: 5724dc0758d812142884abe0dfd8fe3d, type: 3}
+    shoulderR: {fileID: 21300000, guid: 6ec787dfefda37e489a3282a403ebaae, type: 3}
+    armR: {fileID: 21300000, guid: e7db0ba2bc036634d9d5dcd8a71b034f, type: 3}
+    handR: {fileID: 21300000, guid: 8ac8d57146c66fb4aa3f6efc1fe00675, type: 3}
+    thighL: {fileID: 21300000, guid: 9a0f651fdd4895149a3a32f5aff3deec, type: 3}
+    thighR: {fileID: 21300000, guid: 33f36aedc70806d4cabd45ec266fcc3a, type: 3}
+    legL: {fileID: 21300000, guid: 989363ef3f1ab0542bf8890ce66ee8ae, type: 3}
+    legR: {fileID: 21300000, guid: 38d526a65fd95584196167aeac769ebb, type: 3}
+  - skinId: skin_demon
+    displayName: Skin Demon
+    head: {fileID: 21300000, guid: 0409af7778867714995ee38172b5f22f, type: 3}
+    body: {fileID: 21300000, guid: f57e3cfd5efc54f42a2fb42a8d6dce2a, type: 3}
+    shoulderL: {fileID: 21300000, guid: 045c83eaa272d2c44b642f560dc9de6c, type: 3}
+    armL: {fileID: 21300000, guid: aaa6a9fcd2207fc418b3ebac7fae34a8, type: 3}
+    handL: {fileID: 21300000, guid: c016dc4cf92957e4487690c64440bf04, type: 3}
+    shoulderR: {fileID: 21300000, guid: 1620e5deb4ea32a4d8a68aeef7489d58, type: 3}
+    armR: {fileID: 21300000, guid: fbfb745e56c9b82419f3651ad0743d8c, type: 3}
+    handR: {fileID: 21300000, guid: c3213c2a906e7f141a348ab2bd83b5ad, type: 3}
+    thighL: {fileID: 21300000, guid: 14e7b28874ed6b54e9992ad20e94a52d, type: 3}
+    thighR: {fileID: 21300000, guid: 1c3cb79a3bc7fc24d8133903f8147f45, type: 3}
+    legL: {fileID: 21300000, guid: 2a1ce3146d2884d4d96ea68a160314bf, type: 3}
+    legR: {fileID: 21300000, guid: 4ff1cd4e45bf5784daec32e69507dec4, type: 3}

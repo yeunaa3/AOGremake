@@ -19,6 +19,7 @@ namespace AOG.Duel
         [SerializeField] private GameObject pveButton;
         [SerializeField] private GameObject pvpButton;
         [SerializeField] private GameObject rankButton;
+        [SerializeField] private GameObject skinButton;
         [SerializeField] private GameObject settingButton;
         [SerializeField] private MenuOptionBar setOptionBar;
         [Header("Stand Bow Info Display")]
@@ -85,40 +86,27 @@ namespace AOG.Duel
 
             RefreshPedestalSkillIcons();
             UpdateStandBowLabels(PlayerLoadoutManager.HasInstance ? PlayerLoadoutManager.Instance.EquippedBow : null);
+            ApplySavedSkinToCharacter();
             SetupMenuMusic();
         }
 
         private void SetupMenuMusic()
         {
-            if (audioSource == null)
-            {
-                audioSource = GetComponent<AudioSource>();
-                if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
-            }
-
 #if UNITY_EDITOR
             if (angelLobbyBgm == null)
                 angelLobbyBgm = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/BGM_Lobby_Angel.ogg");
             if (devilLobbyBgm == null)
                 devilLobbyBgm = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/BGM_Lobby_Devil.ogg");
 #endif
+            MenuMusicManager.EnsureInstance(angelLobbyBgm, devilLobbyBgm, angelLobbyVolume, devilLobbyVolume);
+            MenuMusicManager.Instance.PlayLobbyMusic();
+        }
 
-            bool chooseAngel = Random.value < 0.5f;
-            AudioClip chosen = chooseAngel ? angelLobbyBgm : devilLobbyBgm;
-            float vol = chooseAngel ? angelLobbyVolume : devilLobbyVolume;
-            if (chosen == null)
+        private void OnValidate()
+        {
+            if (MenuMusicManager.HasInstance)
             {
-                chosen = chooseAngel ? devilLobbyBgm : angelLobbyBgm;
-                vol = chooseAngel ? devilLobbyVolume : angelLobbyVolume;
-            }
-
-            if (chosen != null)
-            {
-                audioSource.clip = chosen;
-                audioSource.volume = vol;
-                audioSource.loop = true;
-                audioSource.playOnAwake = false;
-                audioSource.Play();
+                MenuMusicManager.Instance.UpdateVolumes(angelLobbyVolume, devilLobbyVolume);
             }
         }
 
@@ -235,6 +223,7 @@ namespace AOG.Duel
             if (keyboard.digit2Key.wasPressedThisFrame) LoadPVPScene();
             if (keyboard.bKey.wasPressedThisFrame) OpenBowSelection();
             if (keyboard.kKey.wasPressedThisFrame) OpenSkillSelection(0);
+            if (keyboard.sKey.wasPressedThisFrame) CycleSkin();
         }
 
         private void HandlePointerInput()
@@ -271,6 +260,7 @@ namespace AOG.Duel
                 if (BelongsToButton(hit, pveButton)) { PlayButtonFeedback(pveButton); LoadPVEScene(); return; }
                 if (BelongsToButton(hit, pvpButton)) { PlayButtonFeedback(pvpButton); LoadPVPScene(); return; }
                 if (BelongsToButton(hit, rankButton)) { PlayButtonFeedback(rankButton); return; }
+                if (BelongsToButton(hit, skinButton)) { PlayButtonFeedback(skinButton); CycleSkin(); return; }
             }
         }
 
@@ -278,6 +268,36 @@ namespace AOG.Duel
         {
             return hit != null && button != null &&
                    (hit.transform == button.transform || hit.transform.IsChildOf(button.transform));
+        }
+
+        public void CycleSkin()
+        {
+            var skinMgr = CharacterSkinManager.Instance;
+            if (skinMgr != null)
+            {
+                var nextSkin = skinMgr.NextSkin();
+                Debug.Log($"[MenuController] Switched skin to: {(nextSkin != null ? nextSkin.displayName : "None")}");
+                ApplySavedSkinToCharacter();
+            }
+        }
+
+        public void ApplySavedSkinToCharacter()
+        {
+            var skinMgr = CharacterSkinManager.Instance;
+            if (skinMgr == null) return;
+
+            if (characterGear != null)
+            {
+                skinMgr.ApplyCurrentSkin(characterGear.gameObject);
+            }
+            else
+            {
+                var player = FindFirstObjectByType<PlayerController>();
+                if (player != null)
+                {
+                    skinMgr.ApplyCurrentSkin(player.gameObject);
+                }
+            }
         }
 
         public void OpenSettings()
@@ -356,6 +376,18 @@ namespace AOG.Duel
         private void PlayButtonFeedback(GameObject buttonObj)
         {
             if (buttonObj == null || !gameObject.activeInHierarchy) return;
+            if (buttonObj == pveButton || buttonObj == pvpButton)
+            {
+                ButtonAudioManager.PlayMatchClick();
+            }
+            else if (buttonObj == bowButton || buttonObj == skillButton)
+            {
+                ButtonAudioManager.PlayInventoryClick();
+            }
+            else
+            {
+                ButtonAudioManager.PlayClick();
+            }
             StartCoroutine(PunchScaleRoutine(buttonObj.transform));
         }
 
@@ -377,6 +409,7 @@ namespace AOG.Duel
             if (pveButton == null) pveButton = GameObject.Find("PVE Button ") ?? GameObject.Find("PVE Button");
             if (pvpButton == null) pvpButton = GameObject.Find("PVP Button");
             if (rankButton == null) rankButton = GameObject.Find("Rank");
+            if (skinButton == null) skinButton = GameObject.Find("Skin Button");
             if (settingButton == null) settingButton = GameObject.Find("Setting");
         }
 
@@ -387,6 +420,7 @@ namespace AOG.Duel
             EnsureButtonColliders(pveButton, new Vector2(1.5f, 0.5f));
             EnsureButtonColliders(pvpButton, new Vector2(1.5f, 0.5f));
             EnsureButtonColliders(rankButton, new Vector2(1.5f, 0.5f));
+            EnsureButtonColliders(skinButton, new Vector2(1.5f, 0.5f));
             EnsureButtonColliders(settingButton, new Vector2(1.2f, 1.2f));
         }
 

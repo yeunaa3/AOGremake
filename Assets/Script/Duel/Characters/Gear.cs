@@ -56,11 +56,27 @@ namespace AOG.Duel
             BowChanged?.Invoke(equippedBow);
         }
 
-        public void TriggerOnShoot(Arrow arrow, bool isSecondaryShot)
+        public void TriggerOnShoot(Arrow arrow, bool isNormalShot)
         {
             if (equippedBow != null && equippedBow.Passive != null && player != null)
             {
-                equippedBow.Passive.OnShoot(player, bowState, arrow, isSecondaryShot);
+                equippedBow.Passive.OnShoot(player, bowState, arrow, isNormalShot);
+            }
+        }
+
+        public void TriggerOnSkillUsed(SkillData skill, int slot, float direction)
+        {
+            if (equippedBow != null && equippedBow.Passive != null && player != null)
+            {
+                equippedBow.Passive.OnSkillUsed(player, bowState, skill, slot, direction);
+            }
+        }
+
+        public void TriggerOnSkillEnded(SkillData skill)
+        {
+            if (equippedBow != null && equippedBow.Passive != null && player != null)
+            {
+                equippedBow.Passive.OnSkillEnded(player, bowState, skill);
             }
         }
 

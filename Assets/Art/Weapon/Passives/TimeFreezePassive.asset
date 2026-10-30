@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60cda090fe494da2aa0790f5c5a7fd15, type: 3}
+  m_Name: TimeFreezePassive
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.TimeFreezePassive
+  passiveName: "Ngừng Đọng Thời Gian"
+  description: "Nội tại hồi sau 25s và tồn tại trong 5s. Trong 5s đó mọi mũi tên đang bay sẽ bị giảm 10x tốc độ bay."
+  cooldown: 25
+  duration: 5
+  slowMultiplier: 0.1

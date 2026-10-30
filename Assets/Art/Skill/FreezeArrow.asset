@@ -17,10 +17,16 @@ MonoBehaviour:
   description: Ban thang mot mui ten, trung dich se dong bang hoan toan.
   icon: {fileID: -8810120499982162568, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 3
-  cooldown: 8
+  cooldown: 12
+  cooldownReductionPerLevel: 0
+  damageGrowthPerLevel: 0.1
+  effectPowerGrowthPerLevel: 0.1
+  healGrowthPerLevel: 0
   animationTrigger: Low
   lockMovement: 1
   cancelOnMove: 0
+  channelUntilCancelled: 0
+  drawSpeed: 1
   showTime: 0.2
   effectTime: 0.76
   duration: 1
@@ -30,7 +36,13 @@ MonoBehaviour:
     count: 1
     offset: {x: 0, y: 0}
     targetRadius: 0
-    spacing: 0
+    volleyCount: 1
+    volleyInterval: 0.15
+    volleyDrawSpeed: 0
+    randomizeRain: 0
+    horizontalRandomness: 0.8
+    spawnHeightVariation: 1.5
+    objectSpacing: 0
     path: 1
     arc: 0
     damageMultiplier: 1

@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: LoadoutDatabase
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.LoadoutDatabase
   bows:
+  - {fileID: 11400000, guid: e9320ab75c694bd1b9f70565e77d5455, type: 2}
+  - {fileID: 11400000, guid: 1051030b28a94cd99b9582516f99ead6, type: 2}
+  - {fileID: 11400000, guid: 037f28f36836460481ce532a849f6643, type: 2}
+  - {fileID: 11400000, guid: 6ddfa5628c944df8b79b1e40dc1fc7ae, type: 2}
   - {fileID: 11400000, guid: b502507f0fdb4cf092a08d8a9f1f3003, type: 2}
   - {fileID: 11400000, guid: b26cb081d75732742a2a524b811df5da, type: 2}
   - {fileID: 11400000, guid: ec53c1bf3d394d27aee7466a7aff2e9b, type: 2}
@@ -21,6 +25,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e19f29bfa0b296e42a9e7c8668f28b6b, type: 2}
   - {fileID: 11400000, guid: ffd86a174dc848d2981bf8eb4e7ab9bd, type: 2}
   skills:
+  - {fileID: 11400000, guid: ab4cdbeb9ae940bab18b04cdec23a227, type: 2}
+  - {fileID: 11400000, guid: 060a5d108f1143ba8826c3dda9f3f626, type: 2}
   - {fileID: 11400000, guid: b7d6c8f9e0a14253c4d5e6f708192a3b, type: 2}
   - {fileID: 11400000, guid: 8f8ba6490d03f4746adef9a7c18f2e21, type: 2}
   - {fileID: 11400000, guid: a02ef8173eb718b42b1bf59024826c63, type: 2}
@@ -37,6 +43,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f1010001000200030004000500060002, type: 2}
   - {fileID: 11400000, guid: f1010001000200030004000500060003, type: 2}
   - {fileID: 11400000, guid: f1010001000200030004000500060004, type: 2}
+  - {fileID: 11400000, guid: f49650f9732bf154e8352012900a3d61, type: 2}
   defaultBow: {fileID: 11400000, guid: b502507f0fdb4cf092a08d8a9f1f3003, type: 2}
   defaultSkills:
   - {fileID: 11400000, guid: b7d6c8f9e0a14253c4d5e6f708192a3b, type: 2}

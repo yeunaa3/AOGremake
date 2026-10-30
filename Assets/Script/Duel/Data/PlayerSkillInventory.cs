@@ -4,13 +4,42 @@ using UnityEngine;
 
 namespace AOG.Duel
 {
-    // Quản lý bộ nhớ thẻ chiêu thức và cấp độ kỹ năng của người chơi (mở rương, nâng cấp thẻ).
+    /// <summary>
+    /// Kết quả nhận thưởng thẻ sau khi mở rương hoặc nhận quà.
+    /// </summary>
+    [Serializable]
+    public struct CardRewardResult
+    {
+        public string CardId;
+        public int AddedAmount;
+        public int TotalCards;
+        public int Level;
+        public int RequiredCards;
+        public bool CanUpgrade;
+
+        public CardRewardResult(string cardId, int added, int total, int level, int required)
+        {
+            CardId = cardId;
+            AddedAmount = added;
+            TotalCards = total;
+            Level = level;
+            RequiredCards = required;
+            CanUpgrade = total >= required && required > 0;
+        }
+    }
+
+    /// <summary>
+    /// Quản lý bộ nhớ thẻ (Card Memory) cho cả Kỹ Năng (Skill) và Cung (Bow):
+    /// - Lưu trữ số lượng thẻ tích lũy (cards / shards) sau khi mở rương.
+    /// - Quản lý Cấp độ (Level 1 đến 10).
+    /// - Kiểm tra và thực hiện Nâng cấp thẻ (Upgrade).
+    /// - Tự động lưu trữ vĩnh viễn vào PlayerPrefs.
+    /// </summary>
     [DefaultExecutionOrder(-95)]
     public sealed class PlayerSkillInventory : MonoBehaviour
     {
-        private const string PrefKeySkillLevelPrefix = "AOG_SkillLevel_";
-        private const string PrefKeySkillCardsPrefix = "AOG_SkillCards_";
-        private const string PrefKeyInitialized = "AOG_SkillInventory_Initialized";
+        private const string PrefKeyCardLevelPrefix = "AOG_SkillLevel_";
+        private const string PrefKeyCardCardsPrefix = "AOG_SkillCards_";
 
         private static PlayerSkillInventory instance;
         public static PlayerSkillInventory Instance
@@ -27,8 +56,8 @@ namespace AOG.Duel
 
         public static bool HasInstance => instance != null;
 
-        private readonly Dictionary<string, int> skillLevels = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<string, int> skillCards = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, int> cardLevels = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, int> cardCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         public event Action<string> InventoryChanged;
 
@@ -43,7 +72,7 @@ namespace AOG.Duel
                 return;
             }
 
-            GameObject go = new GameObject("PlayerSkillInventory");
+            GameObject go = new GameObject("PlayerCardInventory");
             instance = go.AddComponent<PlayerSkillInventory>();
             if (Application.isPlaying) DontDestroyOnLoad(go);
             instance.InitializeIfNeeded();
@@ -65,7 +94,7 @@ namespace AOG.Duel
 
         public const int MaxLevel = 10;
 
-        // Bảng số thẻ yêu cầu theo Fibonacci (Cấp 1 cần 2 để lên cấp 2 -> mặc định ban đầu là 0/2; Cấp 10 là tối đa)
+        // Bảng số thẻ yêu cầu nâng cấp theo Fibonacci: Cấp 1 cần 2 để lên cấp 2 (0/2 ban đầu). Cấp 10 là tối đa.
         private static readonly int[] FibonacciRequiredCards = new int[]
         {
             2,  // Lên Cấp 2: cần 2 thẻ (ban đầu 0/2)
@@ -76,39 +105,19 @@ namespace AOG.Duel
             21, // Lên Cấp 7: cần 21 thẻ
             34, // Lên Cấp 8: cần 34 thẻ
             55, // Lên Cấp 9: cần 55 thẻ
-            89  // Lên Cấp 10: cần 89 thẻ (Cấp 10 là tối đa)
+            89  // Lên Cấp 10: cần 89 thẻ
         };
-
-        private const string PrefKeyFibonacciV1 = "AOG_SkillFibonacci_v2";
 
         private bool initialized;
         public void InitializeIfNeeded()
         {
             if (initialized) return;
             initialized = true;
-
-            // Xóa dữ liệu mẫu cũ (ví dụ 2/5 trước đây) để áp dụng mặc định mới 0/2
-            if (!PlayerPrefs.HasKey(PrefKeyFibonacciV1))
-            {
-                PlayerPrefs.SetInt(PrefKeyFibonacciV1, 1);
-                skillCards.Clear();
-                skillLevels.Clear();
-                // Xóa các key demo cũ nếu có
-                var db = Resources.Load<LoadoutDatabase>("LoadoutDatabase");
-                if (db != null && db.Skills != null)
-                {
-                    foreach (var s in db.Skills)
-                    {
-                        if (s == null) continue;
-                        string sid = !string.IsNullOrEmpty(s.SkillId) ? s.SkillId : s.name;
-                        PlayerPrefs.DeleteKey(PrefKeySkillCardsPrefix + sid);
-                        PlayerPrefs.DeleteKey(PrefKeySkillLevelPrefix + sid);
-                    }
-                }
-                PlayerPrefs.Save();
-            }
         }
 
+        /// <summary>
+        /// Số thẻ yêu cầu để nâng cấp từ cấp hiện tại lên cấp tiếp theo.
+        /// </summary>
         public static int GetRequiredCardsForLevel(int level)
         {
             if (level >= MaxLevel) return 0; // Đạt cấp tối đa
@@ -116,67 +125,92 @@ namespace AOG.Duel
             return FibonacciRequiredCards[index];
         }
 
-        public int GetLevel(string skillId)
+        /// <summary>
+        /// Lấy cấp độ của thẻ (Skill hoặc Bow). Mặc định là Level 1.
+        /// </summary>
+        public int GetLevel(string cardId)
         {
-            if (string.IsNullOrEmpty(skillId)) return 1;
+            if (string.IsNullOrEmpty(cardId)) return 1;
 
-            if (skillLevels.TryGetValue(skillId, out int level))
+            if (cardLevels.TryGetValue(cardId, out int level))
             {
                 return Mathf.Clamp(level, 1, MaxLevel);
             }
 
-            int savedLevel = PlayerPrefs.GetInt(PrefKeySkillLevelPrefix + skillId, 1);
+            int savedLevel = PlayerPrefs.GetInt(PrefKeyCardLevelPrefix + cardId, 1);
             savedLevel = Mathf.Clamp(savedLevel, 1, MaxLevel);
-            skillLevels[skillId] = savedLevel;
+            cardLevels[cardId] = savedLevel;
             return savedLevel;
         }
 
-        public int GetCards(string skillId)
+        /// <summary>
+        /// Lấy số lượng thẻ đang sở hữu (Skill hoặc Bow). Mặc định là 0.
+        /// </summary>
+        public int GetCards(string cardId)
         {
-            if (string.IsNullOrEmpty(skillId)) return 0;
+            if (string.IsNullOrEmpty(cardId)) return 0;
 
-            if (skillCards.TryGetValue(skillId, out int cards))
+            if (cardCounts.TryGetValue(cardId, out int cards))
             {
                 return Mathf.Max(0, cards);
             }
 
-            // Mặc định ban đầu là 0 thẻ (kết hợp cấp 1 cần 2 -> hiển thị 0/2)
-            int savedCards = PlayerPrefs.GetInt(PrefKeySkillCardsPrefix + skillId, 0);
-            skillCards[skillId] = savedCards;
+            int savedCards = PlayerPrefs.GetInt(PrefKeyCardCardsPrefix + cardId, 0);
+            cardCounts[cardId] = savedCards;
             return savedCards;
         }
 
-        public int GetRequiredCards(string skillId)
+        public int GetRequiredCards(string cardId)
         {
-            return GetRequiredCardsForLevel(GetLevel(skillId));
+            return GetRequiredCardsForLevel(GetLevel(cardId));
         }
 
-        public void AddCards(string skillId, int count)
+        /// <summary>
+        /// Cộng thêm số thẻ (mở rương, nhận quà event) vào bộ nhớ thẻ.
+        /// </summary>
+        public CardRewardResult AddCards(string cardId, int count)
         {
-            if (string.IsNullOrEmpty(skillId) || count <= 0) return;
+            if (string.IsNullOrEmpty(cardId) || count <= 0)
+            {
+                return new CardRewardResult(cardId, 0, GetCards(cardId), GetLevel(cardId), GetRequiredCards(cardId));
+            }
 
-            int current = GetCards(skillId);
+            int current = GetCards(cardId);
             int updated = current + count;
-            skillCards[skillId] = updated;
+            cardCounts[cardId] = updated;
 
-            PlayerPrefs.SetInt(PrefKeySkillCardsPrefix + skillId, updated);
+            PlayerPrefs.SetInt(PrefKeyCardCardsPrefix + cardId, updated);
             PlayerPrefs.Save();
 
-            InventoryChanged?.Invoke(skillId);
+            InventoryChanged?.Invoke(cardId);
+
+            int lv = GetLevel(cardId);
+            int req = GetRequiredCardsForLevel(lv);
+            return new CardRewardResult(cardId, count, updated, lv, req);
         }
 
-        public bool CanUpgrade(string skillId)
+        /// <summary>
+        /// Kiểm tra xem thẻ có đủ số lượng để nâng cấp không.
+        /// </summary>
+        public bool CanUpgrade(string cardId)
         {
-            if (string.IsNullOrEmpty(skillId)) return false;
-            return GetCards(skillId) >= GetRequiredCards(skillId);
+            if (string.IsNullOrEmpty(cardId)) return false;
+            int lv = GetLevel(cardId);
+            if (lv >= MaxLevel) return false;
+            return GetCards(cardId) >= GetRequiredCardsForLevel(lv);
         }
 
-        public bool TryUpgrade(string skillId)
+        /// <summary>
+        /// Nâng cấp thẻ lên cấp tiếp theo nếu đủ thẻ. Trừ số thẻ yêu cầu và tăng Level.
+        /// </summary>
+        public bool TryUpgrade(string cardId)
         {
-            if (string.IsNullOrEmpty(skillId)) return false;
+            if (string.IsNullOrEmpty(cardId)) return false;
 
-            int level = GetLevel(skillId);
-            int cards = GetCards(skillId);
+            int level = GetLevel(cardId);
+            if (level >= MaxLevel) return false;
+
+            int cards = GetCards(cardId);
             int required = GetRequiredCardsForLevel(level);
 
             if (cards < required) return false;
@@ -184,33 +218,56 @@ namespace AOG.Duel
             int updatedCards = cards - required;
             int updatedLevel = level + 1;
 
-            skillCards[skillId] = updatedCards;
-            skillLevels[skillId] = updatedLevel;
+            cardCounts[cardId] = updatedCards;
+            cardLevels[cardId] = updatedLevel;
 
-            PlayerPrefs.SetInt(PrefKeySkillCardsPrefix + skillId, updatedCards);
-            PlayerPrefs.SetInt(PrefKeySkillLevelPrefix + skillId, updatedLevel);
+            PlayerPrefs.SetInt(PrefKeyCardCardsPrefix + cardId, updatedCards);
+            PlayerPrefs.SetInt(PrefKeyCardLevelPrefix + cardId, updatedLevel);
             PlayerPrefs.Save();
 
-            InventoryChanged?.Invoke(skillId);
+            InventoryChanged?.Invoke(cardId);
             return true;
         }
 
-        public void SetCards(string skillId, int amount)
+        // ==================== CÁC HÀM TIỆN ÍCH DÀNH CHO RƯƠNG VÀ ĐỒ TRANG BỊ ====================
+
+        public CardRewardResult AddSkillCards(string skillId, int count) => AddCards(skillId, count);
+        public CardRewardResult AddBowCards(string bowId, int count) => AddCards(bowId, count);
+
+        public int GetSkillLevel(string skillId) => GetLevel(skillId);
+        public int GetBowLevel(string bowId) => GetLevel(bowId);
+
+        public int GetSkillCards(string skillId) => GetCards(skillId);
+        public int GetBowCards(string bowId) => GetCards(bowId);
+
+        public void SetCards(string cardId, int amount)
         {
-            if (string.IsNullOrEmpty(skillId)) return;
-            skillCards[skillId] = Mathf.Max(0, amount);
-            PlayerPrefs.SetInt(PrefKeySkillCardsPrefix + skillId, skillCards[skillId]);
+            if (string.IsNullOrEmpty(cardId)) return;
+            cardCounts[cardId] = Mathf.Max(0, amount);
+            PlayerPrefs.SetInt(PrefKeyCardCardsPrefix + cardId, cardCounts[cardId]);
             PlayerPrefs.Save();
-            InventoryChanged?.Invoke(skillId);
+            InventoryChanged?.Invoke(cardId);
         }
 
-        public void SetLevel(string skillId, int level)
+        public void SetLevel(string cardId, int level)
         {
-            if (string.IsNullOrEmpty(skillId)) return;
-            skillLevels[skillId] = Mathf.Max(1, level);
-            PlayerPrefs.SetInt(PrefKeySkillLevelPrefix + skillId, skillLevels[skillId]);
+            if (string.IsNullOrEmpty(cardId)) return;
+            cardLevels[cardId] = Mathf.Clamp(level, 1, MaxLevel);
+            PlayerPrefs.SetInt(PrefKeyCardLevelPrefix + cardId, cardLevels[cardId]);
             PlayerPrefs.Save();
-            InventoryChanged?.Invoke(skillId);
+            InventoryChanged?.Invoke(cardId);
+        }
+
+        /// <summary>
+        /// Xóa sạch dữ liệu thẻ để test hoặc chơi lại từ đầu.
+        /// </summary>
+        public void ResetAllCards()
+        {
+            cardCounts.Clear();
+            cardLevels.Clear();
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save();
+            InventoryChanged?.Invoke(string.Empty);
         }
     }
 }

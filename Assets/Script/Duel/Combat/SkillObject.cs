@@ -77,6 +77,7 @@ namespace AOG.Duel
         private SpriteRenderer[] allRenderers;
         private Color[] originalColors;
         private Coroutine hitReactionRoutine;
+        protected Vector3 initialBaseScale;
 
         public PlayerController Owner => owner;
         public int Team => owner == null ? -1 : owner.Team;
@@ -103,6 +104,7 @@ namespace AOG.Duel
 
             rb = GetComponent<Rigidbody2D>();
             col = GetComponent<Collider2D>();
+            initialBaseScale = transform.localScale;
         }
 
         private void CacheVisualRenderers()
@@ -355,6 +357,13 @@ namespace AOG.Duel
                 case ArrowEffect.KnockUp:
                     freezeTime = Mathf.Max(freezeTime, duration > 0f ? duration : 1.5f);
                     break;
+
+                case ArrowEffect.Boom:
+                    if (power > 0)
+                    {
+                        TakeDamage(power, attacker, Vector2.zero, ArrowEffect.None);
+                    }
+                    break;
             }
         }
 
@@ -417,14 +426,17 @@ namespace AOG.Duel
             }
 
             // 2. Hiệu ứng giật 1 cái (Jolt & Squash/Stretch)
+            bool isBoulder = this is RollingBoulder;
             Vector3 joltVec = (Vector3)(hitDirection.normalized) * hitJoltDistance;
             joltVec.y += hitJoltDistance * 0.2f;
 
             transform.position += joltVec;
 
-            Vector3 origScale = transform.localScale;
-            float signX = Mathf.Sign(origScale.x);
-            transform.localScale = new Vector3(signX * Mathf.Abs(origScale.x) * 1.12f, origScale.y * 0.88f, origScale.z);
+            if (!isBoulder)
+            {
+                float signX = Mathf.Sign(transform.localScale.x);
+                transform.localScale = new Vector3(signX * Mathf.Abs(initialBaseScale.x) * 1.12f, initialBaseScale.y * 0.88f, initialBaseScale.z);
+            }
 
             float halfTime = hitDuration * 0.5f;
             yield return new WaitForSeconds(halfTime);
@@ -432,9 +444,12 @@ namespace AOG.Duel
             // Thu hồi vị trí giật
             transform.position -= joltVec;
 
-            // Khôi phục scale gốc nhưng giữ nguyên chiều nhìn hiện tại
-            float currentSignX = Mathf.Sign(transform.localScale.x);
-            transform.localScale = new Vector3(currentSignX * Mathf.Abs(origScale.x), origScale.y, origScale.z);
+            // Khôi phục scale chuẩn
+            if (!isBoulder)
+            {
+                float currentSignX = Mathf.Sign(transform.localScale.x);
+                transform.localScale = new Vector3(currentSignX * Mathf.Abs(initialBaseScale.x), initialBaseScale.y, initialBaseScale.z);
+            }
 
             hitReactionRoutine = null;
 
@@ -569,6 +584,11 @@ namespace AOG.Duel
                 StopCoroutine(hitReactionRoutine);
                 hitReactionRoutine = null;
                 ResetColors();
+            }
+            if (initialBaseScale != Vector3.zero)
+            {
+                float currentSignX = Mathf.Sign(transform.localScale.x);
+                transform.localScale = new Vector3(currentSignX * Mathf.Abs(initialBaseScale.x), initialBaseScale.y, initialBaseScale.z);
             }
             CleanupStatusParticles();
             if (rb != null)

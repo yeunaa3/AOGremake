@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9638436a0fee4535b457ec2be5d0d656, type: 3}
+  m_Name: ShieldShotPassive
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.ShieldShotPassive
+  passiveName: "Khi\xEAn B\u1EA5t T\u1EED"
+  description: "Sau c\xE1c ph\xE1t b\u1EAFn t\xEDch l\u0169y, ph\xE1t b\u1EAFn th\u01B0\u1EDDng
+    s\u1EBD trang b\u1ECB khi\xEAn. Khi\xEAn t\u1ED3n t\u1EA1i 5s b\u1EA5t t\u1EED
+    k\u1EC3 t\u1EEB l\u1EA7n \u0111\u1EA7u ti\xEAn nh\u1EADn dame."
+  shotsRequired: 10
+  shieldBarrierPrefab: {fileID: 1400000000, guid: fb9c70e86f1b43a78fea868bcd3a20d4, type: 3}
+  immortalDuration: 4

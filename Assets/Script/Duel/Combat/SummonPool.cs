@@ -81,6 +81,8 @@ namespace AOG.Duel
                 obj.transform.rotation = rotation;
             }
 
+            // Luôn khôi phục scale gốc của prefab khi spawn / tái sử dụng từ pool
+            obj.transform.localScale = prefab.transform.localScale;
             obj.SetActive(true);
             activeSummons.Add(obj);
             return obj;
@@ -103,6 +105,7 @@ namespace AOG.Duel
 
             if (instanceToPrefab.TryGetValue(obj, out GameObject prefab) && prefab != null)
             {
+                obj.transform.localScale = prefab.transform.localScale;
                 if (!pool.TryGetValue(prefab, out Queue<GameObject> queue))
                 {
                     queue = new Queue<GameObject>();

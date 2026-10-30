@@ -18,11 +18,16 @@ MonoBehaviour:
     (tong hoi 125 mau trong 5 giay).
   icon: {fileID: -1148056187835553646, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 1
-  cooldown: 15
+  cooldown: 12
+  cooldownReductionPerLevel: 0.03
+  damageGrowthPerLevel: 0.1
+  effectPowerGrowthPerLevel: 0.1
+  healGrowthPerLevel: 0.1
   animationTrigger: Rest
   lockMovement: 1
   cancelOnMove: 1
   channelUntilCancelled: 1
+  drawSpeed: 1
   showTime: -1
   effectTime: 0.05
   duration: 999999

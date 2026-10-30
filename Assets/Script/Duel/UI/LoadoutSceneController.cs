@@ -49,6 +49,7 @@ namespace AOG.Duel
         private void Start()
         {
             EnsureLoadoutComponents();
+            MenuMusicManager.EnsurePlaying();
 
             if (switchTabOptionBar != null)
             {
@@ -65,6 +66,11 @@ namespace AOG.Duel
                 {
                     characterGear.EquipBow(mgr.EquippedBow);
                 }
+            }
+
+            if (characterGear != null && CharacterSkinManager.Instance != null)
+            {
+                CharacterSkinManager.Instance.ApplyCurrentSkin(characterGear.gameObject);
             }
 
             LoadoutTab tabToShow = hasExplicitTab ? requestedTab : LoadoutTab.Skill;
@@ -100,7 +106,11 @@ namespace AOG.Duel
 
         public void ShowBow() => Show(LoadoutTab.Bow);
         public void ShowSkill() => Show(LoadoutTab.Skill);
-        public void BackToMenu() => SceneManager.LoadScene(menuSceneName);
+        public void BackToMenu()
+        {
+            ButtonAudioManager.PlayClick();
+            SceneManager.LoadScene(menuSceneName);
+        }
 
         private void OnSwitchTabOptionSelected(int index)
         {

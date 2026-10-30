@@ -19,9 +19,15 @@ MonoBehaviour:
   icon: {fileID: -9076474535567420299, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 3
   cooldown: 18
+  cooldownReductionPerLevel: 0
+  damageGrowthPerLevel: 0.1
+  effectPowerGrowthPerLevel: 0.1
+  healGrowthPerLevel: 0
   animationTrigger: 
   lockMovement: 0
   cancelOnMove: 0
+  channelUntilCancelled: 0
+  drawSpeed: 1
   showTime: -1
   effectTime: 0.05
   duration: 0.2

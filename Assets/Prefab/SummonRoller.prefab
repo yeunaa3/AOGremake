@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1010001000200030004000500060004, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.RollingBoulder
-  maxHp: 160
+  maxHp: 200
   decayPercentPerSecond: 10
   maxLifetime: 0
   miniHealthBar: {fileID: 1400000012}
@@ -136,8 +136,8 @@ MonoBehaviour:
   rollRotationSpeed: 360
   visualTransform: {fileID: 1400000006}
   useCoordinateBoundary: 1
-  leftBoundary: -6.5
-  rightBoundary: -2
+  leftBoundary: -6.8
+  rightBoundary: -1.8
   bounceCooldown: 0.2
   reflectDamagePercent: 30
   reflectEffectPrefab: {fileID: 6399403723404837957, guid: 53b2cc39336e4386b904dcb332bd1f6c, type: 3}

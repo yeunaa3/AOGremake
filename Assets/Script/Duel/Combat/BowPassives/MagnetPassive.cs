@@ -13,7 +13,7 @@ namespace AOG.Duel
         public float Interval => interval;
         public float RedirectSpeedMultiplier => redirectSpeedMultiplier;
 
-        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isSecondaryShot)
+        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isNormalShot)
         {
             if (arrow == null || player == null) return;
 

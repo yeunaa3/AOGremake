@@ -203,6 +203,11 @@ namespace AOG.Duel
             {
                 player.Action.SetSkills(equippedSkills);
             }
+
+            if (player.Team == 0 && CharacterSkinManager.Instance != null)
+            {
+                CharacterSkinManager.Instance.ApplyCurrentSkin(player.gameObject);
+            }
         }
 
         private void SaveCurrentSet()

@@ -38,7 +38,8 @@ namespace AOG.Duel
         Stun,
         Silence,
         Slow,
-        KnockUp
+        KnockUp,
+        Boom
     }
 
     public struct InputCmd

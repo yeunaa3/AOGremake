@@ -14,6 +14,7 @@ namespace AOG.Duel
 
         public void PlayClick()
         {
+            ButtonAudioManager.PlayClick();
             if (gameObject.activeInHierarchy) StartCoroutine(BounceRoutine());
             onClick?.Invoke();
         }

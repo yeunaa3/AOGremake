@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e7d6450081bc374590da90ff332f781, type: 3}
+  m_Name: BombArrow
+  m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
+  skillId: BombArrow
+  displayName: Bomb Arrow
+  description: "B\u1EAFn m\u1ED9t m\u0169i t\xEAn b\xECnh th\u01B0\u1EDDng, khi ch\u1EA1m
+    m\u1EE5c ti\xEAu ho\u1EB7c m\u1EB7t \u0111\u1EA5t s\u1EBD g\u1ECDi bom h\u1EB9n
+    gi\u1EDD 1s ph\xE1t n\u1ED5 g\xE2y s\xE1t th\u01B0\u01A1ng di\u1EC7n r\u1ED9ng."
+  icon: {fileID: 2193243892841791663, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
+  rarity: 2
+  cooldown: 10
+  cooldownReductionPerLevel: 0
+  damageGrowthPerLevel: 0.1
+  effectPowerGrowthPerLevel: 0.1
+  healGrowthPerLevel: 0
+  animationTrigger: Mid
+  lockMovement: 1
+  cancelOnMove: 0
+  channelUntilCancelled: 0
+  drawSpeed: 1
+  showTime: 0.2
+  effectTime: 0.75
+  duration: 1
+  spawn:
+    prefab: {fileID: 6688573736509035971, guid: 66d432150ac8d494f9d62a61c953a6d1, type: 3}
+    spawnPoint: 0
+    count: 1
+    offset: {x: 0, y: 0}
+    targetRadius: 0
+    volleyCount: 1
+    volleyInterval: 0.15
+    volleyDrawSpeed: 0
+    randomizeRain: 0
+    horizontalRandomness: 0.8
+    spawnHeightVariation: 1.5
+    objectSpacing: 0
+    path: 0
+    arc: 0
+    damageMultiplier: 1
+    speedMultiplier: 1
+    groundDuration: 2
+    hasEffect: 0
+    effect: 8
+    effectPower: 0
+    effectDuration: 0
+    flightAnimationState: MineOnArrow
+    onHitPrefab: {fileID: 1500000000, guid: 78a456619a6d4eb895a0d431634ee984, type: 3}
+  showInHand: 1
+  heldFanAngle: 0

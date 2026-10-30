@@ -9,22 +9,46 @@ namespace AOG.Duel
         [SerializeField, Min(1)] private int shotsRequired = 10;
         [Tooltip("Kỹ năng băng được gọi ra khi tích đủ phát bắn (mặc định FreezeArrow).")]
         [SerializeField] private SkillData iceSkill;
-        [Tooltip("Trigger animation dùng để thi triển skill băng (mặc định Low).")]
-        [SerializeField] private string animationTrigger = "Low";
+        [Tooltip("Trigger animation dùng để thi triển skill băng (mặc định Mid theo yêu cầu).")]
+        [SerializeField] private string animationTrigger = "Mid";
 
         public int ShotsRequired => shotsRequired;
         public SkillData IceSkill => iceSkill;
         public string AnimationTrigger => animationTrigger;
 
-        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isSecondaryShot)
-        {
-            if (isSecondaryShot || arrow == null || player == null) return;
+        public override bool HasChargeRelease => true;
+        public override string SpecialAnimationTrigger => "Mid";
+        public override SkillData SpecialSkill => iceSkill;
 
-            state.shotCount++;
-            if (state.shotCount >= shotsRequired)
+        public override void ExecuteSpecialRelease(PlayerController player, BowRuntimeState state)
+        {
+            if (state != null)
             {
                 state.shotCount = 0;
-                state.specialSkillReady = true;
+                state.specialSkillReady = false;
+            }
+
+            if (iceSkill != null)
+            {
+                iceSkill.Use(player.Action.CurrentSkillContext());
+            }
+            else
+            {
+                player.ShootArrow(ProjectilePath.Straight, 1f, 1.2f, ArrowEffect.Freeze, 0, 2f);
+            }
+        }
+
+        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isNormalShot)
+        {
+            if (arrow == null || player == null || state == null) return;
+
+            if (state.shotCount < shotsRequired)
+            {
+                state.shotCount++;
+                if (state.shotCount >= shotsRequired)
+                {
+                    state.specialSkillReady = true;
+                }
             }
         }
 

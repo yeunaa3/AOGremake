@@ -17,7 +17,7 @@ namespace AOG.Duel
         public float Delay => delay;
         public int MaxChainDepth => maxChainDepth;
 
-        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isSecondaryShot)
+        public override void OnShoot(PlayerController player, BowRuntimeState state, Arrow arrow, bool isNormalShot)
         {
             if (arrow == null || player == null || !player.Alive) return;
 

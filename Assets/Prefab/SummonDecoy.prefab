@@ -134,7 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1010001000200030004000500060001, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.TauntTotem
-  maxHp: 200
+  maxHp: 300
   decayPercentPerSecond: 15
   maxLifetime: 0
   miniHealthBar: {fileID: 1100000012}

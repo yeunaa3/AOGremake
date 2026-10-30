@@ -582,6 +582,7 @@ namespace AOG.Duel
                 SpriteRenderer sr = ascDecButton.GetComponent<SpriteRenderer>();
                 if ((col != null && col.OverlapPoint(worldPoint)) || (sr != null && sr.bounds.Contains(worldPoint)))
                 {
+                    ButtonAudioManager.PlayClick();
                     ToggleSortOrder();
                     return true;
                 }

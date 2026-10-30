@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: IceShotPassive
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.IceShotPassive
   passiveName: "B\u0103ng Ti\xEAn"
-  description: "Sau 10 ph\xE1t b\u1EAFn, b\u1EAFn k\u1EF9 n\u0103ng b\u0103ng v\u1EDBi trigger Low \u0111\xF3ng b\u0103ng k\u1EBB \u0111\u1ECBch."
+  description: "Sau 10 ph\xE1t b\u1EAFn, b\u1EAFn k\u1EF9 n\u0103ng b\u0103ng v\u1EDBi
+    trigger Low \u0111\xF3ng b\u0103ng k\u1EBB \u0111\u1ECBch."
   shotsRequired: 10
   iceSkill: {fileID: 11400000, guid: b7d6c8f9e0a14253c4d5e6f708192a3b, type: 2}
   animationTrigger: Low

@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: TrapShotPassive
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.TrapShotPassive
   passiveName: "B\u1EABy R\u01A1i"
-  description: "Sau 10 ph\xE1t b\u1EAFn, b\u1EAFn ra 2 prefab b\u1EABy r\u01A1i xu\u1ED1ng ch\xE2n \u0111\u1ECBch g\xE2y s\xE1t th\u01B0\u01A1ng v\xE0 l\xE0m ch\u1EADm."
+  description: "Sau 10 ph\xE1t b\u1EAFn, b\u1EAFn ra 2 prefab b\u1EABy r\u01A1i xu\u1ED1ng
+    ch\xE2n \u0111\u1ECBch g\xE2y s\xE1t th\u01B0\u01A1ng v\xE0 l\xE0m ch\u1EADm."
   shotsRequired: 10
   trapPrefab: {fileID: 1000000000, guid: 2cf952330ea445ba8b3dd2986637319c, type: 3}
+  usePrefabSettings: 1
   trapCount: 2
-  dropHeight: 3
-  spreadDistance: 0.8
+  dropHeight: 8
+  spreadDistance: 1

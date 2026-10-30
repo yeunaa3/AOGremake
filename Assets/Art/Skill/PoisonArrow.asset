@@ -19,9 +19,15 @@ MonoBehaviour:
   icon: {fileID: -7384247667993896594, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 1
   cooldown: 8
+  cooldownReductionPerLevel: 0.03
+  damageGrowthPerLevel: 0.1
+  effectPowerGrowthPerLevel: 0.1
+  healGrowthPerLevel: 0.1
   animationTrigger: Mid
   lockMovement: 1
   cancelOnMove: 0
+  channelUntilCancelled: 0
+  drawSpeed: 1
   showTime: 0.2
   effectTime: 0.76
   duration: 1
@@ -31,6 +37,9 @@ MonoBehaviour:
     count: 1
     offset: {x: 0, y: 0}
     targetRadius: 0
+    volleyCount: 1
+    volleyInterval: 0.15
+    volleyDrawSpeed: 0
     randomizeRain: 0
     horizontalRandomness: 0.8
     spawnHeightVariation: 1.5
@@ -39,7 +48,7 @@ MonoBehaviour:
     arc: 0
     damageMultiplier: 1
     speedMultiplier: 1
-    groundDuration: 3
+    groundDuration: 2
     hasEffect: 1
     effect: 2
     effectPower: 10

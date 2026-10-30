@@ -19,10 +19,16 @@ MonoBehaviour:
     minh xung quanh."
   icon: {fileID: 559559370, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 3
-  cooldown: 12
+  cooldown: 16
+  cooldownReductionPerLevel: 0
+  damageGrowthPerLevel: 0.1
+  effectPowerGrowthPerLevel: 0.1
+  healGrowthPerLevel: 0.1
   animationTrigger: High
   lockMovement: 1
   cancelOnMove: 0
+  channelUntilCancelled: 0
+  drawSpeed: 1
   showTime: 0.2
   effectTime: 0.76
   duration: 1
@@ -32,6 +38,9 @@ MonoBehaviour:
     count: 1
     offset: {x: 0, y: 0}
     targetRadius: 0
+    volleyCount: 1
+    volleyInterval: 0.15
+    volleyDrawSpeed: 0
     randomizeRain: 0
     horizontalRandomness: 0.8
     spawnHeightVariation: 1.5

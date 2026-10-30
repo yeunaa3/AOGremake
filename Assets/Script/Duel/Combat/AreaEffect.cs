@@ -13,12 +13,62 @@ namespace AOG.Duel
         [SerializeField, Min(0)] private int effectPower;
         [SerializeField, Min(0f)] private float effectDuration;
 
+        [Header("Audio")]
+        [Tooltip("Âm thanh hiệu ứng lửa trên mặt đất")]
+        [SerializeField] private AudioClip fireSound;
+        [Tooltip("Âm lượng hiệu ứng lửa")]
+        [SerializeField, Range(0f, 1f)] private float soundVolume = 0.7f;
+
+        private AudioSource audioSource;
         private readonly Dictionary<PlayerController, float> nextHit = new Dictionary<PlayerController, float>();
         private PlayerController owner;
         private bool statusOnly;
         private readonly HashSet<PlayerController> affectedTargets = new HashSet<PlayerController>();
 
-        private void Awake() => GetComponent<Collider2D>().isTrigger = true;
+        private void Awake()
+        {
+            GetComponent<Collider2D>().isTrigger = true;
+            SetupAudio();
+        }
+
+        private void SetupAudio()
+        {
+#if UNITY_EDITOR
+            if (fireSound == null)
+            {
+                fireSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Skill/Ingame_Effect_Fire.ogg");
+            }
+#endif
+            if (fireSound != null)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.clip = fireSound;
+                audioSource.volume = soundVolume;
+                audioSource.loop = true;
+                audioSource.playOnAwake = false;
+                audioSource.spatialBlend = 0f;
+                audioSource.Play();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (audioSource != null && audioSource.isPlaying)
+            {
+                audioSource.Stop();
+            }
+        }
+
+        private void Reset()
+        {
+#if UNITY_EDITOR
+            if (fireSound == null)
+            {
+                fireSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Skill/Ingame_Effect_Fire.ogg");
+            }
+#endif
+        }
         private void Update()
         {
             lifetime -= Time.deltaTime;

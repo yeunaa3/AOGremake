@@ -128,6 +128,7 @@ namespace AOG.Duel
             {
                 if (hit != null && TrySelectByHit(hit))
                 {
+                    ButtonAudioManager.PlayClick();
                     return true;
                 }
             }
