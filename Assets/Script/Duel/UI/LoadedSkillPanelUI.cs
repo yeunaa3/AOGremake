@@ -12,12 +12,17 @@ namespace AOG.Duel
         [SerializeField] private LoadoutDatabase database;
         [SerializeField] private SkillCollectionGridUI skillCollectionGridUI;
         [SerializeField] private MenuOptionBar setOptionBar;
+        [SerializeField] private SkillDetailDisplayUI skillDetailDisplayUI;
 
         [Header("5 Slots Kỹ Năng Đã Chọn (Có sẵn trong Scene)")]
         [SerializeField] private List<SkillCardSlotUI> slots = new List<SkillCardSlotUI>();
 
         private int selectedSlotIndex = 0;
         public int SelectedSlotIndex => selectedSlotIndex;
+
+        private float lastSlotClickTime;
+        private int lastClickedSlotIndex = -1;
+        private const float DoubleClickThreshold = 0.35f;
 
         public event Action<int> SlotSelected;
 
@@ -33,6 +38,7 @@ namespace AOG.Duel
                 skillCollectionGridUI = FindFirstObjectByType<SkillCollectionGridUI>();
             }
 
+            if (skillDetailDisplayUI == null) skillDetailDisplayUI = FindFirstObjectByType<SkillDetailDisplayUI>(FindObjectsInactive.Include);
             FindExistingSlots();
         }
 
@@ -163,6 +169,7 @@ namespace AOG.Duel
 
         public void RefreshAllSlots()
         {
+            if (skillDetailDisplayUI == null) skillDetailDisplayUI = FindFirstObjectByType<SkillDetailDisplayUI>(FindObjectsInactive.Include);
             FindExistingSlots();
 
             for (int i = 0; i < slots.Count; i++)
@@ -225,11 +232,25 @@ namespace AOG.Duel
             }
 
             SlotSelected?.Invoke(selectedSlotIndex);
+
+            if (skillDetailDisplayUI != null && skillDetailDisplayUI.gameObject.activeSelf && PlayerLoadoutManager.HasInstance)
+            {
+                SkillData currentEquipped = PlayerLoadoutManager.Instance.GetEquippedSkill(selectedSlotIndex);
+                if (currentEquipped != null)
+                {
+                    skillDetailDisplayUI.DisplaySkill(currentEquipped);
+                }
+            }
         }
 
         public void OnSlotClicked(int slotIndex)
         {
             if (slotIndex < 0 || slotIndex >= slots.Count) return;
+
+            float now = Time.unscaledTime;
+            bool isDoubleClick = (slotIndex == lastClickedSlotIndex && (now - lastSlotClickTime) <= DoubleClickThreshold);
+            lastSlotClickTime = now;
+            lastClickedSlotIndex = slotIndex;
 
             if (skillCollectionGridUI == null)
             {
@@ -243,9 +264,21 @@ namespace AOG.Duel
                 PlayerLoadoutManager.Instance.EquipSkillToSlot(slotIndex, skillToEquip);
                 // Xóa trạng thái staging sau khi đã đưa vào slot mong muốn
                 skillCollectionGridUI.ClearStaging();
+                SelectSlot(slotIndex);
+                return;
             }
 
             SelectSlot(slotIndex);
+
+            // Chỉ khi double click thì mới mở panel SkillDetail
+            if (isDoubleClick && skillDetailDisplayUI != null && PlayerLoadoutManager.HasInstance)
+            {
+                SkillData currentEquipped = PlayerLoadoutManager.Instance.GetEquippedSkill(slotIndex);
+                if (currentEquipped != null)
+                {
+                    skillDetailDisplayUI.Show(currentEquipped);
+                }
+            }
         }
 
         private void HandleSlotClicked(SkillCardSlotUI clickedSlot)

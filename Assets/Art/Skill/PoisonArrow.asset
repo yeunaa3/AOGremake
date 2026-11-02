@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
   skillId: poison_arrow
   displayName: Poison Arrow
-  description: Ban mot mui ten doc. Khi cham dat hoac trung dich se tao thanh bai
-    doc gay sat thuong va nhiem doc lien tuc.
+  description: "Fires a toxic arrow that leaves a damaging poison puddle."
   icon: {fileID: -7384247667993896594, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 1
   cooldown: 8

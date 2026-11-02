@@ -64,6 +64,8 @@ namespace AOG.Duel
         [SerializeField] private GameObject chainEffect;
         [Tooltip("Animator điều khiển bẫy và xích")]
         [SerializeField] private Animator animator;
+        [Tooltip("Sprite bẫy sập khi cắn hụt không trúng ai")]
+        [SerializeField] private Sprite closedTrapSprite;
 
         private PlayerController owner;
         private Collider2D trapCollider;
@@ -130,6 +132,7 @@ namespace AOG.Duel
             }
             if (animator != null)
             {
+                animator.enabled = true;
                 animator.Rebind();
                 animator.Play("TrapTrigger", 0, 0f);
             }
@@ -355,62 +358,132 @@ namespace AOG.Duel
 
             triggered = true;
 
-            // LÚC CẮN TRÚNG:
-            // 1. Chỉnh position x của trap = position x của aim target địch theo yêu cầu
-            if (target != null)
+            // KIỂM TRA LẠI: Sau thời gian trễ (delay), người chơi có CÒN ĐANG ĐỨNG trong vùng hitbox bẫy hay không?
+            // Nếu người chơi chỉ lướt qua / đã nhảy/dash ra khỏi hitbox thì bẫy sập hụt (không cắn trúng)!
+            PlayerController victim = GetVictimStillInHitbox(target);
+
+            if (victim != null)
             {
+                // Người chơi VẪN CÒN trong vùng hitbox -> Bẫy cắn trúng!
+                // 1. Chỉnh position x của trap = position x của aim target địch theo yêu cầu
                 Vector3 trapPos = transform.position;
-                trapPos.x = target.Aim.x;
+                trapPos.x = victim.Aim.x;
                 transform.position = trapPos;
-            }
 
-            // 2. Hiển thị hiệu ứng xích trói khớp với aim target của địch
-            if (chainEffect != null)
-            {
-                if (target != null)
+                // 2. Hiển thị hiệu ứng xích trói khớp với aim target của địch
+                if (chainEffect != null)
                 {
-                    chainEffect.transform.position = new Vector3(target.Aim.x, target.Aim.y, 0f);
+                    chainEffect.transform.position = new Vector3(victim.Aim.x, victim.Aim.y, 0f);
+                    chainEffect.SetActive(true);
                 }
-                chainEffect.SetActive(true);
-            }
 
-            // 3. Quản lý bởi Animator: Chuyển sang TrapCap (cắn bẫy & kích hoạt hiệu ứng xích)
-            if (animator != null)
-            {
-                animator.SetTrigger("Cap");
-                animator.Play("TrapCap", 0, 0f);
-            }
-
-            // 4. Gây sát thương và khóa nạn nhân (Stun)
-            ApplyTrapEffect(target);
-
-            // Hiệu ứng bẫy nổ/sập
-            SkillAudioManager.PlayBoom();
-            if (triggerParticlePrefab != null)
-            {
-                ParticleSystem ps = Instantiate(triggerParticlePrefab, transform.position, Quaternion.identity);
-                ps.Play(true);
-                Destroy(ps.gameObject, 1.5f);
-            }
-
-            // 5. Duy trì hiệu ứng trói và khóa nạn nhân trong suốt thời gian lockDuration
-            float elapsedLock = 0f;
-            while (elapsedLock < lockDuration)
-            {
-                elapsedLock += Time.deltaTime;
-                if (chainEffect != null && target != null)
+                // 3. Quản lý bởi Animator: Chuyển sang TrapCap (cắn bẫy & kích hoạt hiệu ứng xích)
+                if (animator != null)
                 {
-                    chainEffect.transform.position = new Vector3(target.Aim.x, target.Aim.y, 0f);
+                    animator.SetTrigger("Cap");
+                    animator.Play("TrapCap", 0, 0f);
                 }
-                yield return null;
-            }
 
-            if (chainEffect != null)
+                // 4. Gây sát thương và khóa nạn nhân (Stun)
+                ApplyTrapEffect(victim);
+
+                // Hiệu ứng bẫy nổ/sập
+                SkillAudioManager.PlayBoom();
+                if (triggerParticlePrefab != null)
+                {
+                    ParticleSystem ps = Instantiate(triggerParticlePrefab, transform.position, Quaternion.identity);
+                    ps.Play(true);
+                    Destroy(ps.gameObject, 1.5f);
+                }
+
+                // 5. Duy trì hiệu ứng trói và khóa nạn nhân trong suốt thời gian lockDuration
+                float elapsedLock = 0f;
+                while (elapsedLock < lockDuration)
+                {
+                    elapsedLock += Time.deltaTime;
+                    if (chainEffect != null && victim != null)
+                    {
+                        chainEffect.transform.position = new Vector3(victim.Aim.x, victim.Aim.y, 0f);
+                    }
+                    yield return null;
+                }
+
+                if (chainEffect != null)
+                {
+                    chainEffect.SetActive(false);
+                }
+            }
+            else
             {
-                chainEffect.SetActive(false);
+                // Người chơi đã lướt ra ngoài kịp thời -> Bẫy sập hụt trên không khí
+                // TUYỆT ĐỐI KHÔNG BẬT ANIMATION TRÓI (KHÔNG BẬT XÍCH)
+                if (chainEffect != null)
+                {
+                    chainEffect.SetActive(false);
+                    SpriteRenderer[] srs = chainEffect.GetComponentsInChildren<SpriteRenderer>(true);
+                    for (int i = 0; i < srs.Length; i++)
+                    {
+                        if (srs[i] != null) srs[i].enabled = false;
+                    }
+                }
+
+                // Tắt Animator để clip TrapCap không thể tự động bật Chains lên
+                if (animator != null)
+                {
+                    animator.enabled = false;
+                }
+
+                // Đổi sprite bẫy sang trạng thái đóng nếu có
+                SpriteRenderer sr = GetComponent<SpriteRenderer>();
+                if (sr != null && closedTrapSprite != null)
+                {
+                    sr.sprite = closedTrapSprite;
+                }
+
+                SkillAudioManager.PlayBoom();
+                if (triggerParticlePrefab != null)
+                {
+                    ParticleSystem ps = Instantiate(triggerParticlePrefab, transform.position, Quaternion.identity);
+                    ps.Play(true);
+                    Destroy(ps.gameObject, 1.5f);
+                }
+                yield return new WaitForSeconds(0.35f);
             }
 
             Despawn();
+        }
+
+        private PlayerController GetVictimStillInHitbox(PlayerController primaryTarget)
+        {
+            float trapX = transform.position.x;
+            float trapY = transform.position.y;
+            // Vùng hitbox thực tế của bẫy: độ rộng collider + dung sai vị trí (khoảng 0.4m)
+            float hitboxHalfWidth = (trapCollider != null ? trapCollider.bounds.extents.x : 0.2f) + 0.35f;
+            float maxVerticalDist = 1.6f;
+
+            // 1. Kiểm tra mục tiêu ban đầu
+            if (primaryTarget != null && primaryTarget.Alive)
+            {
+                float dx = Mathf.Abs(primaryTarget.transform.position.x - trapX);
+                float dy = Mathf.Abs(primaryTarget.transform.position.y - trapY);
+                if (dx <= hitboxHalfWidth && dy <= maxVerticalDist)
+                {
+                    return primaryTarget;
+                }
+            }
+
+            // 2. Kiểm tra bất kỳ đối thủ nào khác đang đứng trong vùng hitbox này
+            Collider2D[] cols = Physics2D.OverlapBoxAll(transform.position, new Vector2(hitboxHalfWidth * 2f, maxVerticalDist * 2f), 0f);
+            for (int i = 0; i < cols.Length; i++)
+            {
+                PlayerController p = cols[i].GetComponentInParent<PlayerController>();
+                if (p != null && owner != null && p.Team != owner.Team && p.Alive)
+                {
+                    return p;
+                }
+            }
+
+            return null;
         }
 
         private void ApplyTrapEffect(PlayerController primaryTarget)
@@ -418,17 +491,6 @@ namespace AOG.Duel
             if (primaryTarget != null && primaryTarget.Alive && primaryTarget.Stats != null)
             {
                 DamageAndLockTarget(primaryTarget);
-            }
-
-            // Đồng thời tác động lên bất kỳ đối thủ nào đứng trong phạm vi bẫy khi nổ
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, triggerRadius);
-            for (int i = 0; i < colliders.Length; i++)
-            {
-                PlayerController p = colliders[i].GetComponentInParent<PlayerController>();
-                if (p != null && p != primaryTarget && owner != null && p.Team != owner.Team && p.Alive)
-                {
-                    DamageAndLockTarget(p);
-                }
             }
         }
 
@@ -491,6 +553,10 @@ namespace AOG.Duel
             if (chainEffect != null)
             {
                 chainEffect.SetActive(false);
+            }
+            if (animator != null)
+            {
+                animator.enabled = true;
             }
             if (body != null)
             {

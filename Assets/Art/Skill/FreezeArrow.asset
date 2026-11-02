@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
   skillId: freeze_arrow
   displayName: Freeze Arrow
-  description: Ban thang mot mui ten, trung dich se dong bang hoan toan.
+  description: "Fires a frost arrow that completely freezes the hit target."
   icon: {fileID: -8810120499982162568, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 3
   cooldown: 12

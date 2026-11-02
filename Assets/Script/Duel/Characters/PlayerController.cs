@@ -189,6 +189,11 @@ namespace AOG.Duel
             LookAtEnemy();
         }
 
+        public void RefreshInputs()
+        {
+            inputs = GetComponents<InputSource>();
+        }
+
         public void ResetPlayer()
         {
             playing = false;

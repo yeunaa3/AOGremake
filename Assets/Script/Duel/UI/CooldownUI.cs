@@ -86,6 +86,13 @@ namespace AOG.Duel
             }
         }
 
+        public void BindCharacter(PlayerController targetCharacter)
+        {
+            character = targetCharacter;
+            shownSkill = null;
+            RefreshSkillVisual();
+        }
+
         public void SelectSkill(SkillData skill)
         {
             if (slot < DuelActionSlot.Skill1 || loadout == null) return;

@@ -28,14 +28,14 @@ namespace AOG.Duel
             int level = GetCasterLevel(context);
             BuffData activeBuff = (level <= 1) ? buff : CloneLeveledBuff(buff, level);
 
-            if (activeBuff != null && activeBuff.heal > 0)
+            if (activeBuff != null && (activeBuff.heal > 0 || activeBuff.invulnerable))
             {
                 SkillAudioManager.PlayHeal();
             }
             context.Caster.Stats.ApplyBuff(activeBuff);
             if (activeBuff.vfxPrefab != null && !activeBuff.isRestSkill && activeBuff.healPerSecond == 0)
             {
-                Instantiate(activeBuff.vfxPrefab, context.Caster.transform.position, Quaternion.identity, context.Caster.transform);
+                Instantiate(activeBuff.vfxPrefab, context.Caster.transform.position, Quaternion.identity);
             }
         }
 

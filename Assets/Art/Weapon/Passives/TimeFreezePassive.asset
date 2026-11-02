@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60cda090fe494da2aa0790f5c5a7fd15, type: 3}
   m_Name: TimeFreezePassive
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.TimeFreezePassive
-  passiveName: "Ngừng Đọng Thời Gian"
-  description: "Nội tại hồi sau 25s và tồn tại trong 5s. Trong 5s đó mọi mũi tên đang bay sẽ bị giảm 10x tốc độ bay."
-  cooldown: 25
+  passiveName: "Ng\u1EEBng \u0110\u1ECDng Th\u1EDDi Gian"
+  description: "N\u1ED9i t\u1EA1i h\u1ED3i sau 25s v\xE0 t\u1ED3n t\u1EA1i trong
+    5s. Trong 5s \u0111\xF3 m\u1ECDi m\u0169i t\xEAn \u0111ang bay s\u1EBD b\u1ECB
+    gi\u1EA3m 10x t\u1ED1c \u0111\u1ED9 bay."
+  cooldown: 20
   duration: 5
   slowMultiplier: 0.1

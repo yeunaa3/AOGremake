@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BuffSkill
   skillId: skill_purify
   displayName: Purify
-  description: Xoa sach toan bo hieu ung bat loi va mien nhiem hieu ung bat loi trong
-    4 giay.
+  description: "Cleanses all negative debuffs and grants debuff immunity for 5s."
   icon: {fileID: -765370794, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 2
   cooldown: 12

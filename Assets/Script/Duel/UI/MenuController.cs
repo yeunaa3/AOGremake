@@ -32,6 +32,7 @@ namespace AOG.Duel
         [Header("Tên Màn Đấu")]
         [SerializeField] private string[] pveSceneNames = new string[] { "Map1", "Map2" };
         [SerializeField] private string pveSceneName = "Map1";
+        [SerializeField] private string[] pvpSceneNames = new string[] { "Map1", "Map2" };
         [SerializeField] private string pvpSceneName = "Map2";
         [SerializeField] private string loadoutSceneName = "Loadout";
 
@@ -317,19 +318,58 @@ namespace AOG.Duel
 
         public void OpenBowSelection() => LoadoutSceneController.Open(loadoutSceneName, LoadoutSceneController.LoadoutTab.Bow);
         public void OpenSkillSelection(int targetSlot = 0) => LoadoutSceneController.Open(loadoutSceneName, LoadoutSceneController.LoadoutTab.Skill);
+        private static string lastPlayedMap = string.Empty;
+        private static int sameMapStreak = 0;
+
+        private string GetRandomBattleMap(string[] mapList, string fallback)
+        {
+            string[] pool = (mapList != null && mapList.Length > 0) ? mapList : new string[] { "Map1", "Map2" };
+            if (pool.Length == 1) return pool[0];
+
+            string chosen;
+            // Nếu có 2 map ("Map1", "Map2"): tỷ lệ chuẩn 50/50 kèm chống lặp quá 2 lần liên tiếp
+            if (pool.Length == 2)
+            {
+                if (sameMapStreak >= 2 && !string.IsNullOrEmpty(lastPlayedMap))
+                {
+                    chosen = (lastPlayedMap == pool[0]) ? pool[1] : pool[0];
+                }
+                else
+                {
+                    chosen = (Random.value < 0.5f) ? pool[0] : pool[1];
+                }
+
+                if (chosen == lastPlayedMap)
+                {
+                    sameMapStreak++;
+                }
+                else
+                {
+                    lastPlayedMap = chosen;
+                    sameMapStreak = 1;
+                }
+
+                Debug.Log($"[MenuController] Chọn ngẫu nhiên map: {chosen} (Tỷ lệ 50/50, Chế độ: {GameModeManager.CurrentMode})");
+                return chosen;
+            }
+
+            int idx = Random.Range(0, pool.Length);
+            return pool[idx];
+        }
+
         public void LoadPVEScene()
         {
-            if (pveSceneNames != null && pveSceneNames.Length > 0)
-            {
-                int index = Random.Range(0, pveSceneNames.Length);
-                SceneManager.LoadScene(pveSceneNames[index]);
-            }
-            else
-            {
-                SceneManager.LoadScene(pveSceneName);
-            }
+            GameModeManager.CurrentMode = GameMode.PVE;
+            string map = GetRandomBattleMap(pveSceneNames, pveSceneName);
+            SceneManager.LoadScene(map);
         }
-        public void LoadPVPScene() => SceneManager.LoadScene(pvpSceneName);
+
+        public void LoadPVPScene()
+        {
+            GameModeManager.CurrentMode = GameMode.PVP;
+            string map = GetRandomBattleMap(pvpSceneNames != null && pvpSceneNames.Length > 0 ? pvpSceneNames : pveSceneNames, pvpSceneName);
+            SceneManager.LoadScene(map);
+        }
 
         private void HandleBowChanged(BowData newBow)
         {

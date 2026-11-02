@@ -161,10 +161,7 @@ namespace AOG.Duel
             {
                 screenPos = UnityEngine.InputSystem.Touchscreen.current.primaryTouch.position.ReadValue();
             }
-            else if (UnityEngine.Input.GetMouseButtonDown(0))
-            {
-                screenPos = UnityEngine.Input.mousePosition;
-            }
+
             else
             {
                 return;

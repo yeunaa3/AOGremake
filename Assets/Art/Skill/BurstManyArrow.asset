@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: BurstManyArrow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
   skillId: BurstManyArrow
-  displayName: Burst Many Arrow
-  description: 
+  displayName: Burst Arrows
+  description: "Fires multiple rapid bursts of arrows in quick succession."
   icon: {fileID: 6867338628389476636, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 1
   cooldown: 10

@@ -128,6 +128,12 @@ namespace AOG.Duel
         public float EffectDuration => effectDuration;
         public GameObject WorldEffectPrefab => worldEffectPrefab;
         public int ResetCooldownSlot => resetCooldownSlot;
+        public float FlightSpeed => flightSpeed;
+        public float PathLength => pathLength;
+        public float TraveledDistance => traveledDistance;
+        public float EffectiveFlightSpeed => flightSpeed * shotSpeedMultiplier * (owner != null ? owner.Stats.ProjectileSpeedMultiplier : 1f) * timeScale;
+        public Vector2 ControlPoint => controlPoint;
+        public Vector2 StraightDirection => straightDirection;
 
         private void Awake()
         {
@@ -320,6 +326,116 @@ namespace AOG.Duel
         public void PrepareForPool(Action<Arrow> onDespawn)
         {
             returnToPool = onDespawn;
+        }
+
+        // Nhân đôi trực tiếp từ mũi tên đang bay: cùng vị trí, góc bay và quỹ đạo tiếp tục bay tới mục tiêu
+        public void LaunchFromFlyingArrow(Arrow source, float lagDistance = 0.08f)
+        {
+            if (source == null || !source.flying) return;
+
+            if (body == null) body = GetComponent<Rigidbody2D>();
+            if (hitbox == null) hitbox = GetComponent<Collider2D>();
+            if (visual == null) visual = GetComponentInChildren<SpriteRenderer>(true);
+
+            owner = source.owner;
+            startPoint = source.startPoint;
+            endPoint = source.endPoint;
+            controlPoint = source.controlPoint;
+            path = source.path;
+            straightDirection = source.straightDirection;
+            pathLength = source.pathLength;
+            Array.Copy(source.pathDistances, pathDistances, source.pathDistances.Length);
+
+            shotSpeedMultiplier = source.shotSpeedMultiplier;
+            timeScale = source.timeScale;
+            damage = source.damage;
+            effect = source.effect;
+            effectPower = source.effectPower;
+            effectDuration = source.effectDuration;
+            lifeSteal = source.lifeSteal;
+            resetCooldownSlot = source.resetCooldownSlot;
+            worldEffectPrefab = source.worldEffectPrefab;
+            worldEffectCreated = false;
+            activeOnHitPrefab = source.activeOnHitPrefab;
+            activeGroundLifetime = source.activeGroundLifetime;
+            stuckInGround = false;
+            groundTime = 0f;
+            lifetime = source.lifetime;
+            transform.localScale = source.transform.localScale;
+
+            if (visual != null)
+            {
+                visual.gameObject.SetActive(true);
+                visual.sprite = source.ArrowSprite != null
+                    ? source.ArrowSprite
+                    : (owner != null ? owner.Stats.ArrowSprite : visual.sprite);
+                normalColor = source.normalColor;
+                normalColor.a = 1f;
+                visual.color = normalColor;
+            }
+
+            Vector2 spawnPos;
+            float spawnAngle;
+
+            if (path == ProjectilePath.NormalArc && pathLength > 0.001f)
+            {
+                float safeLag = Mathf.Clamp(lagDistance, 0f, Mathf.Max(0f, source.traveledDistance));
+                traveledDistance = Mathf.Max(0f, source.traveledDistance - safeLag);
+
+                // Đồng bộ chính xác pathSampleIndex cho traveledDistance mới để FixedUpdate không bao giờ bị nhảy index
+                int sampleIdx = 1;
+                while (sampleIdx < PathSamples && pathDistances[sampleIdx] < traveledDistance)
+                {
+                    sampleIdx++;
+                }
+                pathSampleIndex = sampleIdx;
+
+                int upper = Mathf.Clamp(sampleIdx, 1, PathSamples);
+                float denom = pathDistances[upper] - pathDistances[upper - 1];
+                float part = denom > 0.00001f ? Mathf.Clamp01((traveledDistance - pathDistances[upper - 1]) / denom) : 0f;
+                float t = Mathf.Clamp01((upper - 1 + part) / PathSamples);
+
+                spawnPos = EvaluateBezier(t);
+
+                // Đạo hàm bậc 1 chuẩn xác của đường cong Bezier bậc 2: B'(t) = 2*(1-t)*(P1 - P0) + 2*t*(P2 - P1)
+                // Đảm bảo góc xoay ban đầu và chuyển động khung hình kế tiếp trùng khớp 100% không lệch 1 độ nào
+                Vector2 tangent = 2f * (1f - t) * (controlPoint - startPoint) + 2f * t * (endPoint - controlPoint);
+                spawnAngle = tangent.sqrMagnitude > 0.000001f
+                    ? Mathf.Atan2(tangent.y, tangent.x) * Mathf.Rad2Deg
+                    : (source.body != null ? source.body.rotation : source.transform.eulerAngles.z);
+            }
+            else
+            {
+                Vector2 dir = source.straightDirection.sqrMagnitude > 0.000001f
+                    ? source.straightDirection.normalized
+                    : ((Vector2)source.transform.right).normalized;
+                straightDirection = dir;
+                float safeLag = Mathf.Max(0f, lagDistance);
+                traveledDistance = Mathf.Max(0f, source.traveledDistance - safeLag);
+                pathSampleIndex = source.pathSampleIndex;
+
+                spawnPos = (Vector2)source.transform.position - dir * safeLag;
+                spawnAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            }
+
+            transform.SetPositionAndRotation(
+                spawnPos,
+                rotateAlongPath ? Quaternion.Euler(0f, 0f, spawnAngle) : transform.rotation);
+            gameObject.SetActive(true);
+
+            if (body != null)
+            {
+                body.linearVelocity = Vector2.zero;
+                body.angularVelocity = 0f;
+                body.position = spawnPos;
+                if (rotateAlongPath) body.rotation = spawnAngle;
+            }
+            previousPoint = spawnPos;
+
+            if (hitbox != null) hitbox.enabled = true;
+            StartTrail(effect);
+            StartFlightEffect(effect, null);
+            flying = true;
         }
 
         public void ResetProjectile()

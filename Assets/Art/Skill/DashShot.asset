@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.MoveSkill
   skillId: DashShot
   displayName: Dash Shot
-  description: Dash left or right, then fire one arrow.
+  description: "Dashes horizontally and fires a quick arrow."
   icon: {fileID: -8939933371808457760, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 0
   cooldown: 8

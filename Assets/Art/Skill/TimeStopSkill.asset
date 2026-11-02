@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.TimeStopSkill
   skillId: skill_timestop
   displayName: Time Stop
-  description: "Ng\u1EEBng \u0111\u1ECDng th\u1EDDi gian! L\xE0m ch\u1EADm 10x t\u1EA5t
-    c\u1EA3 m\u0169i t\xEAn \u0111ang bay c\u1EE7a b\u1EA1n trong 5 gi\xE2y."
+  description: Freezes time, slowing all projectiles and enemy movement by 10x for
+    3s.
   icon: {fileID: 2382717428535433824, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 3
-  cooldown: 18
+  cooldown: 2
   cooldownReductionPerLevel: 0
   damageGrowthPerLevel: 0.1
   effectPowerGrowthPerLevel: 0.1
@@ -31,6 +31,6 @@ MonoBehaviour:
   showTime: -1
   effectTime: 0.05
   duration: 0.2
-  timeSlowDuration: 5
+  timeSlowDuration: 1
   slowMultiplier: 0.1
   vfxPrefab: {fileID: 0}

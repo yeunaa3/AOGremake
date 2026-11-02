@@ -14,9 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
   skillId: BombArrow
   displayName: Bomb Arrow
-  description: "B\u1EAFn m\u1ED9t m\u0169i t\xEAn b\xECnh th\u01B0\u1EDDng, khi ch\u1EA1m
-    m\u1EE5c ti\xEAu ho\u1EB7c m\u1EB7t \u0111\u1EA5t s\u1EBD g\u1ECDi bom h\u1EB9n
-    gi\u1EDD 1s ph\xE1t n\u1ED5 g\xE2y s\xE1t th\u01B0\u01A1ng di\u1EC7n r\u1ED9ng."
+  description: "Fires an explosive arrow that detonates on impact dealing area damage."
   icon: {fileID: 2193243892841791663, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 2
   cooldown: 10

@@ -16,5 +16,5 @@ MonoBehaviour:
   description: "C\u1EE9 sau m\u1ED7i 30s, m\u1ECDi m\u0169i t\xEAn m\xECnh b\u1EAFn
     ra m\xE0 ch\u01B0a bi\u1EBFn m\u1EA5t ph\xF3ng x2 t\u1ED1c \u0111\u1ED9 th\u1EB3ng
     v\xE0o ng\u01B0\u1EDDi \u0111\u1ECBch."
-  interval: 25
+  interval: 20
   redirectSpeedMultiplier: 3

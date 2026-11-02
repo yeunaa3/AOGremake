@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.MoveSkill
   skillId: JumpShot
   displayName: Jump Shot
-  description: Jump upward and fire one arrow.
+  description: "Leaps into the air and fires a downward arrow."
   icon: {fileID: -7208825320986378091, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 0
   cooldown: 8

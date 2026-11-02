@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BuffSkill
   skillId: skill_heal
   displayName: Heal
-  description: Hoi 80 mau ngay lap tuc cho ban than.
+  description: "Instantly restores 80 Health to yourself."
   icon: {fileID: -9060023563291207507, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 1
   cooldown: 12

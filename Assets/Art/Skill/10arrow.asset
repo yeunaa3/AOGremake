@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
   skillId: 10arrow
   displayName: 10 Arrows
-  description: "B\u1EAFn li\xEAn ti\u1EBFp 10 m\u0169i t\xEAn d\u1ED3n d\u1EADp v\xE0o m\u1EE5c ti\xEAu."
+  description: "Fires a rapid barrage of 10 consecutive arrows at the target."
   icon: {fileID: 6597165044541539804, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 2
   cooldown: 14

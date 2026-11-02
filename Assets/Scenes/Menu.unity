@@ -494,6 +494,9 @@ MonoBehaviour:
   - Map1
   - Map2
   pveSceneName: Map1
+  pvpSceneNames:
+  - Map1
+  - Map2
   pvpSceneName: Map2
   loadoutSceneName: Loadout
   audioSource: {fileID: 0}

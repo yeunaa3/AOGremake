@@ -41,6 +41,12 @@ namespace AOG.Duel
             if (input == null) input = FindAnyObjectByType<TouchInput>();
         }
 
+        public void BindInputs(KeyInput keyIn, TouchInput touchIn)
+        {
+            keyboardInput = keyIn;
+            input = touchIn;
+        }
+
         private bool CanPress => button == null || button.IsInteractable();
 
         private void LateUpdate()

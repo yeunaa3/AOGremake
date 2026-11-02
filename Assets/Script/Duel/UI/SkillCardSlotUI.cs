@@ -332,6 +332,20 @@ namespace AOG.Duel
             }
         }
 
+        public void SetSortingOrder(int baseOrder)
+        {
+            EnsureHierarchyAndComponents();
+            if (baseRenderer != null) baseRenderer.sortingOrder = baseOrder;
+            if (frameSkillRenderer != null) frameSkillRenderer.sortingOrder = baseOrder + 1;
+            if (frameLevelRenderer != null) frameLevelRenderer.sortingOrder = baseOrder + 1;
+            if (iconRenderer != null) iconRenderer.sortingOrder = baseOrder + 2;
+            if (fillRenderer != null) fillRenderer.sortingOrder = baseOrder + 2;
+            if (levelBadgeRenderer != null) levelBadgeRenderer.sortingOrder = baseOrder + 3;
+            if (levelText != null) levelText.sortingOrder = baseOrder + 4;
+            if (progressText != null) progressText.sortingOrder = baseOrder + 4;
+            if (selectionRenderer != null) selectionRenderer.sortingOrder = baseOrder + 5;
+        }
+
         public void SetMaskInteraction(SpriteMaskInteraction interaction)
         {
             EnsureHierarchyAndComponents();
@@ -414,7 +428,7 @@ namespace AOG.Duel
             if (baseRenderer == null)
             {
                 baseRenderer = GetComponent<SpriteRenderer>();
-                if (baseRenderer != null) baseRenderer.sortingOrder = 2;
+                if (baseRenderer != null && baseRenderer.sortingOrder <= 0) baseRenderer.sortingOrder = 2;
             }
             if (cardBaseSprite == null && baseRenderer != null && baseRenderer.sprite != null)
             {
@@ -425,14 +439,19 @@ namespace AOG.Duel
                 emptyPlaceholderSprite = baseRenderer.sprite;
             }
 
+            int baseOrder = baseRenderer != null ? baseRenderer.sortingOrder : 2;
+
             // 1. Frame skill
             Transform frameSkillT = transform.Find("Frame skill");
             if (frameSkillT != null)
             {
                 if (frameSkillRenderer == null) frameSkillRenderer = frameSkillT.GetComponent<SpriteRenderer>();
-                if (frameSkillRenderer != null) frameSkillRenderer.sortingOrder = 3;
+                if (frameSkillRenderer != null && frameSkillRenderer.sortingOrder <= baseOrder)
+                {
+                    frameSkillRenderer.sortingOrder = baseOrder + 1;
+                }
 
-                // Icon under Frame skill (sortingOrder: 4, đè lên trên Frame skill)
+                // Icon under Frame skill (sortingOrder: baseOrder + 2, đè lên trên Frame skill)
                 Transform iconT = frameSkillT.Find("Icon");
                 if (iconT == null)
                 {
@@ -447,7 +466,10 @@ namespace AOG.Duel
                     iconRenderer = iconT.GetComponent<SpriteRenderer>();
                     if (iconRenderer == null) iconRenderer = iconT.gameObject.AddComponent<SpriteRenderer>();
                 }
-                if (iconRenderer != null) iconRenderer.sortingOrder = 4;
+                if (iconRenderer != null && iconRenderer.sortingOrder <= baseOrder + 1)
+                {
+                    iconRenderer.sortingOrder = baseOrder + 2;
+                }
             }
 
             // 2. Frame (Khung thanh cấp độ & tiến độ)
@@ -455,14 +477,20 @@ namespace AOG.Duel
             if (frameLevelT != null)
             {
                 if (frameLevelRenderer == null) frameLevelRenderer = frameLevelT.GetComponent<SpriteRenderer>();
-                if (frameLevelRenderer != null) frameLevelRenderer.sortingOrder = 3;
+                if (frameLevelRenderer != null && frameLevelRenderer.sortingOrder <= baseOrder)
+                {
+                    frameLevelRenderer.sortingOrder = baseOrder + 1;
+                }
 
                 // Fill
                 Transform fillT = frameLevelT.Find("Fill");
                 if (fillT != null)
                 {
                     if (fillRenderer == null) fillRenderer = fillT.GetComponent<SpriteRenderer>();
-                    if (fillRenderer != null) fillRenderer.sortingOrder = 4;
+                    if (fillRenderer != null && fillRenderer.sortingOrder <= baseOrder + 1)
+                    {
+                        fillRenderer.sortingOrder = baseOrder + 2;
+                    }
                 }
 
                 // ProgressText (trực tiếp dưới Frame để không bị ẩn khi Fill tắt)
@@ -487,7 +515,10 @@ namespace AOG.Duel
                 if (levelT != null)
                 {
                     if (levelBadgeRenderer == null) levelBadgeRenderer = levelT.GetComponent<SpriteRenderer>();
-                    if (levelBadgeRenderer != null) levelBadgeRenderer.sortingOrder = 5;
+                    if (levelBadgeRenderer != null && levelBadgeRenderer.sortingOrder <= baseOrder + 2)
+                    {
+                        levelBadgeRenderer.sortingOrder = baseOrder + 3;
+                    }
 
                     // LevelText trên Level Badge
                     Transform ltT = levelT.Find("LevelText");
@@ -533,7 +564,8 @@ namespace AOG.Duel
             tmp.fontSize = 1.0f;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.color = Color.white;
-            tmp.sortingOrder = 6;
+            int baseOrder = baseRenderer != null ? baseRenderer.sortingOrder : 2;
+            tmp.sortingOrder = baseOrder + 4;
             tmp.rectTransform.sizeDelta = new Vector2(0.7f, 0.25f);
             tmp.rectTransform.localPosition = new Vector3(0.06f, 0f, 0f);
         }
@@ -546,7 +578,8 @@ namespace AOG.Duel
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.color = Color.white;
-            tmp.sortingOrder = 6;
+            int baseOrder = baseRenderer != null ? baseRenderer.sortingOrder : 2;
+            tmp.sortingOrder = baseOrder + 4;
             tmp.rectTransform.sizeDelta = new Vector2(0.25f, 0.25f);
             tmp.rectTransform.localPosition = Vector3.zero;
         }

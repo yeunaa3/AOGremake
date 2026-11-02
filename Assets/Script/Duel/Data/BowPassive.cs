@@ -8,6 +8,7 @@ namespace AOG.Duel
         public int shotCount;
         public float timer;
         public bool specialSkillReady;
+        public int triggerCount;
         public readonly List<Arrow> activeArrows = new List<Arrow>();
         public readonly List<GameObject> activeSummons = new List<GameObject>();
 
@@ -16,6 +17,7 @@ namespace AOG.Duel
             shotCount = 0;
             timer = 0f;
             specialSkillReady = false;
+            triggerCount = 0;
             activeArrows.Clear();
             activeSummons.Clear();
         }

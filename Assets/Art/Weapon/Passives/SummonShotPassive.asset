@@ -12,9 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e7aa5c8f5884a61883c9a9c1d128395, type: 3}
   m_Name: SummonShotPassive
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonShotPassive
-  passiveName: "Triệu Hồi Pháo Đài"
-  description: "Sau các phát bắn tích lũy, phát bắn thường tiếp theo sẽ triệu hồi pháo đài tại chân đối thủ."
-  shotsRequired: 6
-  prefabToSummon: {fileID: 1300000000, guid: e1010001000200030004000500060003, type: 3}
+  passiveName: "Tri\u1EC7u H\u1ED3i Th\u1EA7n Kh\xED"
+  description: "T\xEDch \u0111\u1EE7 ph\xE1t b\u1EAFn th\u01B0\u1EDDng, \u0111\xF2n
+    ti\u1EBFp theo s\u1EBD tri\u1EC7u h\u1ED3i v\u0169 kh\xED t\u1EEB tr\u1EDDi r\u01A1i
+    xu\u1ED1ng \u0111\u1EA7u k\u1EBB \u0111\u1ECBch (Map 1: Thi\xEAn Gi\xE1o; Map
+    2: Ma Ki\u1EBFm N\u1ED5). C\u1EE9 sau m\u1ED7i l\u1EA7n tung n\u1ED9i t\u1EA1i
+    s\u1ED1 l\u01B0\u1EE3ng tri\u1EC7u h\u1ED3i s\u1EBD t\u0103ng th\xEAm 1 (t\u1ED1i
+    \u0111a 5 c\xE1i)."
+  shotsRequired: 20
+  prefabMap1: {fileID: 1300000000, guid: e1010001000200030004000500060011, type: 3}
+  prefabMap2: {fileID: 1300000000, guid: e1010001000200030004000500060012, type: 3}
   summonAtTarget: 1
-  spawnOffset: {x: 0, y: 0}
+  spawnOffset: {x: 0, y: 15}
+  maxSpawnCount: 5
+  minSpawnX: 2
+  maxSpawnX: 6.5
+  spacing: 1

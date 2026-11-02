@@ -312,6 +312,297 @@ namespace AOG.Duel
 
             playerOne.Setup(this, playerTwo, 0, projectilePool);
             playerTwo.Setup(this, playerOne, 1, projectilePool);
+
+            // Phân biệt chế độ PVP (2 người chơi trên cùng máy) và PVE (đấu với Máy)
+            if (GameModeManager.IsPVP)
+            {
+                ConfigureLocalPVP(playerOne, playerTwo);
+            }
+            else
+            {
+                ConfigureEnemyLoadout(playerTwo);
+            }
+
+            ConfigureHUD(GameModeManager.IsPVP);
+        }
+
+        
+        private void ConfigureHUD(bool isPvp)
+        {
+            Canvas canvas = FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            // 1. Nút di chuyển (MoveButton) ở góc dưới bên trái
+            Transform moveBtnTransform = canvas.transform.Find("MoveButton");
+            if (moveBtnTransform == null)
+            {
+                GameObject mbObj = GameObject.Find("MoveButton");
+                if (mbObj != null) moveBtnTransform = mbObj.transform;
+            }
+
+            if (moveBtnTransform != null)
+            {
+                // Ở chế độ PVP: ẩn nút di chuyển để nhường chỗ cho thanh Skill Bar của Player 1
+                // Ở chế độ PVE: hiển thị nút di chuyển như bình thường
+                moveBtnTransform.gameObject.SetActive(!isPvp);
+            }
+
+            // 2. Thanh Skill Bar của Player 1
+            Transform p1SkillBarTransform = canvas.transform.Find("Skill Bar");
+            if (p1SkillBarTransform == null)
+            {
+                GameObject sbObj = GameObject.Find("Skill Bar");
+                if (sbObj != null) p1SkillBarTransform = sbObj.transform;
+            }
+
+            if (p1SkillBarTransform == null) return;
+
+            RectTransform p1Rt = p1SkillBarTransform.GetComponent<RectTransform>();
+            if (p1Rt != null)
+            {
+                if (isPvp)
+                {
+                    // Chuyển sang bên trái màn hình (đối xứng với Player 2)
+                    p1Rt.anchoredPosition = new Vector2(-540f, -416f);
+                }
+                else
+                {
+                    // Vị trí mặc định ở bên phải màn hình trong PVE
+                    p1Rt.anchoredPosition = new Vector2(500f, -416f);
+                }
+            }
+
+            // Bind CooldownUI và Input cho Player 1
+            foreach (var cd in p1SkillBarTransform.GetComponentsInChildren<CooldownUI>(true))
+            {
+                cd.BindCharacter(playerOne);
+            }
+            KeyInput p1Input = playerOne != null ? playerOne.GetComponent<KeyInput>() : null;
+            TouchInput p1Touch = playerOne != null ? playerOne.GetComponent<TouchInput>() : null;
+            foreach (var mb in p1SkillBarTransform.GetComponentsInChildren<MobileButton>(true))
+            {
+                mb.BindInputs(p1Input, p1Touch);
+            }
+
+            // 3. Thanh Skill Bar của Player 2 trong PVP
+            Transform p2SkillBarTransform = canvas.transform.Find("Skill Bar P2");
+            if (isPvp)
+            {
+                GameObject p2SkillBarObj;
+                if (p2SkillBarTransform == null)
+                {
+                    p2SkillBarObj = Instantiate(p1SkillBarTransform.gameObject, canvas.transform);
+                    p2SkillBarObj.name = "Skill Bar P2";
+                    p2SkillBarTransform = p2SkillBarObj.transform;
+                }
+                else
+                {
+                    p2SkillBarObj = p2SkillBarTransform.gameObject;
+                }
+
+                p2SkillBarObj.SetActive(true);
+
+                RectTransform p2Rt = p2SkillBarObj.GetComponent<RectTransform>();
+                if (p2Rt != null)
+                {
+                    p2Rt.anchoredPosition = new Vector2(540f, -416f);
+                }
+
+                // Gán toàn bộ CooldownUI cho Player 2
+                foreach (var cd in p2SkillBarObj.GetComponentsInChildren<CooldownUI>(true))
+                {
+                    cd.BindCharacter(playerTwo);
+                }
+
+                // Gán input phản hồi của Player 2
+                KeyInput p2Input = playerTwo != null ? playerTwo.GetComponent<KeyInput>() : null;
+                TouchInput p2Touch = playerTwo != null ? playerTwo.GetComponent<TouchInput>() : null;
+                foreach (var mb in p2SkillBarObj.GetComponentsInChildren<MobileButton>(true))
+                {
+                    mb.BindInputs(p2Input, p2Touch);
+                }
+            }
+            else
+            {
+                if (p2SkillBarTransform != null)
+                {
+                    p2SkillBarTransform.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        private void ConfigureLocalPVP(PlayerController p1, PlayerController p2)
+        {
+            if (p2 == null) return;
+
+            // 1. Tắt Bot AI
+            Bot bot = p2.GetComponent<Bot>();
+            if (bot != null) bot.enabled = false;
+
+            // 2. Kích hoạt KeyInput cho Người chơi 2 (PlayerIndex = 1)
+            KeyInput p2Input = p2.GetComponent<KeyInput>();
+            if (p2Input == null) p2Input = p2.gameObject.AddComponent<KeyInput>();
+            p2Input.enabled = true;
+            p2Input.PlayerIndex = 1;
+            p2Input.ReloadKeybindings();
+            p2.RefreshInputs();
+
+            // Đảm bảo Người chơi 1 dùng PlayerIndex = 0
+            if (p1 != null)
+            {
+                KeyInput p1Input = p1.GetComponent<KeyInput>();
+                if (p1Input != null)
+                {
+                    p1Input.PlayerIndex = 0;
+                    p1Input.ReloadKeybindings();
+                }
+            }
+
+            // 3. Thiết lập trang bị cho Player 2 theo tùy chọn P2LoadoutMode
+            switch (GameModeManager.P2Mode)
+            {
+                case P2LoadoutMode.Random:
+                    // Ngẫu nhiên: Random Cung và 5 chiêu thức (1 Common, 1 Rare, 1 Heroic, 2 Legendary) khác biệt mỗi trận
+                    ConfigureEnemyLoadout(p2);
+                    break;
+
+                case P2LoadoutMode.UseSet2:
+                    // Dùng Set II: Lấy từ Set kỹ năng II mà người chơi đã trang bị ở màn Kỹ năng
+                    if (PlayerLoadoutManager.Instance != null)
+                    {
+                        PlayerLoadoutManager.Instance.ApplySetToPlayer(p2, 1);
+                    }
+                    break;
+
+                case P2LoadoutMode.Mirror:
+                    // Giống Player 1
+                    if (PlayerLoadoutManager.Instance != null)
+                    {
+                        PlayerLoadoutManager.Instance.ApplyToPlayer(p2);
+                    }
+                    break;
+            }
+
+            // 4. Chọn skin khác biệt cho Player 2 để dễ phân biệt
+            CharacterSkinDatabase skinDb = CharacterSkinManager.HasInstance && CharacterSkinManager.Instance.Database != null
+                ? CharacterSkinManager.Instance.Database
+                : Resources.Load<CharacterSkinDatabase>("CharacterSkinDatabase");
+
+            if (skinDb != null && skinDb.Skins != null && skinDb.Skins.Count > 1)
+            {
+                int p1Index = CharacterSkinManager.HasInstance ? CharacterSkinManager.Instance.CurrentSkinIndex : 0;
+                int p2Index = (p1Index + 1) % skinDb.Skins.Count;
+                CharacterSkinData distinctSkin = skinDb.Skins[p2Index];
+                if (distinctSkin != null) CharacterSkinManager.ApplySkin(p2.gameObject, distinctSkin);
+            }
+
+            Debug.Log("[GameManager] Đã thiết lập chế độ PVP Local 2 người chơi trên cùng máy tính!");
+        }
+
+        private void ConfigureEnemyLoadout(PlayerController enemy)
+        {
+            if (enemy == null) return;
+
+            // 1. Random Skin
+            CharacterSkinDatabase skinDb = CharacterSkinManager.HasInstance && CharacterSkinManager.Instance.Database != null
+                ? CharacterSkinManager.Instance.Database
+                : Resources.Load<CharacterSkinDatabase>("CharacterSkinDatabase");
+
+            CharacterSkinData randomSkin = null;
+            if (skinDb != null && skinDb.Skins != null && skinDb.Skins.Count > 0)
+            {
+                int randomSkinIdx = UnityEngine.Random.Range(0, skinDb.Skins.Count);
+                randomSkin = skinDb.Skins[randomSkinIdx];
+                CharacterSkinManager.ApplySkin(enemy.gameObject, randomSkin);
+            }
+
+            // 2. Random Bow
+            LoadoutDatabase loadoutDb = Resources.Load<LoadoutDatabase>("LoadoutDatabase");
+            if (loadoutDb == null && PlayerLoadoutManager.HasInstance)
+            {
+                loadoutDb = PlayerLoadoutManager.Instance.Database;
+            }
+
+            BowData randomBow = null;
+            if (loadoutDb != null && loadoutDb.Bows != null && loadoutDb.Bows.Count > 0)
+            {
+                int randomBowIdx = UnityEngine.Random.Range(0, loadoutDb.Bows.Count);
+                randomBow = loadoutDb.Bows[randomBowIdx];
+                if (enemy.Gear != null)
+                {
+                    enemy.Gear.EquipBow(randomBow);
+                }
+            }
+
+            // 3. Random Skills: 1 Common, 1 Rare, 1 Heroic, 2 Legendary
+            if (loadoutDb != null && loadoutDb.Skills != null && loadoutDb.Skills.Count > 0)
+            {
+                var commonPool = new System.Collections.Generic.List<SkillData>();
+                var rarePool = new System.Collections.Generic.List<SkillData>();
+                var heroicPool = new System.Collections.Generic.List<SkillData>();
+                var legendaryPool = new System.Collections.Generic.List<SkillData>();
+
+                for (int i = 0; i < loadoutDb.Skills.Count; i++)
+                {
+                    SkillData s = loadoutDb.Skills[i];
+                    if (s == null) continue;
+                    switch (s.Rarity)
+                    {
+                        case SkillRarity.Common: commonPool.Add(s); break;
+                        case SkillRarity.Rare: rarePool.Add(s); break;
+                        case SkillRarity.Heroic: heroicPool.Add(s); break;
+                        case SkillRarity.Legendary: legendaryPool.Add(s); break;
+                    }
+                }
+
+                SkillData pickCommon = commonPool.Count > 0 ? commonPool[UnityEngine.Random.Range(0, commonPool.Count)] : null;
+                SkillData pickRare = rarePool.Count > 0 ? rarePool[UnityEngine.Random.Range(0, rarePool.Count)] : null;
+                SkillData pickHeroic = heroicPool.Count > 0 ? heroicPool[UnityEngine.Random.Range(0, heroicPool.Count)] : null;
+
+                SkillData pickLegen1 = null;
+                SkillData pickLegen2 = null;
+                if (legendaryPool.Count > 0)
+                {
+                    int idx1 = UnityEngine.Random.Range(0, legendaryPool.Count);
+                    pickLegen1 = legendaryPool[idx1];
+                    if (legendaryPool.Count > 1)
+                    {
+                        int idx2 = UnityEngine.Random.Range(0, legendaryPool.Count - 1);
+                        if (idx2 >= idx1) idx2++;
+                        pickLegen2 = legendaryPool[idx2];
+                    }
+                    else
+                    {
+                        pickLegen2 = pickLegen1;
+                    }
+                }
+
+                var selectedSkills = new System.Collections.Generic.List<SkillData>();
+                if (pickCommon != null) selectedSkills.Add(pickCommon);
+                if (pickRare != null) selectedSkills.Add(pickRare);
+                if (pickHeroic != null) selectedSkills.Add(pickHeroic);
+                if (pickLegen1 != null) selectedSkills.Add(pickLegen1);
+                if (pickLegen2 != null) selectedSkills.Add(pickLegen2);
+
+                // Trộn ngẫu nhiên vị trí giữa các ô kỹ năng
+                for (int i = 0; i < selectedSkills.Count; i++)
+                {
+                    int r = UnityEngine.Random.Range(i, selectedSkills.Count);
+                    SkillData temp = selectedSkills[i];
+                    selectedSkills[i] = selectedSkills[r];
+                    selectedSkills[r] = temp;
+                }
+
+                if (enemy.Action != null)
+                {
+                    enemy.Action.SetSkills(selectedSkills.ToArray());
+                }
+
+                Debug.Log($"[Enemy PVE Loadout] Skin: {(randomSkin != null ? randomSkin.displayName : "Default")}, " +
+                          $"Bow: {(randomBow != null ? randomBow.DisplayName : "Default")}, " +
+                          $"Skills: 1 Common ({pickCommon?.DisplayName}), 1 Rare ({pickRare?.DisplayName}), " +
+                          $"1 Heroic ({pickHeroic?.DisplayName}), 2 Legendary ({pickLegen1?.DisplayName}, {pickLegen2?.DisplayName})");
+            }
         }
 
         private static void PlaceAtSpawn(PlayerController character, Transform point)

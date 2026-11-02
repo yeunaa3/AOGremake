@@ -17,7 +17,7 @@ MonoBehaviour:
     l\xE2u m\u0169i t\xEAn c\xE0ng n\u1EDF to v\xE0 s\xE1t th\u01B0\u01A1ng t\u0103ng
     d\u1EA7n theo th\u1EDDi gian."
   initialSpeedMultiplier: 0.6
-  sizeGrowthRate: 0.5
+  sizeGrowthRate: 0.4
   maxSizeMultiplier: 2.5
   damageGrowthRate: 0.36
   maxDamageMultiplier: 3

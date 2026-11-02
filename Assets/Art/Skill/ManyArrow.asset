@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: ManyArrow
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.SummonObject
   skillId: ManyArrow
-  displayName: ManyArrow
-  description: 
+  displayName: Multi-Shot
+  description: "Fires a wide spread of multiple arrows at once."
   icon: {fileID: 6873380534569638714, guid: bd2a33bcae190b947adbb36d4dee3171, type: 3}
   rarity: 0
   cooldown: 5

@@ -18,8 +18,8 @@ MonoBehaviour:
     head: {fileID: 21300000, guid: d3b79acd350a1a5469b61e97cae5c319, type: 3}
     body: {fileID: 21300000, guid: 26c3ed8a777e6d34fa73337afb7eba90, type: 3}
     shoulderL: {fileID: 21300000, guid: c8e0cda010f4ae844b97b46e6880da3f, type: 3}
-    armL: {fileID: 21300000, guid: d63a49e71ee7ec3479aa271f7005e164, type: 3}
-    handL: {fileID: 21300000, guid: c0c33a58598892347b9e5df74240ca83, type: 3}
+    armL: {fileID: 21300000, guid: 374ca1c316644574793adcce00bcfb54, type: 3}
+    handL: {fileID: 21300000, guid: f5b82c076dce2824689aee265646d3e8, type: 3}
     shoulderR: {fileID: 21300000, guid: 9a211b09af4ac1e40b0ac4382e7edf7a, type: 3}
     armR: {fileID: 21300000, guid: 39ed5bb6c77351649aa876e42f6dc6ed, type: 3}
     handR: {fileID: 21300000, guid: c1f06ef3c7b28cd4ab8275d7c9a7abca, type: 3}
@@ -86,7 +86,7 @@ MonoBehaviour:
   - skinId: skin5
     displayName: Skin 5
     head: {fileID: 21300000, guid: 7eb0b5a188ae3b2489287ea4e581addf, type: 3}
-    body: {fileID: 21300000, guid: 4cfa9c048d374084ca3d92c46dddb10e, type: 3}
+    body: {fileID: 21300000, guid: 54e906f65da340540a28732d9d030c29, type: 3}
     shoulderL: {fileID: 21300000, guid: 2f634e297cc7b214ca59a8cd840ed95f, type: 3}
     armL: {fileID: 21300000, guid: 7f025d4a75a07274388a459eba0a5035, type: 3}
     handL: {fileID: 21300000, guid: 3e00c6f9bc5ab924087b91a6427f850d, type: 3}
