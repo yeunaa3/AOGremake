@@ -130,15 +130,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AOG.Duel.BombObject
   delay: 1
   damage: 86
-  effect: 0
-  effectPower: 0
-  effectDuration: 0
-  damageCollider: {fileID: 0}
+  groundLifetime: 20
+  explosionRadius: 0.65
   explosionParticlePrefab: {fileID: 2170247513286342540, guid: abbe19a5c44c214a29cbd39c41869bb7, type: 3}
   groundSmokePrefab: {fileID: 2170247513286342540, guid: 1fdbe55f8bf24e24b1b7f0d1f770ac5e, type: 3}
   explosionSound: {fileID: 0}
---- !u!61 &1316156483763069027
-BoxCollider2D:
+--- !u!58 &1316156483763069027
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -167,19 +165,9 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.0014933571, y: 0.011467509}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.19, y: 0.13}
-    newSize: {x: 0.19, y: 0.13}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 0.22882758, y: 0.10706498}
-  m_EdgeRadius: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.17

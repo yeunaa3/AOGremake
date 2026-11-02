@@ -17,7 +17,9 @@ namespace AOG.Duel
         public string AnimationTrigger => animationTrigger;
 
         public override bool HasChargeRelease => true;
-        public override string SpecialAnimationTrigger => "Mid";
+        public override string SpecialAnimationTrigger => !string.IsNullOrEmpty(animationTrigger)
+            ? animationTrigger
+            : (iceSkill != null && !string.IsNullOrEmpty(iceSkill.AnimationTrigger) ? iceSkill.AnimationTrigger : "Mid");
         public override SkillData SpecialSkill => iceSkill;
 
         public override void ExecuteSpecialRelease(PlayerController player, BowRuntimeState state)

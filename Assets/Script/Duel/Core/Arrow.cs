@@ -394,6 +394,11 @@ namespace AOG.Duel
 
             if (string.IsNullOrEmpty(targetState) || (arrowEffect == ArrowEffect.None && string.IsNullOrEmpty(customState)))
             {
+                if (flightEffectAnimator != null && HasAnimatorState("Empty"))
+                {
+                    flightEffectAnimator.Play("Empty", 0, 0f);
+                }
+                if (flightEffectRoot != null) flightEffectRoot.gameObject.SetActive(false);
                 return;
             }
 
@@ -415,9 +420,19 @@ namespace AOG.Duel
         {
             if (flightEffectAnimator != null)
             {
+                if (flightEffectAnimator.runtimeAnimatorController != null && HasAnimatorState("Empty"))
+                {
+                    flightEffectAnimator.Play("Empty", 0, 0f);
+                    flightEffectAnimator.Update(0f);
+                }
                 flightEffectAnimator.enabled = false;
             }
-            if (flightEffectRoot != null) flightEffectRoot.gameObject.SetActive(false);
+            if (flightEffectRoot != null)
+            {
+                var sr = flightEffectRoot.GetComponent<SpriteRenderer>();
+                if (sr != null) sr.sprite = null;
+                flightEffectRoot.gameObject.SetActive(false);
+            }
         }
 
         private void StartTrail(ArrowEffect arrowEffect)

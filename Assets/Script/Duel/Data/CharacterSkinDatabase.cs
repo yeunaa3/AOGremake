@@ -72,5 +72,95 @@ namespace AOG.Duel
             }
             return 0;
         }
+#if UNITY_EDITOR
+        [UnityEditor.MenuItem("AOG/Database/Sync All Character Skins")]
+        public static void MenuSyncDatabase()
+        {
+            var db = Resources.Load<CharacterSkinDatabase>("CharacterSkinDatabase");
+            if (db != null)
+            {
+                db.SyncDatabase();
+                UnityEditor.EditorUtility.SetDirty(db);
+                UnityEditor.AssetDatabase.SaveAssets();
+                Debug.Log($"[CharacterSkinDatabase] Đã đồng bộ: {db.skins.Count} skins.");
+            }
+        }
+
+        public void SyncDatabase()
+        {
+            string characterDirectory = System.IO.Path.Combine(Application.dataPath, "Art/Character");
+            if (!System.IO.Directory.Exists(characterDirectory)) return;
+
+            string[] subDirectories = System.IO.Directory.GetDirectories(characterDirectory);
+            System.Array.Sort(subDirectories);
+
+            foreach (string directoryPath in subDirectories)
+            {
+                string folderName = System.IO.Path.GetFileName(directoryPath);
+                if (folderName.Equals("Animation", StringComparison.OrdinalIgnoreCase)) continue;
+
+                CharacterSkinData skin = skins.Find(s => string.Equals(s.skinId, folderName, StringComparison.OrdinalIgnoreCase));
+                if (skin == null)
+                {
+                    skin = new CharacterSkinData
+                    {
+                        skinId = folderName,
+                        displayName = FormatDisplayName(folderName)
+                    };
+                    skins.Add(skin);
+                }
+
+                string[] pngFiles = System.IO.Directory.GetFiles(directoryPath, "*.png");
+                List<string> unmappedFileNames = new List<string>();
+
+                foreach (string filePath in pngFiles)
+                {
+                    string fileName = System.IO.Path.GetFileName(filePath);
+                    if (fileName.EndsWith(" 1.png", StringComparison.OrdinalIgnoreCase)) continue;
+
+                    string assetPath = "Assets/Art/Character/" + folderName + "/" + fileName;
+                    Sprite sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+                    if (sprite == null) continue;
+
+                    string cleanName = fileName.ToLowerInvariant().Replace("_", "");
+                    if (cleanName.Contains("head")) skin.head = sprite;
+                    else if (cleanName.Contains("body")) skin.body = sprite;
+                    else if (cleanName.Contains("shoulderl")) skin.shoulderL = sprite;
+                    else if (cleanName.Contains("shoulderr")) skin.shoulderR = sprite;
+                    else if (cleanName.Contains("arml")) skin.armL = sprite;
+                    else if (cleanName.Contains("armr")) skin.armR = sprite;
+                    else if (cleanName.Contains("handl")) skin.handL = sprite;
+                    else if (cleanName.Contains("handr")) skin.handR = sprite;
+                    else if (cleanName.Contains("thighl") || cleanName.Contains("upperlegl")) skin.thighL = sprite;
+                    else if (cleanName.Contains("thighr") || cleanName.Contains("upperlegr")) skin.thighR = sprite;
+                    else if (cleanName.Contains("legl")) skin.legL = sprite;
+                    else if (cleanName.Contains("legr")) skin.legR = sprite;
+                    else unmappedFileNames.Add(fileName);
+                }
+
+                foreach (string fileName in unmappedFileNames)
+                {
+                    string assetPath = "Assets/Art/Character/" + folderName + "/" + fileName;
+                    Sprite sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+                    if (sprite == null) continue;
+
+                    string lowerName = fileName.ToLowerInvariant();
+                    if (skin.handR == null && lowerName.Contains("hand")) skin.handR = sprite;
+                    else if (skin.armR == null && lowerName.Contains("arm")) skin.armR = sprite;
+                }
+            }
+        }
+
+        private static string FormatDisplayName(string id)
+        {
+            if (id.StartsWith("skin", StringComparison.OrdinalIgnoreCase))
+            {
+                string rest = id.Substring(4).TrimStart('_');
+                if (int.TryParse(rest, out int num)) return $"Skin {num}";
+                if (!string.IsNullOrEmpty(rest)) return $"Skin {char.ToUpper(rest[0]) + rest.Substring(1)}";
+            }
+            return id;
+        }
+#endif
     }
 }

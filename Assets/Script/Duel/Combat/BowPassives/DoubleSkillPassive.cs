@@ -46,11 +46,11 @@ namespace AOG.Duel
             if (player == null || !player.Alive || pendingSkill == null) return;
 
             SkillData toDuplicate = pendingSkill;
-            float dir = pendingDirection;
+            float shootDirection = pendingDirection;
             pendingSkill = null;
 
             // Ép nhân vật bắn tiếp skill lần thứ 2 liên tiếp ngay lập tức
-            player.Action.TriggerSpecialSkill(toDuplicate, toDuplicate.AnimationTrigger, dir);
+            player.Action.TriggerSpecialSkill(toDuplicate, toDuplicate.AnimationTrigger, shootDirection);
         }
 
         public override float GetProgress(BowRuntimeState state)

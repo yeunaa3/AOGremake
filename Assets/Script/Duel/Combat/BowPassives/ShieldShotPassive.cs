@@ -12,9 +12,23 @@ namespace AOG.Duel
         [Tooltip("Thời gian tồn tại của khiên kể từ lần đầu tiên nhận dame (giây, mặc định 5s).")]
         [SerializeField, Min(1f)] private float immortalDuration = 5f;
 
+        [Header("Tùy chọn Vị trí & Góc quay khiên")]
+        [Tooltip("Nếu tích chọn, sẽ dùng giá trị Front / Height Offset & Rotation Angle tại đây thay vì lấy từ Prefab khiên.")]
+        [SerializeField] private bool overrideTransformConfig = false;
+        [Tooltip("Khoảng cách phía trước mặt nhân vật (mặc định 0.85).")]
+        [SerializeField] private float frontOffset = 0.85f;
+        [Tooltip("Độ cao lệch so với nhân vật (mặc định 0.35).")]
+        [SerializeField] private float heightOffset = 0.35f;
+        [Tooltip("Góc nghiêng của khiên (độ, trục Z, mặc định 0).")]
+        [SerializeField] private float rotationAngle = 0f;
+
         public int ShotsRequired => shotsRequired;
         public GameObject ShieldBarrierPrefab => shieldBarrierPrefab;
         public float ImmortalDuration => immortalDuration;
+        public bool OverrideTransformConfig => overrideTransformConfig;
+        public float FrontOffset => frontOffset;
+        public float HeightOffset => heightOffset;
+        public float RotationAngle => rotationAngle;
 
         public override bool HasChargeRelease => true;
         public override string SpecialAnimationTrigger => "High";
@@ -75,27 +89,39 @@ namespace AOG.Duel
         {
             if (shieldBarrierPrefab == null || player == null) return;
 
-            Vector3 spawnPos = player.transform.position + new Vector3(player.Face * 0.85f, 0.35f, 0f);
-            GameObject obj = SummonPool.Instance != null
-                ? SummonPool.Instance.Spawn(shieldBarrierPrefab, spawnPos, Quaternion.identity)
-                : Object.Instantiate(shieldBarrierPrefab, spawnPos, Quaternion.identity);
+            ShieldBarrierObject prefabBarrier = shieldBarrierPrefab.GetComponent<ShieldBarrierObject>();
+            float targetFrontOffset = overrideTransformConfig ? frontOffset : (prefabBarrier != null ? prefabBarrier.FrontOffset : 0.85f);
+            float targetHeightOffset = overrideTransformConfig ? heightOffset : (prefabBarrier != null ? prefabBarrier.HeightOffset : 0.35f);
+            float targetRotationAngle = overrideTransformConfig ? rotationAngle : (prefabBarrier != null ? prefabBarrier.RotationAngle : 0f);
 
-            if (obj != null)
+            float faceSign = player.Face >= 0f ? 1f : -1f;
+            Vector3 spawnPosition = player.transform.position + new Vector3(faceSign * targetFrontOffset, targetHeightOffset, 0f);
+            Quaternion spawnRotation = Quaternion.Euler(0f, 0f, faceSign * targetRotationAngle);
+
+            GameObject spawnedObject = SummonPool.Instance != null
+                ? SummonPool.Instance.Spawn(shieldBarrierPrefab, spawnPosition, spawnRotation)
+                : Object.Instantiate(shieldBarrierPrefab, spawnPosition, spawnRotation);
+
+            if (spawnedObject != null)
             {
-                ShieldBarrierObject barrier = obj.GetComponent<ShieldBarrierObject>();
-                if (barrier != null)
+                ShieldBarrierObject barrierObject = spawnedObject.GetComponent<ShieldBarrierObject>();
+                if (barrierObject != null)
                 {
-                    barrier.Setup(player);
+                    if (overrideTransformConfig)
+                    {
+                        barrierObject.SetTransformConfig(targetFrontOffset, targetHeightOffset, targetRotationAngle);
+                    }
+                    barrierObject.Setup(player);
                 }
                 else
                 {
-                    SkillObject skillObj = obj.GetComponent<SkillObject>();
-                    skillObj?.Setup(player);
+                    SkillObject skillObject = spawnedObject.GetComponent<SkillObject>();
+                    skillObject?.Setup(player);
                 }
 
                 if (state != null)
                 {
-                    state.RegisterSummon(obj);
+                    state.RegisterSummon(spawnedObject);
                 }
             }
 

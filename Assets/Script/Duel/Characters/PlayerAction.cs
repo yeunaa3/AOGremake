@@ -131,26 +131,26 @@ namespace AOG.Duel
             {
                 if (activePassiveRelease != null)
                 {
-                    SkillData spSkill = specialSkill;
-                    float pSpeed = spSkill != null ? Mathf.Max(0.05f, spSkill.EffectiveDrawSpeed) : 1f;
-                    float pShowAt = (spSkill != null && spSkill.ShowVisualTime >= 0f) ? spSkill.ShowVisualTime / pSpeed : 0.2f;
-                    float pEffectAt = spSkill != null ? (spSkill.EffectTime / pSpeed) : 0.5f;
-                    float pDuration = spSkill != null ? (spSkill.Duration / pSpeed) : 0.85f;
+                    SkillData passiveSkill = specialSkill;
+                    float passiveDrawSpeed = passiveSkill != null ? Mathf.Max(0.05f, passiveSkill.EffectiveDrawSpeed) : 1f;
+                    float passiveVisualTime = (passiveSkill != null && passiveSkill.ShowVisualTime >= 0f) ? passiveSkill.ShowVisualTime / passiveDrawSpeed : 0.2f;
+                    float passiveEffectTime = passiveSkill != null ? (passiveSkill.EffectTime / passiveDrawSpeed) : 0.5f;
+                    float passiveDuration = passiveSkill != null ? (passiveSkill.Duration / passiveDrawSpeed) : 0.85f;
 
-                    if (!skillVisualShown && time >= pShowAt)
+                    if (!skillVisualShown && time >= passiveVisualTime)
                     {
                         skillVisualShown = true;
-                        if (spSkill != null) spSkill.ShowVisual(CurrentSkillContext());
+                        if (passiveSkill != null) passiveSkill.ShowVisual(CurrentSkillContext());
                     }
 
-                    if (!skillEffectDone && time >= pEffectAt)
+                    if (!skillEffectDone && time >= passiveEffectTime)
                     {
                         skillEffectDone = true;
                         player.HideHeldArrows();
                         activePassiveRelease.ExecuteSpecialRelease(player, player.Gear != null ? player.Gear.BowState : null);
                     }
 
-                    if (time >= pDuration)
+                    if (time >= passiveDuration)
                     {
                         activePassiveRelease = null;
                         EndSkillFromClip();
@@ -351,8 +351,8 @@ namespace AOG.Duel
             move.Lock(true);
             move.Stop();
             anim.Face(player.Face);
-            float specialSpd = specialSkill != null ? specialSkill.EffectiveDrawSpeed : 1f;
-            anim.SetPlaybackSpeed(specialSpd);
+            float specialDrawSpeed = specialSkill != null ? specialSkill.EffectiveDrawSpeed : 1f;
+            anim.SetPlaybackSpeed(specialDrawSpeed);
 
             if (specialSkill != null)
             {
@@ -365,8 +365,8 @@ namespace AOG.Duel
                 }
             }
 
-            string trig = passive.SpecialAnimationTrigger;
-            anim.Trigger(trig);
+            string animationTrigger = passive.SpecialAnimationTrigger;
+            anim.Trigger(animationTrigger);
             return true;
         }
 
